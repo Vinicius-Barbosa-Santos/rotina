@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Minha Rotina</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#0e0e0f; --bg2:#161618; --bg3:#1e1e21;
+  --border:rgba(255,255,255,0.07); --border2:rgba(255,255,255,0.13);
+  --text:#f0ede8; --muted:#7a7875; --muted2:#4a4845;
+  --mind:#b57bee;   --mind-bg:rgba(181,123,238,0.10);
+  --health:#f7c948; --health-bg:rgba(247,201,72,0.10);
+  --home:#8ec3f7;   --home-bg:rgba(142,195,247,0.10);
+  --finance:#52c98e;--finance-bg:rgba(82,201,142,0.10);
+  --work:#4f8ef7;   --work-bg:rgba(79,142,247,0.10);
+  --career:#f4855a; --career-bg:rgba(244,133,90,0.10);
+  --social:#e87eb8; --social-bg:rgba(232,126,184,0.10);
+  --admin:#9ba8b5;  --admin-bg:rgba(155,168,181,0.10);
+  --night:#6b6b7a;  --night-bg:rgba(107,107,122,0.10);
+  --english:#34d399;--english-bg:rgba(52,211,153,0.10);
+  --prog:#fb923c;   --prog-bg:rgba(251,146,60,0.10);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;overflow-x:hidden;}
+
+/* HEADER */
+header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:18px 40px;border-bottom:1px solid var(--border);
+  position:sticky;top:0;background:rgba(14,14,15,0.94);
+  backdrop-filter:blur(14px);z-index:200;
+}
+.logo{font-family:'DM Serif Display',serif;font-size:21px;color:var(--text);letter-spacing:-0.02em;}
+.logo span{color:var(--health);}
+.header-right{display:flex;align-items:center;gap:14px;}
+.header-date{font-size:13px;color:var(--muted);font-weight:300;}
+.header-progress{display:flex;align-items:center;gap:8px;}
+.header-pct{font-family:'DM Serif Display',serif;font-size:16px;color:var(--finance);}
+.header-bar-bg{width:80px;height:4px;background:var(--bg3);border-radius:4px;overflow:hidden;}
+.header-bar-fill{height:100%;background:var(--finance);border-radius:4px;transition:width .4s ease;}
+
+/* LAYOUT */
+.layout{display:grid;grid-template-columns:268px 1fr;min-height:calc(100vh - 61px);}
+
+/* SIDEBAR */
+sidebar{
+  border-right:1px solid var(--border);padding:22px 0;
+  position:sticky;top:61px;height:calc(100vh - 61px);
+  overflow-y:auto;display:block;
+}
+.sb-section{padding:0 18px;margin-bottom:26px;}
+.sb-label{font-size:10px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:var(--muted2);margin-bottom:8px;padding:0 6px;}
+
+/* SIDEBAR WEEK STATS */
+.week-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;}
+.week-stat{background:var(--bg2);border:1px solid var(--border);border-radius:9px;padding:10px 6px;text-align:center;}
+.week-stat-num{font-family:'DM Serif Display',serif;font-size:17px;color:var(--text);}
+.week-stat-lbl{font-size:9px;color:var(--muted);margin-top:2px;letter-spacing:.04em;}
+
+/* SECTION BUTTONS (sidebar nav) */
+.sec-btn{
+  display:flex;align-items:center;gap:9px;width:100%;padding:8px 10px;border-radius:9px;
+  border:none;background:transparent;color:var(--muted);font-family:'DM Sans',sans-serif;
+  font-size:13px;cursor:pointer;transition:all .15s;text-align:left;margin-bottom:2px;
+}
+.sec-btn:hover{background:var(--bg3);color:var(--text);}
+.sec-btn.active{background:var(--bg3);color:var(--text);}
+.sec-btn .sec-icon{font-size:15px;flex-shrink:0;}
+.sec-btn .sec-name{flex:1;font-weight:500;}
+.sec-btn .sec-pill{
+  font-size:10px;color:var(--muted2);background:var(--bg2);
+  padding:2px 7px;border-radius:20px;flex-shrink:0;
+}
+.sec-btn.active .sec-pill{background:rgba(255,255,255,0.07);color:var(--muted);}
+.sec-btn .sec-mini-bar{width:28px;height:3px;background:var(--bg3);border-radius:3px;overflow:hidden;flex-shrink:0;}
+.sec-btn .sec-mini-fill{height:100%;border-radius:3px;transition:width .3s;}
+
+/* MAIN */
+main{padding:28px 40px;}
+
+/* DAY HEADER */
+.day-header{margin-bottom:24px;animation:fadeUp .25s ease;}
+.day-title{font-family:'DM Serif Display',serif;font-size:34px;letter-spacing:-.02em;color:var(--text);line-height:1.1;}
+.day-subtitle{font-size:13px;color:var(--muted);margin-top:5px;font-weight:300;}
+.day-bar-bg{height:5px;background:var(--bg3);border-radius:5px;overflow:hidden;margin-top:14px;}
+.day-bar-fill{height:100%;background:linear-gradient(90deg,var(--finance),var(--mind));border-radius:5px;transition:width .4s ease;}
+.day-bar-meta{display:flex;justify-content:space-between;margin-top:5px;}
+.day-bar-lbl{font-size:11px;color:var(--muted);}
+.day-bar-pct{font-size:12px;font-weight:500;color:var(--text);}
+
+/* SECTIONS GRID */
+.sections-grid{display:flex;flex-direction:column;gap:14px;animation:fadeUp .25s ease;}
+
+/* SECTION CARD */
+.sec-card{background:var(--bg2);border:1px solid var(--border);border-radius:14px;overflow:hidden;}
+.sec-card-header{
+  display:flex;align-items:center;gap:10px;padding:13px 16px;
+  border-bottom:1px solid var(--border);cursor:pointer;
+  transition:background .15s;
+}
+.sec-card-header:hover{background:var(--bg3);}
+.sec-header-icon{font-size:18px;flex-shrink:0;}
+.sec-header-title{flex:1;font-size:15px;font-weight:500;color:var(--text);}
+.sec-header-badge{
+  font-size:11px;padding:3px 9px;border-radius:20px;
+  font-weight:500;flex-shrink:0;
+}
+.sec-header-actions{display:flex;align-items:center;gap:8px;flex-shrink:0;}
+.sec-clear-btn{
+  font-size:11px;color:var(--muted2);background:transparent;
+  border:1px solid var(--border2);padding:3px 10px;border-radius:20px;
+  cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .15s;
+}
+.sec-clear-btn:hover{color:var(--text);background:var(--bg3);}
+.sec-toggle{font-size:13px;color:var(--muted);transition:transform .2s;}
+.sec-toggle.open{transform:rotate(180deg);}
+.sec-body{padding:6px 0;}
+
+/* CHECKLIST ITEM */
+.check-item{
+  display:flex;align-items:center;gap:11px;padding:10px 16px;
+  cursor:pointer;transition:background .12s;border-radius:0;
+}
+.check-item:hover{background:var(--bg3);}
+.check-circle{
+  width:20px;height:20px;border-radius:50%;border:1.5px solid var(--border2);
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;transition:all .2s;color:transparent;font-size:11px;
+}
+.check-item:hover .check-circle{border-color:var(--finance);}
+.check-item.done .check-circle{background:var(--finance);border-color:var(--finance);color:#0e0e0f;}
+.check-item.done .check-label{text-decoration:line-through;color:var(--muted);}
+.check-label{font-size:14px;color:var(--text);transition:color .2s;}
+.check-item.done{opacity:.55;}
+
+/* SECTION PROGRESS BAR (inside card) */
+.sec-progress{height:2px;background:var(--bg3);}
+.sec-progress-fill{height:100%;transition:width .3s ease;}
+
+/* MODAL */
+.modal-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.65);
+  display:flex;align-items:center;justify-content:center;
+  z-index:500;opacity:0;pointer-events:none;transition:opacity .2s;
+  backdrop-filter:blur(4px);
+}
+.modal-overlay.open{opacity:1;pointer-events:all;}
+.modal{
+  background:var(--bg2);border:1px solid var(--border2);border-radius:16px;
+  padding:28px;max-width:360px;width:90%;
+  transform:translateY(12px) scale(.97);transition:transform .2s;
+}
+.modal-overlay.open .modal{transform:translateY(0) scale(1);}
+.modal-icon{font-size:32px;margin-bottom:12px;}
+.modal-title{font-family:'DM Serif Display',serif;font-size:20px;color:var(--text);margin-bottom:6px;}
+.modal-desc{font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:22px;}
+.modal-desc strong{color:var(--text);}
+.modal-actions{display:flex;gap:10px;justify-content:flex-end;}
+.modal-cancel{
+  font-size:13px;color:var(--muted);background:transparent;
+  border:1px solid var(--border2);padding:8px 18px;border-radius:30px;
+  cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .15s;
+}
+.modal-cancel:hover{color:var(--text);background:var(--bg3);}
+.modal-confirm{
+  font-size:13px;color:#0e0e0f;background:var(--career);
+  border:none;padding:8px 18px;border-radius:30px;
+  cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:500;transition:all .15s;
+}
+.modal-confirm:hover{opacity:.85;}
+
+/* TOAST */
+.toast{
+  position:fixed;bottom:26px;left:50%;transform:translateX(-50%) translateY(70px);
+  background:var(--bg3);border:1px solid var(--border2);border-radius:30px;
+  padding:9px 18px;font-size:13px;color:var(--text);z-index:999;
+  transition:transform .3s ease;pointer-events:none;white-space:nowrap;
+}
+.toast.show{transform:translateX(-50%) translateY(0);}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+
+/* RESPONSIVE */
+@media(max-width:768px){
+  header{padding:14px 16px;}
+  .layout{grid-template-columns:1fr;}
+  sidebar{position:static;height:auto;border-right:none;border-bottom:1px solid var(--border);padding:12px 0;}
+  .sb-section{padding:0 14px;}
+  main{padding:18px 14px;}
+  .day-title{font-size:26px;}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">minha <span>rotina</span></div>
+  <div class="header-right">
+    <div class="header-date" id="header-date"></div>
+    <div class="header-progress">
+      <div class="header-bar-bg"><div class="header-bar-fill" id="header-bar" style="width:0%"></div></div>
+      <div class="header-pct" id="header-pct">0%</div>
+    </div>
+  </div>
+</header>
+
+<div class="layout">
+  <sidebar id="sidebar"></sidebar>
+  <main id="main"></main>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal">
+    <div class="modal-icon">🗑️</div>
+    <div class="modal-title" id="modal-title">Limpar seção?</div>
+    <div class="modal-desc" id="modal-desc">Isso vai desmarcar todos os itens desta seção.</div>
+    <div class="modal-actions">
+      <button class="modal-cancel" onclick="closeModal()">Cancelar</button>
+      <button class="modal-confirm" onclick="confirmClear()">Limpar</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ─── SECTIONS DATA ──────────────────────────────────────
+const SECTIONS = [
+  {
+    key:"english", icon:"🇺🇸", label:"Inglês (manhã)", color:"var(--english)", bg:"var(--english-bg)",
+    time:"06:30–07:30",
+    items:[
+      "Estudar vocabulário (Anki / Duolingo)",
+      "Ouvir podcast em inglês",
+      "Ler artigo técnico em inglês",
+      "Praticar shadowing / pronúncia",
+      "Escrever algo em inglês",
+      "Assistir vídeo em inglês (sem legenda)",
+    ]
+  },
+  {
+    key:"mind", icon:"🧠", label:"Mentalidade", color:"var(--mind)", bg:"var(--mind-bg)",
+    time:"05:30–06:30",
+    items:[
+      "Fazer oração",
+      "Praticar gratidão",
+      "Meditar 10 min",
+      "Escrever reflexões",
+      "Ler 10 páginas",
+      "Evitar redes sociais excessivamente",
+    ]
+  },
+  {
+    key:"health", icon:"💪", label:"Saúde", color:"var(--health)", bg:"var(--health-bg)",
+    time:"07:30–08:30",
+    items:[
+      "Dormir 7–8 horas",
+      "Beber 2L de água",
+      "Tomar café da manhã",
+      "Comer frutas",
+      "Fazer almoço saudável",
+      "Treinar",
+      "Alongar",
+      "Caminhar",
+    ]
+  },
+  {
+    key:"home", icon:"🏠", label:"Casa", color:"var(--home)", bg:"var(--home-bg)",
+    time:"ao longo do dia",
+    items:[
+      "Arrumar cama",
+      "Limpar quarto",
+      "Lavar louça",
+      "Tirar lixo",
+      "Organizar mesa de trabalho",
+      "Lavar roupas",
+      "Fazer compras",
+      "Limpar banheiro",
+    ]
+  },
+  {
+    key:"finance", icon:"💰", label:"Finanças", color:"var(--finance)", bg:"var(--finance-bg)",
+    time:"18:30–19:15",
+    items:[
+      "Registrar gastos",
+      "Verificar orçamento",
+      "Investir",
+      "Evitar compras impulsivas",
+      "Atualizar patrimônio",
+      "Estudar finanças",
+    ]
+  },
+  {
+    key:"work", icon:"💼", label:"Trabalho", color:"var(--work)", bg:"var(--work-bg)",
+    time:"09:00–18:00",
+    items:[
+      "Verificar e-mails",
+      "Participar da daily",
+      "Atualizar Jira",
+      "Resolver tarefas",
+      "Fazer documentação",
+      "Revisar código",
+      "Aprender algo novo",
+    ]
+  },
+  {
+    key:"prog", icon:"🚀", label:"Programação (noite)", color:"var(--prog)", bg:"var(--prog-bg)",
+    time:"19:30–21:00",
+    items:[
+      "Estudar React",
+      "Estudar Node.js",
+      "Estudar AWS",
+      "Estudar arquitetura de software",
+      "Resolver desafio técnico",
+      "Trabalhar no portfólio",
+      "Atualizar LinkedIn",
+    ]
+  },
+  {
+    key:"social", icon:"👨‍👩‍👧", label:"Relacionamentos", color:"var(--social)", bg:"var(--social-bg)",
+    time:"20:00–21:30",
+    items:[
+      "Falar com família",
+      "Responder mensagens importantes",
+      "Conversar com amigos",
+      "Conhecer pessoas novas",
+      "Fazer algo social",
+    ]
+  },
+  {
+    key:"admin", icon:"📋", label:"Administração da Vida", color:"var(--admin)", bg:"var(--admin-bg)",
+    time:"ao longo do dia",
+    items:[
+      "Verificar agenda",
+      "Planejar amanhã",
+      "Organizar documentos",
+      "Verificar contas a pagar",
+      "Verificar compromissos",
+      "Fazer backup de arquivos",
+    ]
+  },
+  {
+    key:"night", icon:"🌙", label:"Encerramento do Dia", color:"var(--night)", bg:"var(--night-bg)",
+    time:"22:00–22:30",
+    items:[
+      "Revisar conquistas do dia",
+      "Preparar roupas para amanhã",
+      "Organizar ambiente",
+      "Planejar tarefas do próximo dia",
+      "Dormir no horário",
+    ]
+  },
+];
+
+// ─── STATE ──────────────────────────────────────────────
+function todayKey() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+
+function loadState() {
+  try { return JSON.parse(localStorage.getItem('rotina_v2_' + todayKey()) || '{}'); }
+  catch { return {}; }
+}
+
+function saveState(state) {
+  localStorage.setItem('rotina_v2_' + todayKey(), JSON.stringify(state));
+}
+
+// state[secKey] = Set of item indices done
+let STATE = loadState();
+// Convert arrays back to Sets
+SECTIONS.forEach(s => {
+  if (Array.isArray(STATE[s.key])) STATE[s.key] = new Set(STATE[s.key]);
+  else if (!STATE[s.key]) STATE[s.key] = new Set();
+});
+
+function persistState() {
+  const out = {};
+  SECTIONS.forEach(s => { out[s.key] = [...STATE[s.key]]; });
+  saveState(out);
+}
+
+// collapsed sections
+let collapsed = new Set();
+
+// ─── MODAL ──────────────────────────────────────────────
+let pendingClearKey = null;
+
+function openClearModal(secKey, secLabel, doneCount, e) {
+  e.stopPropagation();
+  if (doneCount === 0) { showToast("Nenhum item marcado nesta seção."); return; }
+  pendingClearKey = secKey;
+  document.getElementById("modal-title").textContent = `Limpar "${secLabel}"?`;
+  document.getElementById("modal-desc").innerHTML =
+    `Isso vai desmarcar <strong>${doneCount} item${doneCount>1?"s":""}</strong> desta seção. A ação não pode ser desfeita.`;
+  document.getElementById("modal-overlay").classList.add("open");
+}
+
+function closeModal() {
+  document.getElementById("modal-overlay").classList.remove("open");
+  pendingClearKey = null;
+}
+
+function confirmClear() {
+  if (!pendingClearKey) return;
+  STATE[pendingClearKey] = new Set();
+  persistState();
+  closeModal();
+  render();
+  showToast("Seção limpa.");
+}
+
+document.getElementById("modal-overlay").addEventListener("click", function(e) {
+  if (e.target === this) closeModal();
+});
+
+// ─── TOAST ──────────────────────────────────────────────
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove("show"), 2200);
+}
+
+// ─── TOGGLE ─────────────────────────────────────────────
+function toggleItem(secKey, idx) {
+  const set = STATE[secKey];
+  if (set.has(idx)) set.delete(idx); else set.add(idx);
+  persistState();
+  renderMain();
+  renderSidebar();
+  updateHeader();
+  // if section just completed
+  const sec = SECTIONS.find(s => s.key === secKey);
+  if (set.size === sec.items.length) {
+    setTimeout(() => showToast(`✅ ${sec.label} completo!`), 150);
+  }
+}
+
+function toggleCollapse(secKey) {
+  if (collapsed.has(secKey)) collapsed.delete(secKey);
+  else collapsed.add(secKey);
+  renderMain();
+}
+
+// ─── TOTALS ─────────────────────────────────────────────
+function getTotal() {
+  let done=0, total=0;
+  SECTIONS.forEach(s => { total += s.items.length; done += STATE[s.key].size; });
+  return { done, total, pct: total ? Math.round(done/total*100) : 0 };
+}
+
+// ─── HEADER ─────────────────────────────────────────────
+function updateHeader() {
+  const { done, total, pct } = getTotal();
+  document.getElementById("header-bar").style.width = pct + "%";
+  document.getElementById("header-pct").textContent = pct + "%";
+}
+
+// ─── SIDEBAR ────────────────────────────────────────────
+function renderSidebar() {
+  const sb = document.getElementById("sidebar");
+  const { done, total, pct } = getTotal();
+
+  const statsHTML = `
+    <div class="sb-section">
+      <div class="sb-label">hoje</div>
+      <div class="week-grid">
+        <div class="week-stat"><div class="week-stat-num">${done}</div><div class="week-stat-lbl">feitos</div></div>
+        <div class="week-stat"><div class="week-stat-num">${total-done}</div><div class="week-stat-lbl">restantes</div></div>
+        <div class="week-stat"><div class="week-stat-num" style="color:var(--finance)">${pct}%</div><div class="week-stat-lbl">do dia</div></div>
+      </div>
+    </div>`;
+
+  const navHTML = `
+    <div class="sb-section">
+      <div class="sb-label">seções</div>
+      ${SECTIONS.map(s => {
+        const d = STATE[s.key].size, t = s.items.length;
+        const p = t ? d/t : 0;
+        return `<button class="sec-btn" onclick="scrollToSection('${s.key}')">
+          <span class="sec-icon">${s.icon}</span>
+          <span class="sec-name">${s.label}</span>
+          <span class="sec-mini-bar"><span class="sec-mini-fill" style="width:${Math.round(p*100)}%;background:${s.color}"></span></span>
+          <span class="sec-pill">${d}/${t}</span>
+        </button>`;
+      }).join("")}
+    </div>`;
+
+  sb.innerHTML = statsHTML + navHTML;
+}
+
+// ─── MAIN ────────────────────────────────────────────────
+function renderMain() {
+  const now = new Date();
+  const { done, total, pct } = getTotal();
+
+  let subtitle = `${done} de ${total} itens concluídos hoje`;
+  if (pct === 100) subtitle = "🎉 Dia completo! Incrível.";
+
+  const headerHTML = `
+    <div class="day-header">
+      <div class="day-title">${now.toLocaleDateString("pt-BR",{weekday:"long"}).replace(/^\w/,c=>c.toUpperCase())}</div>
+      <div class="day-subtitle">${now.toLocaleDateString("pt-BR",{day:"numeric",month:"long",year:"numeric"})} · ${subtitle}</div>
+      <div class="day-bar-bg"><div class="day-bar-fill" style="width:${pct}%"></div></div>
+      <div class="day-bar-meta">
+        <div class="day-bar-lbl">${pct < 100 ? "progresso do dia" : "dia completo ✓"}</div>
+        <div class="day-bar-pct">${done}/${total}</div>
+      </div>
+    </div>`;
+
+  const sectionsHTML = SECTIONS.map(s => {
+    const set = STATE[s.key];
+    const d = set.size, t = s.items.length;
+    const p = t ? Math.round(d/t*100) : 0;
+    const isOpen = !collapsed.has(s.key);
+
+    const itemsHTML = s.items.map((item, i) => `
+      <div class="check-item ${set.has(i)?"done":""}" onclick="toggleItem('${s.key}',${i})">
+        <div class="check-circle">${set.has(i)?"✓":""}</div>
+        <div class="check-label">${item}</div>
+      </div>`).join("");
+
+    return `
+      <div class="sec-card" id="sec-${s.key}">
+        <div class="sec-progress"><div class="sec-progress-fill" style="width:${p}%;background:${s.color}"></div></div>
+        <div class="sec-card-header" onclick="toggleCollapse('${s.key}')">
+          <span class="sec-header-icon">${s.icon}</span>
+          <span class="sec-header-title">${s.label}</span>
+          <span style="font-size:11px;color:var(--muted);margin-right:6px;">${s.time}</span>
+          <div class="sec-header-actions" onclick="event.stopPropagation()">
+            <button class="sec-clear-btn" onclick="openClearModal('${s.key}','${s.label}',${d},event)">limpar</button>
+          </div>
+          <span class="sec-header-badge" style="background:${s.bg};color:${s.color}">${d}/${t}</span>
+          <span class="sec-toggle ${isOpen?"open":""}">▾</span>
+        </div>
+        ${isOpen ? `<div class="sec-body">${itemsHTML}</div>` : ""}
+      </div>`;
+  }).join("");
+
+  document.getElementById("main").innerHTML = headerHTML + `<div class="sections-grid">${sectionsHTML}</div>`;
+}
+
+function scrollToSection(key) {
+  const el = document.getElementById("sec-" + key);
+  if (el) {
+    if (collapsed.has(key)) { collapsed.delete(key); renderMain(); }
+    setTimeout(() => el.scrollIntoView({ behavior:"smooth", block:"start" }), 50);
+  }
+}
+
+// ─── INIT ───────────────────────────────────────────────
+const now = new Date();
+document.getElementById("header-date").textContent =
+  now.toLocaleDateString("pt-BR",{ weekday:"short", day:"numeric", month:"short" });
+
+renderSidebar();
+renderMain();
+updateHeader();
+</script>
+</body>
+</html>

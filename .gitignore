@@ -1,0 +1,9 @@
+node_modules
+.next
+.netlify
+.env.local
+.env*.local
+out
+dist
+*.log
+.npm-cache
