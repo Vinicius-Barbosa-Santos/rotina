@@ -279,6 +279,10 @@ export default function HomePage() {
   }, [routinePrefs, state]);
 
   const manualEvents = useMemo(() => getManualMeetingEvents(manualMeetings), [manualMeetings]);
+  const visibleAgendaEvents = useMemo(
+    () => [...manualEvents, ...(calendar?.events ?? [])].filter((event) => Boolean(event.meetingUrl)),
+    [calendar?.events, manualEvents]
+  );
 
   useEffect(() => {
     const storedDates = readCompletedDates();
@@ -467,7 +471,7 @@ export default function HomePage() {
                 <span>streak</span>
               </div>
               <div>
-                <strong>{(calendar?.events.length ?? 0) + manualEvents.length}</strong>
+                <strong>{visibleAgendaEvents.length}</strong>
                 <span>eventos</span>
               </div>
             </div>
@@ -765,7 +769,10 @@ function AgendaPanel({
   const [syncing, setSyncing] = useState(false);
   const [syncMessage, setSyncMessage] = useState("");
   const events = useMemo(
-    () => [...manualEvents, ...(calendar?.events ?? [])].sort((a, b) => a.startsAt.localeCompare(b.startsAt)),
+    () =>
+      [...manualEvents, ...(calendar?.events ?? [])]
+        .filter((event) => Boolean(event.meetingUrl))
+        .sort((a, b) => a.startsAt.localeCompare(b.startsAt)),
     [calendar?.events, manualEvents]
   );
 

@@ -262,7 +262,7 @@ function parseRRule(rule: string) {
 
 function findMeetingUrl(text: string) {
   const urls = text.match(/https?:\/\/[^\s<>"')]+/g) ?? [];
-  return urls.find((url) => meetingHosts.some(([host]) => url.includes(host))) ?? urls[0];
+  return urls.find((url) => meetingHosts.some(([host]) => url.includes(host)));
 }
 
 function findGoogleMeetingUrl(event: GoogleCalendarApiEvent) {
@@ -270,7 +270,6 @@ function findGoogleMeetingUrl(event: GoogleCalendarApiEvent) {
   const textWithLinks = [
     conferenceUrl,
     event.hangoutLink,
-    event.htmlLink,
     event.location,
     event.description
   ]
