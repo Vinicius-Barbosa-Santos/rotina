@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ArrowUpRight,
+  Bell,
   BookOpen,
   Briefcase,
   CalendarDays,
@@ -72,6 +73,13 @@ type RoutinePrefs = {
   timeOverrides: Record<string, string>;
 };
 
+type RoutineNotificationSection = {
+  key: string;
+  label: string;
+  startsAt: Date;
+  items: string[];
+};
+
 const iconMap = {
   Mind: Sparkles,
   Sun: Sunrise,
@@ -109,6 +117,9 @@ const defaultMeetingForm = {
   days: [1, 2, 3, 4, 5]
 };
 
+const notificationPreferenceKey = "rotina_browser_notifications";
+const notifiedSectionsKey = "rotina_notified_sections";
+
 function todayKey() {
   const now = new Date();
   return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(
@@ -138,6 +149,40 @@ function formatTime(value: string) {
     hour: "2-digit",
     minute: "2-digit"
   }).format(new Date(value));
+}
+
+function getSectionStartDate(time: string, date = new Date()) {
+  const match = time.match(/^(\d{1,2}):(\d{2})/);
+  if (!match) return null;
+
+  const hour = Number(match[1]);
+  const minute = Number(match[2]);
+  if (hour > 23 || minute > 59) return null;
+
+  const startsAt = new Date(date);
+  startsAt.setHours(hour, minute, 0, 0);
+  return startsAt;
+}
+
+function readNotifiedSectionKeys() {
+  try {
+    const stored = JSON.parse(localStorage.getItem(notifiedSectionsKey) || "{}") as Record<string, string[]>;
+    return new Set(stored[todayKey()] ?? []);
+  } catch {
+    return new Set<string>();
+  }
+}
+
+function saveNotifiedSectionKey(sectionKey: string) {
+  try {
+    const stored = JSON.parse(localStorage.getItem(notifiedSectionsKey) || "{}") as Record<string, string[]>;
+    const today = todayKey();
+    const nextKeys = new Set(stored[today] ?? []);
+    nextKeys.add(sectionKey);
+    localStorage.setItem(notifiedSectionsKey, JSON.stringify({ [today]: Array.from(nextKeys) }));
+  } catch {
+    localStorage.setItem(notifiedSectionsKey, JSON.stringify({ [todayKey()]: [sectionKey] }));
+  }
 }
 
 function readCompletedDates() {
@@ -204,6 +249,9 @@ export default function HomePage() {
   const [calendar, setCalendar] = useState<CalendarResponse | null>(null);
   const [calendarLoading, setCalendarLoading] = useState(true);
   const [calendarError, setCalendarError] = useState("");
+  const notificationTimers = useRef<number[]>([]);
+  const [browserNotificationsEnabled, setBrowserNotificationsEnabled] = useState(false);
+  const [notificationPermission, setNotificationPermission] = useState<NotificationPermission | "unsupported">("default");
   const [manualMeetings, setManualMeetings] = useState<ManualMeeting[]>([]);
   const [newMeeting, setNewMeeting] = useState(defaultMeetingForm);
   const [routinePrefs, setRoutinePrefs] = useState<RoutinePrefs>({
@@ -217,6 +265,13 @@ export default function HomePage() {
   useEffect(() => {
     const saved = localStorage.getItem(`rotina_next_${todayKey()}`);
     if (saved) setState(JSON.parse(saved) as RoutineState);
+
+    if ("Notification" in window) {
+      setNotificationPermission(Notification.permission);
+      setBrowserNotificationsEnabled(localStorage.getItem(notificationPreferenceKey) === "true");
+    } else {
+      setNotificationPermission("unsupported");
+    }
 
     const savedMeetings = localStorage.getItem("rotina_manual_meetings");
     if (savedMeetings) setManualMeetings(JSON.parse(savedMeetings) as ManualMeeting[]);
@@ -283,6 +338,52 @@ export default function HomePage() {
     () => [...manualEvents, ...(calendar?.events ?? [])].filter((event) => Boolean(event.meetingUrl)),
     [calendar?.events, manualEvents]
   );
+  const routineNotificationSections = useMemo<RoutineNotificationSection[]>(() => {
+    const today = new Date();
+
+    return routineSections
+      .map((section) => {
+        const startsAt = getSectionStartDate(getSectionTime(section.key, section.time), today);
+        const items = getPersonalizedItems(section, today).map((item) => item.label);
+        if (!startsAt || items.length === 0) return null;
+        return { key: section.key, label: section.label, startsAt, items };
+      })
+      .filter((section): section is RoutineNotificationSection => Boolean(section));
+  }, [routinePrefs]);
+
+  useEffect(() => {
+    notificationTimers.current.forEach((timer) => window.clearTimeout(timer));
+    notificationTimers.current = [];
+
+    if (!browserNotificationsEnabled || notificationPermission !== "granted") return;
+
+    const notified = readNotifiedSectionKeys();
+    const now = Date.now();
+
+    routineNotificationSections.forEach((section) => {
+      if (notified.has(section.key)) return;
+
+      const delay = section.startsAt.getTime() - now;
+      if (delay < 0) return;
+
+      const timer = window.setTimeout(() => {
+        const firstItems = section.items.slice(0, 3).join(", ");
+        new Notification(`Começa agora: ${section.label}`, {
+          body: firstItems ? `Próximos itens: ${firstItems}` : "Hora de começar este bloco da rotina.",
+          icon: "/minha-rotina-logo.png",
+          tag: `rotina-${todayKey()}-${section.key}`
+        });
+        saveNotifiedSectionKey(section.key);
+      }, delay);
+
+      notificationTimers.current.push(timer);
+    });
+
+    return () => {
+      notificationTimers.current.forEach((timer) => window.clearTimeout(timer));
+      notificationTimers.current = [];
+    };
+  }, [browserNotificationsEnabled, notificationPermission, routineNotificationSections]);
 
   useEffect(() => {
     const storedDates = readCompletedDates();
@@ -435,6 +536,27 @@ export default function HomePage() {
     }));
   }
 
+  async function toggleBrowserNotifications() {
+    if (!("Notification" in window)) {
+      setNotificationPermission("unsupported");
+      return;
+    }
+
+    if (browserNotificationsEnabled) {
+      localStorage.setItem(notificationPreferenceKey, "false");
+      setBrowserNotificationsEnabled(false);
+      return;
+    }
+
+    const permission = Notification.permission === "granted" ? "granted" : await Notification.requestPermission();
+    setNotificationPermission(permission);
+
+    if (permission === "granted") {
+      localStorage.setItem(notificationPreferenceKey, "true");
+      setBrowserNotificationsEnabled(true);
+    }
+  }
+
   return (
     <main className="shell">
       <header className="topbar">
@@ -486,6 +608,29 @@ export default function HomePage() {
               manualEvents={manualEvents}
               getReminderSections={buildReminderSections}
             />
+          </section>
+
+          <section className="sideBlock">
+            <p className="sideLabel">avisos</p>
+            <div className="notificationActions">
+              <button
+                className={browserNotificationsEnabled ? "notificationButton active" : "notificationButton"}
+                onClick={toggleBrowserNotifications}
+                type="button"
+              >
+                <Bell size={15} aria-hidden />
+                {browserNotificationsEnabled ? "Avisos ativados" : "Ativar avisos"}
+              </button>
+              <span>
+                {notificationPermission === "unsupported"
+                  ? "Este navegador não suporta avisos do sistema."
+                  : notificationPermission === "denied"
+                    ? "Permissão bloqueada no navegador."
+                    : browserNotificationsEnabled
+                      ? `${routineNotificationSections.length} blocos com horário hoje.`
+                      : "Receba um aviso quando cada bloco começar."}
+              </span>
+            </div>
           </section>
 
           <section className="sideBlock navList">

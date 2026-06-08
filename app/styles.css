@@ -696,6 +696,38 @@ button {
   line-height: 1.35;
 }
 
+.notificationActions {
+  display: grid;
+  gap: 8px;
+}
+
+.notificationActions span {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.notificationButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  width: fit-content;
+  border: 0;
+  border-radius: 8px;
+  padding: 8px 10px;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text);
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.notificationButton.active {
+  background: var(--green);
+  color: #0d1012;
+}
+
 .syncButton {
   width: fit-content;
   border: 0;
