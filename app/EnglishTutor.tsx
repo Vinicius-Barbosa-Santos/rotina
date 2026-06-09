@@ -151,9 +151,19 @@ export default function EnglishTutor() {
     setError("");
 
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: {
+          channelCount: 1,
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true
+        }
+      });
       const mimeType = getSupportedAudioMimeType();
-      const recorder = new MediaRecorder(stream, mimeType ? { mimeType } : undefined);
+      const recorder = new MediaRecorder(stream, {
+        ...(mimeType ? { mimeType } : {}),
+        audioBitsPerSecond: 128_000
+      });
 
       audioChunksRef.current = [];
       recordingStreamRef.current = stream;
@@ -190,7 +200,7 @@ export default function EnglishTutor() {
     setError("");
     try {
       const text = await requestAudioTranscription(audio);
-      setInput((current) => `${current}${current ? " " : ""}${text}`);
+      setInput(text);
     } catch (requestError) {
       setError(requestError instanceof Error ? requestError.message : "Não consegui transcrever o áudio.");
     } finally {

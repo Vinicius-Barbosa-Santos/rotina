@@ -128,7 +128,13 @@ async function transcribeAudio({
             role: "user",
             parts: [
               {
-                text: "Transcribe the spoken English exactly. Return only the transcript, without comments, quotes, corrections, or markdown."
+                text: `Transcribe this audio as accurately and literally as possible.
+The speaker is a Brazilian software developer practicing spoken English.
+The audio may contain technical terms such as API, backend, frontend, React, Java, JavaScript, TypeScript, AWS, Jira, bug, endpoint, database, deploy, deployment, pull request, code review, branch, commit, merge, test, production, and staging.
+Do not translate, correct grammar, improve phrasing, summarize, or invent missing words.
+Preserve the speaker's actual mistakes and wording.
+If a word is unclear, choose the closest phonetic transcription instead of rewriting the sentence.
+Return only the transcript, without comments, quotes, labels, corrections, or markdown.`
               },
               { inlineData: { mimeType, data: audioData } }
             ]
@@ -136,6 +142,7 @@ async function transcribeAudio({
         ],
         generationConfig: {
           maxOutputTokens: 600,
+          temperature: 0,
           thinkingConfig: { thinkingBudget: 0 }
         }
       })
