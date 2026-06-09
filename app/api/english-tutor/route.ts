@@ -63,32 +63,22 @@ export async function POST(request: Request) {
     return NextResponse.json({ message: "Escreva uma mensagem para começar." }, { status: 400 });
   }
 
-  const model = process.env.GEMINI_ENGLISH_TUTOR_MODEL || "gemini-2.5-flash";
-  const response = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`,
-    {
-      method: "POST",
-      headers: {
-        "x-goog-api-key": apiKey,
-        "Content-Type": "application/json"
+  const { response, payload } = await requestGemini({
+    apiKey,
+    body: {
+      systemInstruction: {
+        parts: [{ text: mode === "summary" ? summaryInstructions : conversationInstructions }]
       },
-      body: JSON.stringify({
-        systemInstruction: {
-          parts: [{ text: mode === "summary" ? summaryInstructions : conversationInstructions }]
-        },
-        contents: messages.map((message) => ({
-          role: message.role === "assistant" ? "model" : "user",
-          parts: [{ text: message.content }]
-        })),
-        generationConfig: {
-          maxOutputTokens: mode === "summary" ? 1_200 : 600,
-          thinkingConfig: { thinkingBudget: 0 }
-        }
-      })
+      contents: messages.map((message) => ({
+        role: message.role === "assistant" ? "model" : "user",
+        parts: [{ text: message.content }]
+      })),
+      generationConfig: {
+        maxOutputTokens: mode === "summary" ? 1_200 : 600,
+        thinkingConfig: { thinkingBudget: 0 }
+      }
     }
-  );
-
-  const payload = (await response.json().catch(() => undefined)) as GeminiResponse | undefined;
+  });
   if (!response.ok) {
     return NextResponse.json(
       { message: payload?.error?.message ?? "Não consegui falar com a tutora agora." },
@@ -113,43 +103,33 @@ async function transcribeAudio({
   audioData: string;
   mimeType: string;
 }) {
-  const model = process.env.GEMINI_ENGLISH_TUTOR_MODEL || "gemini-2.5-flash";
-  const response = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`,
-    {
-      method: "POST",
-      headers: {
-        "x-goog-api-key": apiKey,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        contents: [
-          {
-            role: "user",
-            parts: [
-              {
-                text: `Transcribe this audio as accurately and literally as possible.
+  const { response, payload } = await requestGemini({
+    apiKey,
+    body: {
+      contents: [
+        {
+          role: "user",
+          parts: [
+            {
+              text: `Transcribe this audio as accurately and literally as possible.
 The speaker is a Brazilian software developer practicing spoken English.
 The audio may contain technical terms such as API, backend, frontend, React, Java, JavaScript, TypeScript, AWS, Jira, bug, endpoint, database, deploy, deployment, pull request, code review, branch, commit, merge, test, production, and staging.
 Do not translate, correct grammar, improve phrasing, summarize, or invent missing words.
 Preserve the speaker's actual mistakes and wording.
 If a word is unclear, choose the closest phonetic transcription instead of rewriting the sentence.
 Return only the transcript, without comments, quotes, labels, corrections, or markdown.`
-              },
-              { inlineData: { mimeType, data: audioData } }
-            ]
-          }
-        ],
-        generationConfig: {
-          maxOutputTokens: 600,
-          temperature: 0,
-          thinkingConfig: { thinkingBudget: 0 }
+            },
+            { inlineData: { mimeType, data: audioData } }
+          ]
         }
-      })
+      ],
+      generationConfig: {
+        maxOutputTokens: 600,
+        temperature: 0,
+        thinkingConfig: { thinkingBudget: 0 }
+      }
     }
-  );
-
-  const payload = (await response.json().catch(() => undefined)) as GeminiResponse | undefined;
+  });
   if (!response.ok) {
     return NextResponse.json(
       { message: payload?.error?.message ?? "Não consegui transcrever a gravação." },
@@ -160,6 +140,42 @@ Return only the transcript, without comments, quotes, labels, corrections, or ma
   const text = extractOutputText(payload);
   if (!text) return NextResponse.json({ message: "Nenhuma fala foi detectada na gravação." }, { status: 422 });
   return NextResponse.json({ text });
+}
+
+async function requestGemini({ apiKey, body }: { apiKey: string; body: Record<string, unknown> }) {
+  const primaryModel = process.env.GEMINI_ENGLISH_TUTOR_MODEL || "gemini-2.5-flash";
+  const fallbackModel = process.env.GEMINI_ENGLISH_TUTOR_FALLBACK_MODEL || "gemini-2.5-flash-lite";
+  const models = primaryModel === fallbackModel ? [primaryModel] : [primaryModel, fallbackModel];
+  let lastResponse: Response | undefined;
+  let lastPayload: GeminiResponse | undefined;
+
+  for (const [index, model] of models.entries()) {
+    if (index > 0) await new Promise((resolve) => setTimeout(resolve, 400));
+
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`,
+      {
+        method: "POST",
+        headers: {
+          "x-goog-api-key": apiKey,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(body)
+      }
+    );
+    const payload = (await response.json().catch(() => undefined)) as GeminiResponse | undefined;
+    lastResponse = response;
+    lastPayload = payload;
+
+    if (response.ok || !shouldTryFallback(response.status, payload)) return { response, payload };
+  }
+
+  return { response: lastResponse!, payload: lastPayload };
+}
+
+function shouldTryFallback(status: number, payload?: GeminiResponse) {
+  const message = payload?.error?.message?.toLowerCase() ?? "";
+  return status === 429 || status === 503 || message.includes("high demand") || message.includes("overloaded");
 }
 
 function allowRequest(request: Request) {
