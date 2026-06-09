@@ -28,6 +28,7 @@ import {
   Users
 } from "lucide-react";
 import { getSectionScheduleLabel, getVisibleItems, routineSections } from "@/lib/routine";
+import EnglishTutor from "./EnglishTutor";
 
 type CalendarEvent = {
   id: string;
@@ -805,6 +806,7 @@ export default function HomePage() {
                   {isOpen && (
                     <div className="checklist">
                       {section.note && <p className="sectionNote">{section.note}</p>}
+                      {section.key === "english" && <EnglishTutor />}
                       {!section.references?.length && (
                         <div className="sectionEditor">
                           <label>

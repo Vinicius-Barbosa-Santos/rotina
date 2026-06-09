@@ -162,6 +162,9 @@ GOOGLE_CALENDAR_IDS="primary,vinicius.santos@cd2.com.br"
 GOOGLE_CLIENT_ID="cole-o-client-id-aqui"
 GOOGLE_CLIENT_SECRET="cole-o-client-secret-aqui"
 GOOGLE_REDIRECT_URI="https://seu-projeto.vercel.app/api/auth/google/callback"
+
+GEMINI_API_KEY="cole-sua-chave-gemini-aqui"
+GEMINI_ENGLISH_TUTOR_MODEL="gemini-2.5-flash"
 ```
 
 7. Faça o deploy.
@@ -177,6 +180,19 @@ https://seu-projeto.vercel.app/api/auth/google/callback
 ```
 
 Depois faça um novo deploy ou redeploy na Vercel.
+
+## Prática de inglês com IA
+
+A seção **Inglês** inclui uma conversa com IA que:
+
+- mantém uma conversa natural em inglês;
+- apresenta correções curtas durante a prática;
+- gera um resumo com erros, acertos, vocabulário e próximo foco;
+- salva o histórico somente no dispositivo atual.
+
+Crie uma chave gratuita no Google AI Studio e configure `GEMINI_API_KEY` na Vercel. A chave fica somente no servidor e nunca é enviada ao navegador.
+
+O modelo padrão é o `gemini-2.5-flash`. No plano gratuito, o Google pode usar o conteúdo enviado para melhorar seus produtos; evite inserir informações confidenciais.
 
 ## Alternativas de calendário
 

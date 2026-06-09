@@ -343,6 +343,203 @@ button {
   line-height: 1.45;
 }
 
+.englishTutor {
+  display: grid;
+  gap: 10px;
+  margin: 10px 16px 14px;
+  padding: 12px;
+  border: 1px solid rgba(52, 211, 153, 0.24);
+  border-radius: 8px;
+  background: rgba(52, 211, 153, 0.035);
+}
+
+.englishTutorHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.englishTutorHeader div {
+  display: grid;
+  gap: 4px;
+}
+
+.englishTutorHeader span {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--green);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.englishTutorHeader small,
+.englishTutorActions span {
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.englishTutorHeader button {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--line-2);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  flex: 0 0 auto;
+}
+
+.englishTutorHeader button:hover {
+  background: var(--panel-2);
+  color: var(--text);
+}
+
+.englishConversation {
+  display: grid;
+  gap: 8px;
+  max-height: 360px;
+  overflow-y: auto;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--bg);
+}
+
+.englishMessage {
+  display: grid;
+  gap: 3px;
+  width: min(84%, 640px);
+  padding: 9px 10px;
+  border-radius: 8px;
+}
+
+.englishMessage.assistant {
+  justify-self: start;
+  background: var(--panel-2);
+}
+
+.englishMessage.user {
+  justify-self: end;
+  background: rgba(52, 211, 153, 0.15);
+}
+
+.englishMessage small {
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.englishMessage p {
+  margin: 0;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.englishMessage.loading {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.englishComposer {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 42px;
+  gap: 8px;
+}
+
+.englishComposer textarea {
+  min-width: 0;
+  resize: vertical;
+  border: 1px solid var(--line-2);
+  border-radius: 8px;
+  background: var(--panel-2);
+  color: var(--text);
+  padding: 9px 10px;
+  outline: none;
+  font: inherit;
+  font-size: 13px;
+}
+
+.englishComposer textarea:focus {
+  border-color: var(--green);
+}
+
+.englishComposer button {
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 8px;
+  background: var(--green);
+  color: #0d1012;
+  cursor: pointer;
+}
+
+.englishComposer button:disabled,
+.englishTutorActions button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.englishTutorActions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.englishTutorActions button {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border: 1px solid rgba(52, 211, 153, 0.32);
+  border-radius: 8px;
+  padding: 8px 10px;
+  background: transparent;
+  color: var(--green);
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.englishTutorError {
+  padding: 9px 10px;
+  border: 1px solid rgba(244, 133, 90, 0.3);
+  border-radius: 8px;
+  color: #ffb199;
+  font-size: 12px;
+}
+
+.englishSummary {
+  display: grid;
+  gap: 7px;
+  padding: 11px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel-2);
+}
+
+.englishSummary strong {
+  color: var(--green);
+  font-size: 13px;
+}
+
+.englishSummary p {
+  margin: 0;
+  white-space: pre-wrap;
+  font-size: 12px;
+  line-height: 1.55;
+}
+
 .sectionEditor {
   padding: 10px 16px 4px;
 }
@@ -852,5 +1049,14 @@ button {
   .sectionActions {
     flex-direction: column-reverse;
     align-items: flex-end;
+  }
+
+  .englishTutor {
+    margin-inline: 10px;
+    padding: 10px;
+  }
+
+  .englishMessage {
+    width: 92%;
   }
 }
