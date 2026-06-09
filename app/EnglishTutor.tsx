@@ -188,27 +188,17 @@ export default function EnglishTutor() {
     };
     recognition.onerror = (event) => {
       if (event.error === "not-allowed" || event.error === "service-not-allowed") {
-        keepListeningRef.current = false;
-        setListening(false);
         setError("O acesso ao microfone foi bloqueado. Libere a permissão do navegador e tente novamente.");
+      } else if (event.error === "no-speech") {
+        setError("Nenhuma fala foi detectada. Toque no microfone e tente novamente.");
       }
+      keepListeningRef.current = false;
+      setListening(false);
     };
     recognition.onend = () => {
-      if (!keepListeningRef.current) {
-        setListening(false);
-        return;
-      }
-
-      window.setTimeout(() => {
-        if (!keepListeningRef.current) return;
-        try {
-          recognition.start();
-        } catch {
-          keepListeningRef.current = false;
-          setListening(false);
-          setError("Não consegui manter o microfone ativo. Tente novamente.");
-        }
-      }, 250);
+      keepListeningRef.current = false;
+      recognitionRef.current = null;
+      setListening(false);
     };
     recognitionRef.current = recognition;
     setError("");
@@ -305,7 +295,7 @@ export default function EnglishTutor() {
         <span>
           {speechSupported
             ? listening
-              ? "Microfone ativo. Fale com calma e toque novamente para parar."
+              ? "Microfone ativo. Fale agora ou toque novamente para parar."
               : "Ative a voz para ouvir a tutora e use o microfone para responder."
             : "A fala não está disponível neste navegador; pratique por texto."}
         </span>
