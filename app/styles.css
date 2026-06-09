@@ -567,6 +567,32 @@ button {
   font-size: 13px;
 }
 
+.englishSummaryHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.englishSummaryHeader button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid var(--line-2);
+  border-radius: 8px;
+  padding: 6px 8px;
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.englishSummaryHeader button:hover {
+  border-color: var(--green);
+  color: var(--green);
+}
+
 .englishSummary p {
   margin: 0;
   white-space: pre-wrap;

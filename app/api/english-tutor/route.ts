@@ -8,6 +8,7 @@ type TutorMessage = {
 type TutorRequest = {
   mode?: "chat" | "summary" | "transcribe";
   messages?: TutorMessage[];
+  pronunciationNotes?: string[];
   audio?: {
     data?: string;
     mimeType?: string;
@@ -58,6 +59,7 @@ export async function POST(request: Request) {
   }
 
   const messages = sanitizeMessages(body?.messages ?? []);
+  const pronunciationNotes = sanitizePronunciationNotes(body?.pronunciationNotes ?? []);
 
   if (!messages.length) {
     return NextResponse.json({ message: "Escreva uma mensagem para começar." }, { status: 400 });
@@ -67,7 +69,18 @@ export async function POST(request: Request) {
     apiKey,
     body: {
       systemInstruction: {
-        parts: [{ text: mode === "summary" ? summaryInstructions : conversationInstructions }]
+        parts: [
+          {
+            text:
+              mode === "summary"
+                ? `${summaryInstructions}\n\nPronunciation observations collected directly from the learner's recordings:\n${
+                    pronunciationNotes.length
+                      ? pronunciationNotes.map((note) => `- ${note}`).join("\n")
+                      : "- No reliable pronunciation observations were collected."
+                  }`
+                : conversationInstructions
+          }
+        ]
       },
       contents: messages.map((message) => ({
         role: message.role === "assistant" ? "model" : "user",
@@ -117,7 +130,10 @@ The audio may contain technical terms such as API, backend, frontend, React, Jav
 Do not translate, correct grammar, improve phrasing, summarize, or invent missing words.
 Preserve the speaker's actual mistakes and wording.
 If a word is unclear, choose the closest phonetic transcription instead of rewriting the sentence.
-Return only the transcript, without comments, quotes, labels, corrections, or markdown.`
+Also evaluate pronunciation from the audio itself. Mention only clear, useful pronunciation points. Do not infer pronunciation problems from grammar or wording.
+Return a JSON object with:
+- "transcript": the literal English transcript;
+- "pronunciationFeedback": a concise observation in Brazilian Portuguese, with specific English words to practice, or an empty string when pronunciation cannot be assessed reliably.`
             },
             { inlineData: { mimeType, data: audioData } }
           ]
@@ -126,6 +142,15 @@ Return only the transcript, without comments, quotes, labels, corrections, or ma
       generationConfig: {
         maxOutputTokens: 600,
         temperature: 0,
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: "OBJECT",
+          properties: {
+            transcript: { type: "STRING" },
+            pronunciationFeedback: { type: "STRING" }
+          },
+          required: ["transcript", "pronunciationFeedback"]
+        },
         thinkingConfig: { thinkingBudget: 0 }
       }
     }
@@ -137,9 +162,9 @@ Return only the transcript, without comments, quotes, labels, corrections, or ma
     );
   }
 
-  const text = extractOutputText(payload);
-  if (!text) return NextResponse.json({ message: "Nenhuma fala foi detectada na gravação." }, { status: 422 });
-  return NextResponse.json({ text });
+  const result = parseTranscriptionResult(extractOutputText(payload) ?? "");
+  if (!result.text) return NextResponse.json({ message: "Nenhuma fala foi detectada na gravação." }, { status: 422 });
+  return NextResponse.json(result);
 }
 
 async function requestGemini({ apiKey, body }: { apiKey: string; body: Record<string, unknown> }) {
@@ -214,12 +239,33 @@ function sanitizeMessages(messages: TutorMessage[]) {
     .reverse();
 }
 
+function sanitizePronunciationNotes(notes: unknown) {
+  return (Array.isArray(notes) ? notes : [])
+    .filter((note) => typeof note === "string")
+    .map((note) => note.trim().slice(0, 500))
+    .filter(Boolean)
+    .slice(-12);
+}
+
 function extractOutputText(payload?: GeminiResponse) {
   return payload?.candidates
     ?.flatMap((candidate) => candidate.content?.parts ?? [])
     .map((part) => part.text ?? "")
     .join("\n")
     .trim();
+}
+
+function parseTranscriptionResult(output: string) {
+  try {
+    const parsed = JSON.parse(output) as { transcript?: unknown; pronunciationFeedback?: unknown };
+    return {
+      text: typeof parsed.transcript === "string" ? parsed.transcript.trim() : "",
+      pronunciationFeedback:
+        typeof parsed.pronunciationFeedback === "string" ? parsed.pronunciationFeedback.trim() : ""
+    };
+  } catch {
+    return { text: output.trim(), pronunciationFeedback: "" };
+  }
 }
 
 const conversationInstructions = `
@@ -253,12 +299,15 @@ Use exactly these short sections:
 
 ## Cenário praticado
 ## O que você comunicou bem
-## Correções importantes
+## Pontos gramaticais para melhorar
+## Pronúncia
+## Clareza e confiança ao falar
 ## Vocabulário técnico aprendido
 ## Frases úteis para o trabalho
-## Próximo foco de comunicação
+## Plano para a próxima prática
 
 Evaluate clarity, confidence, grammar, and ability to explain technical work.
+For pronunciation, use only the pronunciation observations supplied below. Never infer pronunciation from written text. If there are no reliable observations, say so clearly.
 Be specific and quote only short fragments from the learner's messages.
-Explain corrections clearly and give 3 practical example sentences the learner can reuse at work.
+Explain grammatical corrections clearly, include corrected examples, and give 3 practical example sentences the learner can reuse at work.
 `.trim();
