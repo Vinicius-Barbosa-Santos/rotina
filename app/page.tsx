@@ -245,6 +245,7 @@ function getManualMeetingEvents(meetings: ManualMeeting[], date = new Date()) {
 }
 
 export default function HomePage() {
+  const [hydrated, setHydrated] = useState(false);
   const [state, setState] = useState<RoutineState>({});
   const [openSections, setOpenSections] = useState(() => new Set(routineSections.map((item) => item.key)));
   const [calendar, setCalendar] = useState<CalendarResponse | null>(null);
@@ -281,6 +282,8 @@ export default function HomePage() {
     if (savedPrefs) {
       setRoutinePrefs(JSON.parse(savedPrefs) as RoutinePrefs);
     }
+
+    setHydrated(true);
   }, []);
 
   useEffect(() => {
@@ -556,6 +559,16 @@ export default function HomePage() {
       localStorage.setItem(notificationPreferenceKey, "true");
       setBrowserNotificationsEnabled(true);
     }
+  }
+
+  if (!hydrated) {
+    return (
+      <main className="appLoading">
+        <img src="/minha-rotina-logo.png" alt="Minha Rotina" />
+        <Loader2 className="spin" size={20} aria-hidden />
+        <span>Carregando sua rotina</span>
+      </main>
+    );
   }
 
   return (

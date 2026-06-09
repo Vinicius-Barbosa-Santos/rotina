@@ -48,6 +48,24 @@ button {
   min-height: 100vh;
 }
 
+.appLoading {
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 12px;
+  min-height: 100vh;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.appLoading img {
+  width: 58px;
+  height: 58px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  object-fit: cover;
+}
+
 .topbar {
   position: sticky;
   top: 0;
