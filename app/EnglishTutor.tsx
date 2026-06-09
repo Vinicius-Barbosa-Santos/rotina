@@ -9,8 +9,11 @@ type SpeechRecognitionInstance = {
   continuous: boolean;
   start: () => void;
   stop: () => void;
-  onresult: ((event: { results: ArrayLike<{ 0: { transcript: string } }> }) => void) | null;
-  onerror: (() => void) | null;
+  onresult: ((event: {
+    resultIndex: number;
+    results: ArrayLike<{ 0: { transcript: string }; isFinal?: boolean }>;
+  }) => void) | null;
+  onerror: ((event: { error?: string }) => void) | null;
   onend: (() => void) | null;
 };
 
@@ -50,6 +53,7 @@ export default function EnglishTutor() {
   const [speechSupported, setSpeechSupported] = useState(false);
   const conversationRef = useRef<HTMLDivElement>(null);
   const recognitionRef = useRef<SpeechRecognitionInstance | null>(null);
+  const keepListeningRef = useRef(false);
 
   useEffect(() => {
     const savedMessages = localStorage.getItem(conversationKey);
@@ -64,6 +68,12 @@ export default function EnglishTutor() {
     }
     if (savedSummary) setSummary(savedSummary);
     setSpeechSupported(Boolean(window.speechSynthesis && (window.SpeechRecognition || window.webkitSpeechRecognition)));
+
+    return () => {
+      keepListeningRef.current = false;
+      recognitionRef.current?.stop();
+      window.speechSynthesis?.cancel();
+    };
   }, []);
 
   useEffect(() => {
@@ -75,6 +85,7 @@ export default function EnglishTutor() {
     const content = input.trim();
     if (!content || loading) return;
 
+    stopListening();
     const userMessage: TutorMessage = { id: crypto.randomUUID(), role: "user", content };
     const nextMessages = [...messages, userMessage];
     setMessages(nextMessages);
@@ -110,6 +121,7 @@ export default function EnglishTutor() {
   }
 
   function clearConversation() {
+    stopListening();
     window.speechSynthesis?.cancel();
     setMessages([welcomeMessage]);
     setSummary("");
@@ -141,6 +153,15 @@ export default function EnglishTutor() {
     window.speechSynthesis.speak(utterance);
   }
 
+  function toggleListening() {
+    if (listening) {
+      stopListening();
+      return;
+    }
+
+    startListening();
+  }
+
   function startListening() {
     const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!Recognition) {
@@ -148,24 +169,64 @@ export default function EnglishTutor() {
       return;
     }
 
-    recognitionRef.current?.stop();
+    keepListeningRef.current = true;
+    window.speechSynthesis?.cancel();
     const recognition = new Recognition();
     recognition.lang = "en-US";
     recognition.interimResults = false;
-    recognition.continuous = false;
+    recognition.continuous = true;
     recognition.onresult = (event) => {
-      const transcript = event.results[0]?.[0]?.transcript;
-      if (transcript) setInput((current) => `${current}${current ? " " : ""}${transcript}`);
+      const transcripts: string[] = [];
+      for (let index = event.resultIndex; index < event.results.length; index += 1) {
+        const result = event.results[index];
+        const transcript = result?.[0]?.transcript?.trim();
+        if (transcript && result.isFinal !== false) transcripts.push(transcript);
+      }
+      if (transcripts.length) {
+        setInput((current) => `${current}${current ? " " : ""}${transcripts.join(" ")}`);
+      }
     };
-    recognition.onerror = () => {
-      setError("Não consegui ouvir. Verifique a permissão do microfone e tente novamente.");
-      setListening(false);
+    recognition.onerror = (event) => {
+      if (event.error === "not-allowed" || event.error === "service-not-allowed") {
+        keepListeningRef.current = false;
+        setListening(false);
+        setError("O acesso ao microfone foi bloqueado. Libere a permissão do navegador e tente novamente.");
+      }
     };
-    recognition.onend = () => setListening(false);
+    recognition.onend = () => {
+      if (!keepListeningRef.current) {
+        setListening(false);
+        return;
+      }
+
+      window.setTimeout(() => {
+        if (!keepListeningRef.current) return;
+        try {
+          recognition.start();
+        } catch {
+          keepListeningRef.current = false;
+          setListening(false);
+          setError("Não consegui manter o microfone ativo. Tente novamente.");
+        }
+      }, 250);
+    };
     recognitionRef.current = recognition;
     setError("");
     setListening(true);
-    recognition.start();
+    try {
+      recognition.start();
+    } catch {
+      keepListeningRef.current = false;
+      setListening(false);
+      setError("Não consegui iniciar o microfone. Tente novamente.");
+    }
+  }
+
+  function stopListening() {
+    keepListeningRef.current = false;
+    recognitionRef.current?.stop();
+    recognitionRef.current = null;
+    setListening(false);
   }
 
   return (
@@ -225,11 +286,11 @@ export default function EnglishTutor() {
         <button
           className={listening ? "englishMicButton listening" : "englishMicButton"}
           type="button"
-          onClick={startListening}
-          disabled={listening || !speechSupported}
-          aria-label="Responder usando o microfone"
+          onClick={toggleListening}
+          disabled={!speechSupported}
+          aria-label={listening ? "Parar microfone" : "Responder usando o microfone"}
         >
-          {listening ? <Loader2 className="spin" size={17} aria-hidden /> : <Mic size={17} aria-hidden />}
+          <Mic size={17} aria-hidden />
         </button>
         <button type="submit" disabled={!input.trim() || loading} aria-label="Enviar mensagem">
           <Send size={17} aria-hidden />
@@ -243,7 +304,9 @@ export default function EnglishTutor() {
         </button>
         <span>
           {speechSupported
-            ? "Ative a voz para ouvir a tutora e use o microfone para responder."
+            ? listening
+              ? "Microfone ativo. Fale com calma e toque novamente para parar."
+              : "Ative a voz para ouvir a tutora e use o microfone para responder."
             : "A fala não está disponível neste navegador; pratique por texto."}
         </span>
       </div>
