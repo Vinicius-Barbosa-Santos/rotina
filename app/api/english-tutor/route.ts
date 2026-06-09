@@ -6,8 +6,12 @@ type TutorMessage = {
 };
 
 type TutorRequest = {
-  mode?: "chat" | "summary";
+  mode?: "chat" | "summary" | "transcribe";
   messages?: TutorMessage[];
+  audio?: {
+    data?: string;
+    mimeType?: string;
+  };
 };
 
 type GeminiResponse = {
@@ -41,7 +45,18 @@ export async function POST(request: Request) {
   }
 
   const body = (await request.json().catch(() => undefined)) as TutorRequest | undefined;
-  const mode = body?.mode === "summary" ? "summary" : "chat";
+  const mode = body?.mode === "summary" || body?.mode === "transcribe" ? body.mode : "chat";
+
+  if (mode === "transcribe") {
+    const audioData = body?.audio?.data;
+    const mimeType = body?.audio?.mimeType;
+    if (!audioData || !mimeType || audioData.length > 12_000_000) {
+      return NextResponse.json({ message: "A gravação está vazia ou muito longa." }, { status: 400 });
+    }
+
+    return transcribeAudio({ apiKey, audioData, mimeType });
+  }
+
   const messages = sanitizeMessages(body?.messages ?? []);
 
   if (!messages.length) {
@@ -86,6 +101,57 @@ export async function POST(request: Request) {
     return NextResponse.json({ message: "A tutora não retornou uma resposta." }, { status: 502 });
   }
 
+  return NextResponse.json({ text });
+}
+
+async function transcribeAudio({
+  apiKey,
+  audioData,
+  mimeType
+}: {
+  apiKey: string;
+  audioData: string;
+  mimeType: string;
+}) {
+  const model = process.env.GEMINI_ENGLISH_TUTOR_MODEL || "gemini-2.5-flash";
+  const response = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`,
+    {
+      method: "POST",
+      headers: {
+        "x-goog-api-key": apiKey,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        contents: [
+          {
+            role: "user",
+            parts: [
+              {
+                text: "Transcribe the spoken English exactly. Return only the transcript, without comments, quotes, corrections, or markdown."
+              },
+              { inlineData: { mimeType, data: audioData } }
+            ]
+          }
+        ],
+        generationConfig: {
+          maxOutputTokens: 600,
+          thinkingConfig: { thinkingBudget: 0 }
+        }
+      })
+    }
+  );
+
+  const payload = (await response.json().catch(() => undefined)) as GeminiResponse | undefined;
+  if (!response.ok) {
+    return NextResponse.json(
+      { message: payload?.error?.message ?? "Não consegui transcrever a gravação." },
+      { status: response.status }
+    );
+  }
+
+  const text = extractOutputText(payload);
+  if (!text) return NextResponse.json({ message: "Nenhuma fala foi detectada na gravação." }, { status: 422 });
   return NextResponse.json({ text });
 }
 

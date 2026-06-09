@@ -3,29 +3,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Loader2, Mic, Send, Sparkles, Trash2, Volume2, VolumeX } from "lucide-react";
 
-type SpeechRecognitionInstance = {
-  lang: string;
-  interimResults: boolean;
-  continuous: boolean;
-  start: () => void;
-  stop: () => void;
-  onresult: ((event: {
-    resultIndex: number;
-    results: ArrayLike<{ 0: { transcript: string }; isFinal?: boolean }>;
-  }) => void) | null;
-  onerror: ((event: { error?: string }) => void) | null;
-  onend: (() => void) | null;
-};
-
-type SpeechRecognitionConstructor = new () => SpeechRecognitionInstance;
-
-declare global {
-  interface Window {
-    SpeechRecognition?: SpeechRecognitionConstructor;
-    webkitSpeechRecognition?: SpeechRecognitionConstructor;
-  }
-}
-
 type TutorMessage = {
   id: string;
   role: "user" | "assistant";
@@ -49,11 +26,13 @@ export default function EnglishTutor() {
   const [loading, setLoading] = useState(false);
   const [summarizing, setSummarizing] = useState(false);
   const [voiceEnabled, setVoiceEnabled] = useState(false);
-  const [listening, setListening] = useState(false);
+  const [recording, setRecording] = useState(false);
+  const [transcribing, setTranscribing] = useState(false);
   const [speechSupported, setSpeechSupported] = useState(false);
   const conversationRef = useRef<HTMLDivElement>(null);
-  const recognitionRef = useRef<SpeechRecognitionInstance | null>(null);
-  const keepListeningRef = useRef(false);
+  const recorderRef = useRef<MediaRecorder | null>(null);
+  const recordingStreamRef = useRef<MediaStream | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
 
   useEffect(() => {
     const savedMessages = localStorage.getItem(conversationKey);
@@ -67,11 +46,11 @@ export default function EnglishTutor() {
       }
     }
     if (savedSummary) setSummary(savedSummary);
-    setSpeechSupported(Boolean(window.speechSynthesis && (window.SpeechRecognition || window.webkitSpeechRecognition)));
+    setSpeechSupported("speechSynthesis" in window && "mediaDevices" in navigator && "MediaRecorder" in window);
 
     return () => {
-      keepListeningRef.current = false;
-      recognitionRef.current?.stop();
+      recorderRef.current?.stop();
+      recordingStreamRef.current?.getTracks().forEach((track) => track.stop());
       window.speechSynthesis?.cancel();
     };
   }, []);
@@ -85,7 +64,7 @@ export default function EnglishTutor() {
     const content = input.trim();
     if (!content || loading) return;
 
-    stopListening();
+    stopRecording();
     const userMessage: TutorMessage = { id: crypto.randomUUID(), role: "user", content };
     const nextMessages = [...messages, userMessage];
     setMessages(nextMessages);
@@ -121,7 +100,7 @@ export default function EnglishTutor() {
   }
 
   function clearConversation() {
-    stopListening();
+    stopRecording();
     window.speechSynthesis?.cancel();
     setMessages([welcomeMessage]);
     setSummary("");
@@ -153,70 +132,70 @@ export default function EnglishTutor() {
     window.speechSynthesis.speak(utterance);
   }
 
-  function toggleListening() {
-    if (listening) {
-      stopListening();
+  function toggleRecording() {
+    if (recording) {
+      stopRecording();
       return;
     }
 
-    startListening();
+    startRecording();
   }
 
-  function startListening() {
-    const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!Recognition) {
+  async function startRecording() {
+    if (!("mediaDevices" in navigator) || !("MediaRecorder" in window)) {
       setError("O microfone para fala não é suportado neste navegador.");
       return;
     }
 
-    keepListeningRef.current = true;
     window.speechSynthesis?.cancel();
-    const recognition = new Recognition();
-    recognition.lang = "en-US";
-    recognition.interimResults = false;
-    recognition.continuous = true;
-    recognition.onresult = (event) => {
-      const transcripts: string[] = [];
-      for (let index = event.resultIndex; index < event.results.length; index += 1) {
-        const result = event.results[index];
-        const transcript = result?.[0]?.transcript?.trim();
-        if (transcript && result.isFinal !== false) transcripts.push(transcript);
-      }
-      if (transcripts.length) {
-        setInput((current) => `${current}${current ? " " : ""}${transcripts.join(" ")}`);
-      }
-    };
-    recognition.onerror = (event) => {
-      if (event.error === "not-allowed" || event.error === "service-not-allowed") {
-        setError("O acesso ao microfone foi bloqueado. Libere a permissão do navegador e tente novamente.");
-      } else if (event.error === "no-speech") {
-        setError("Nenhuma fala foi detectada. Toque no microfone e tente novamente.");
-      }
-      keepListeningRef.current = false;
-      setListening(false);
-    };
-    recognition.onend = () => {
-      keepListeningRef.current = false;
-      recognitionRef.current = null;
-      setListening(false);
-    };
-    recognitionRef.current = recognition;
     setError("");
-    setListening(true);
+
     try {
-      recognition.start();
-    } catch {
-      keepListeningRef.current = false;
-      setListening(false);
-      setError("Não consegui iniciar o microfone. Tente novamente.");
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mimeType = getSupportedAudioMimeType();
+      const recorder = new MediaRecorder(stream, mimeType ? { mimeType } : undefined);
+
+      audioChunksRef.current = [];
+      recordingStreamRef.current = stream;
+      recorderRef.current = recorder;
+      recorder.ondataavailable = (event) => {
+        if (event.data.size > 0) audioChunksRef.current.push(event.data);
+      };
+      recorder.onstop = async () => {
+        const audio = new Blob(audioChunksRef.current, { type: recorder.mimeType || "audio/webm" });
+        recordingStreamRef.current?.getTracks().forEach((track) => track.stop());
+        recordingStreamRef.current = null;
+        recorderRef.current = null;
+        setRecording(false);
+        if (audio.size > 0) await transcribeAudio(audio);
+      };
+      recorder.start();
+      setRecording(true);
+    } catch (requestError) {
+      setRecording(false);
+      setError(
+        requestError instanceof DOMException && requestError.name === "NotAllowedError"
+          ? "O acesso ao microfone foi bloqueado. Libere a permissão do navegador e tente novamente."
+          : "Não consegui iniciar a gravação. Tente novamente."
+      );
     }
   }
 
-  function stopListening() {
-    keepListeningRef.current = false;
-    recognitionRef.current?.stop();
-    recognitionRef.current = null;
-    setListening(false);
+  function stopRecording() {
+    if (recorderRef.current?.state === "recording") recorderRef.current.stop();
+  }
+
+  async function transcribeAudio(audio: Blob) {
+    setTranscribing(true);
+    setError("");
+    try {
+      const text = await requestAudioTranscription(audio);
+      setInput((current) => `${current}${current ? " " : ""}${text}`);
+    } catch (requestError) {
+      setError(requestError instanceof Error ? requestError.message : "Não consegui transcrever o áudio.");
+    } finally {
+      setTranscribing(false);
+    }
   }
 
   return (
@@ -274,13 +253,13 @@ export default function EnglishTutor() {
           rows={2}
         />
         <button
-          className={listening ? "englishMicButton listening" : "englishMicButton"}
+          className={recording ? "englishMicButton listening" : "englishMicButton"}
           type="button"
-          onClick={toggleListening}
-          disabled={!speechSupported}
-          aria-label={listening ? "Parar microfone" : "Responder usando o microfone"}
+          onClick={toggleRecording}
+          disabled={!speechSupported || transcribing}
+          aria-label={recording ? "Parar gravação" : "Gravar resposta"}
         >
-          <Mic size={17} aria-hidden />
+          {transcribing ? <Loader2 className="spin" size={17} aria-hidden /> : <Mic size={17} aria-hidden />}
         </button>
         <button type="submit" disabled={!input.trim() || loading} aria-label="Enviar mensagem">
           <Send size={17} aria-hidden />
@@ -294,9 +273,11 @@ export default function EnglishTutor() {
         </button>
         <span>
           {speechSupported
-            ? listening
-              ? "Microfone ativo. Fale agora ou toque novamente para parar."
-              : "Ative a voz para ouvir a tutora e use o microfone para responder."
+            ? recording
+              ? "Gravando. Fale com calma e toque novamente para transcrever."
+              : transcribing
+                ? "Transcrevendo sua resposta com o Gemini..."
+                : "Ative a voz para ouvir a tutora e grave sua resposta pelo microfone."
             : "A fala não está disponível neste navegador; pratique por texto."}
         </span>
       </div>
@@ -328,4 +309,34 @@ async function requestTutor(mode: "chat" | "summary", messages: TutorMessage[]) 
   }
 
   return payload.text;
+}
+
+function getSupportedAudioMimeType() {
+  return ["audio/webm;codecs=opus", "audio/webm", "audio/mp4"].find((type) => MediaRecorder.isTypeSupported(type));
+}
+
+async function requestAudioTranscription(audio: Blob) {
+  if (audio.size > 8 * 1024 * 1024) throw new Error("O áudio ficou muito longo. Grave uma resposta mais curta.");
+
+  const data = await blobToBase64(audio);
+  const response = await fetch("/api/english-tutor", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      mode: "transcribe",
+      audio: { data, mimeType: audio.type || "audio/webm" }
+    })
+  });
+  const payload = (await response.json()) as { text?: string; message?: string };
+  if (!response.ok || !payload.text) throw new Error(payload.message ?? "Não consegui transcrever o áudio.");
+  return payload.text;
+}
+
+function blobToBase64(blob: Blob) {
+  return new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => resolve(String(reader.result).split(",")[1] ?? "");
+    reader.onerror = () => reject(new Error("Não consegui ler a gravação."));
+    reader.readAsDataURL(blob);
+  });
 }
