@@ -185,9 +185,10 @@ Depois faça um novo deploy ou redeploy na Vercel.
 
 A seção **Inglês** inclui uma conversa com IA que:
 
-- mantém uma conversa natural em inglês;
+- simula comunicação do dia a dia de desenvolvimento, como daily, bugs, tarefas, code review e entrevistas;
+- lê as respostas em inglês e permite responder pelo microfone em navegadores compatíveis;
 - apresenta correções curtas durante a prática;
-- gera um resumo com erros, acertos, vocabulário e próximo foco;
+- gera um relatório com comunicação, erros, acertos, vocabulário técnico e próximo foco;
 - salva o histórico somente no dispositivo atual.
 
 Crie uma chave gratuita no Google AI Studio e configure `GEMINI_API_KEY` na Vercel. A chave fica somente no servidor e nunca é enviada ao navegador.

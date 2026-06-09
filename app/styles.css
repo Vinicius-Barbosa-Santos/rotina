@@ -365,6 +365,11 @@ button {
   gap: 4px;
 }
 
+.englishTutorHeader .englishTutorHeaderActions {
+  display: flex;
+  gap: 6px;
+}
+
 .englishTutorHeader span {
   display: flex;
   align-items: center;
@@ -453,7 +458,7 @@ button {
 
 .englishComposer {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 42px;
+  grid-template-columns: minmax(0, 1fr) 42px 42px;
   gap: 8px;
 }
 
@@ -482,6 +487,17 @@ button {
   background: var(--green);
   color: #0d1012;
   cursor: pointer;
+}
+
+.englishComposer .englishMicButton {
+  border: 1px solid var(--line-2);
+  background: var(--panel-2);
+  color: var(--text);
+}
+
+.englishComposer .englishMicButton.listening {
+  border-color: var(--green);
+  color: var(--green);
 }
 
 .englishComposer button:disabled,
