@@ -89,9 +89,8 @@ export const routineSections: RoutineSection[] = [
     time: "18:30-20:00",
     days: weekdays,
     items: [
-      { label: "React" },
-      { label: "Java" },
-      { label: "AWS" }
+      { label: "Frontend" },
+      { label: "Backend" }
     ]
   },
   {
@@ -142,7 +141,7 @@ export const routineSections: RoutineSection[] = [
     items: [
       { label: "Projeto pessoal" },
       { label: "Projeto Full Stack" },
-      { label: "React + Java" },
+      { label: "Frontend + Backend" },
       { label: "Organizar a semana" },
       { label: "Fazer algo fora de casa" }
     ]
@@ -198,8 +197,8 @@ export const routineSections: RoutineSection[] = [
       { label: "Quanto treinei?", days: [0] },
       { label: "Quanto estudei?", days: [0] },
       { label: "O que evoluí em inglês?", days: [0] },
-      { label: "O que evoluí em Java?", days: [0] },
-      { label: "O que evoluí em React?", days: [0] },
+      { label: "O que evoluí em Backend?", days: [0] },
+      { label: "O que evoluí em Frontend?", days: [0] },
       { label: "Estou mais próximo da vaga internacional?", days: [0] },
       { label: "Qual é a prioridade da próxima semana?", days: [0] }
     ]
