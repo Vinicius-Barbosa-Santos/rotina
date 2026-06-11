@@ -12,65 +12,83 @@ type RefreshResponse = {
   error_description?: string;
 };
 
+class GoogleCalendarAuthError extends Error {}
+
 const reminderMinutes = 10;
 
 export async function POST(request: Request) {
-  const cookieStore = await cookies();
-  const refreshToken = cookieStore.get("google_refresh_token")?.value;
-  let accessToken = cookieStore.get("google_access_token")?.value;
-  const expiresAt = Number(cookieStore.get("google_token_expires_at")?.value ?? "0");
+  try {
+    const cookieStore = await cookies();
+    const refreshToken = cookieStore.get("google_refresh_token")?.value;
+    let accessToken = cookieStore.get("google_access_token")?.value;
+    const expiresAt = Number(cookieStore.get("google_token_expires_at")?.value ?? "0");
 
-  if (!accessToken && !refreshToken) {
+    if (!accessToken && !refreshToken) {
+      return NextResponse.json(
+        { message: "Conecte seu Google Calendar antes de criar notificações." },
+        { status: 401 }
+      );
+    }
+
+    if ((!accessToken || expiresAt < Date.now()) && refreshToken) {
+      const refreshed = await refreshGoogleAccessToken(refreshToken);
+      accessToken = refreshed.accessToken;
+      cookieStore.set("google_access_token", refreshed.accessToken, {
+        httpOnly: true,
+        sameSite: "lax",
+        secure: process.env.NODE_ENV === "production",
+        path: "/",
+        maxAge: refreshed.expiresIn
+      });
+      cookieStore.set("google_token_expires_at", String(Date.now() + (refreshed.expiresIn - 60) * 1000), {
+        httpOnly: true,
+        sameSite: "lax",
+        secure: process.env.NODE_ENV === "production",
+        path: "/",
+        maxAge: refreshed.expiresIn
+      });
+    }
+
+    if (!accessToken) {
+      return NextResponse.json(
+        { message: "Conecte seu Google Calendar antes de criar notificações." },
+        { status: 401 }
+      );
+    }
+
+    const calendarId = process.env.GOOGLE_CALENDAR_ID || "primary";
+    const timeZone = process.env.CALENDAR_TIMEZONE || "America/Sao_Paulo";
+    const body = await request.json().catch(() => undefined) as { sections?: RoutineSection[] } | undefined;
+    const sourceSections = body?.sections?.length ? body.sections : routineSections;
+    const timedSections = sourceSections.filter((section) => parseTimeRange(section.time));
+    const synced: string[] = [];
+
+    for (const section of timedSections) {
+      await upsertRoutineEvent({ section, calendarId, accessToken, timeZone });
+      synced.push(section.label);
+    }
+
+    return NextResponse.json({
+      ok: true,
+      count: synced.length,
+      reminderMinutes,
+      synced
+    });
+  } catch (error) {
+    if (error instanceof GoogleCalendarAuthError) {
+      const response = NextResponse.json(
+        { message: "Sua sessão do Google expirou. Conecte o Google Calendar novamente." },
+        { status: 401 }
+      );
+      clearGoogleAuthCookies(response);
+      return response;
+    }
+
     return NextResponse.json(
-      { message: "Conecte seu Google Calendar antes de criar notificações." },
-      { status: 401 }
+      { message: error instanceof Error ? error.message : "Não consegui criar as notificações." },
+      { status: 500 }
     );
   }
-
-  if ((!accessToken || expiresAt < Date.now()) && refreshToken) {
-    const refreshed = await refreshGoogleAccessToken(refreshToken);
-    accessToken = refreshed.accessToken;
-    cookieStore.set("google_access_token", refreshed.accessToken, {
-      httpOnly: true,
-      sameSite: "lax",
-      secure: process.env.NODE_ENV === "production",
-      path: "/",
-      maxAge: refreshed.expiresIn
-    });
-    cookieStore.set("google_token_expires_at", String(Date.now() + (refreshed.expiresIn - 60) * 1000), {
-      httpOnly: true,
-      sameSite: "lax",
-      secure: process.env.NODE_ENV === "production",
-      path: "/",
-      maxAge: refreshed.expiresIn
-    });
-  }
-
-  if (!accessToken) {
-    return NextResponse.json(
-      { message: "Conecte seu Google Calendar antes de criar notificações." },
-      { status: 401 }
-    );
-  }
-
-  const calendarId = process.env.GOOGLE_CALENDAR_ID || "primary";
-  const timeZone = process.env.CALENDAR_TIMEZONE || "America/Sao_Paulo";
-  const body = await request.json().catch(() => undefined) as { sections?: RoutineSection[] } | undefined;
-  const sourceSections = body?.sections?.length ? body.sections : routineSections;
-  const timedSections = sourceSections.filter((section) => parseTimeRange(section.time));
-  const synced: string[] = [];
-
-  for (const section of timedSections) {
-    await upsertRoutineEvent({ section, calendarId, accessToken, timeZone });
-    synced.push(section.label);
-  }
-
-  return NextResponse.json({
-    ok: true,
-    count: synced.length,
-    reminderMinutes,
-    synced
-  });
 }
 
 async function upsertRoutineEvent({
@@ -256,11 +274,17 @@ async function refreshGoogleAccessToken(refreshToken: string) {
   const payload = (await response.json()) as RefreshResponse;
 
   if (!response.ok || !payload.access_token) {
-    throw new Error(payload.error_description ?? "Não consegui renovar o acesso ao Google Calendar.");
+    throw new GoogleCalendarAuthError(payload.error_description ?? "Não consegui renovar o acesso ao Google Calendar.");
   }
 
   return {
     accessToken: payload.access_token,
     expiresIn: payload.expires_in ?? 3600
   };
+}
+
+function clearGoogleAuthCookies(response: NextResponse) {
+  response.cookies.delete("google_access_token");
+  response.cookies.delete("google_refresh_token");
+  response.cookies.delete("google_token_expires_at");
 }

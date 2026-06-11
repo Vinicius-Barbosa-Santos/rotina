@@ -280,15 +280,7 @@ export default function HomePage() {
 
     const savedPrefs = localStorage.getItem("rotina_preferences");
     if (savedPrefs) {
-      const parsedPrefs = JSON.parse(savedPrefs) as RoutinePrefs;
-      const savedCustomItems = parsedPrefs.customItems ?? {};
-      setRoutinePrefs({
-        ...parsedPrefs,
-        customItems: {
-          ...savedCustomItems,
-          career: (savedCustomItems.career ?? []).filter((item) => item.label.trim().toLowerCase() !== "outlier")
-        }
-      });
+      setRoutinePrefs(JSON.parse(savedPrefs) as RoutinePrefs);
     }
 
     setHydrated(true);

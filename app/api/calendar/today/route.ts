@@ -136,13 +136,15 @@ export async function GET(request: Request) {
     });
   } catch (error) {
     if (error instanceof GoogleCalendarAuthError) {
-      return NextResponse.json({
+      const response = NextResponse.json({
         configured: true,
         authRequired: true,
         source: "oauth",
         events: [],
         message: "Sua sessão do Google expirou ou a permissão foi removida. Conecte o Google Calendar novamente."
       });
+      clearGoogleAuthCookies(response);
+      return response;
     }
 
     return NextResponse.json(
@@ -185,13 +187,19 @@ async function refreshGoogleAccessToken(refreshToken: string) {
   const payload = (await response.json()) as { access_token?: string; expires_in?: number; error_description?: string };
 
   if (!response.ok || !payload.access_token) {
-    throw new Error(payload.error_description ?? "Não consegui renovar o acesso ao Google Calendar.");
+    throw new GoogleCalendarAuthError(payload.error_description ?? "Não consegui renovar o acesso ao Google Calendar.");
   }
 
   return {
     accessToken: payload.access_token,
     expiresIn: payload.expires_in ?? 3600
   };
+}
+
+function clearGoogleAuthCookies(response: NextResponse) {
+  response.cookies.delete("google_access_token");
+  response.cookies.delete("google_refresh_token");
+  response.cookies.delete("google_token_expires_at");
 }
 
 async function fetchGoogleCalendarEventsWithToken({
