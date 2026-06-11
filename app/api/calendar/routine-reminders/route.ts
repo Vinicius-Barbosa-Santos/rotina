@@ -3,7 +3,11 @@ import { NextResponse } from "next/server";
 import { routineSections, type RoutineSection } from "@/lib/routine";
 
 type GoogleEventListResponse = {
-  items?: Array<{ id: string; summary?: string }>;
+  items?: Array<{ id: string; summary?: string; recurrence?: string[] }>;
+};
+
+type SyncSection = Omit<RoutineSection, "items"> & {
+  items: Array<{ label: string; completed?: boolean; days?: Array<0 | 1 | 2 | 3 | 4 | 5 | 6> }>;
 };
 
 type RefreshResponse = {
@@ -58,13 +62,16 @@ export async function POST(request: Request) {
 
     const calendarId = process.env.GOOGLE_CALENDAR_ID || "primary";
     const timeZone = process.env.CALENDAR_TIMEZONE || "America/Sao_Paulo";
-    const body = await request.json().catch(() => undefined) as { sections?: RoutineSection[] } | undefined;
+    const body = await request.json().catch(() => undefined) as { sections?: SyncSection[] } | undefined;
     const sourceSections = body?.sections?.length ? body.sections : routineSections;
-    const timedSections = sourceSections.filter((section) => parseTimeRange(section.time));
+    const today = new Date();
+    const timedSections = sourceSections.filter(
+      (section) => parseTimeRange(section.time) && isSectionScheduledForDay(section, today.getDay())
+    );
     const synced: string[] = [];
 
     for (const section of timedSections) {
-      await upsertRoutineEvent({ section, calendarId, accessToken, timeZone });
+      await upsertRoutineEvent({ section, calendarId, accessToken, timeZone, date: today });
       synced.push(section.label);
     }
 
@@ -95,15 +102,19 @@ async function upsertRoutineEvent({
   section,
   calendarId,
   accessToken,
-  timeZone
+  timeZone,
+  date
 }: {
-  section: RoutineSection;
+  section: SyncSection;
   calendarId: string;
   accessToken: string;
   timeZone: string;
+  date: Date;
 }) {
-  const existingIds = await findExistingRoutineEvents({ section, calendarId, accessToken });
-  const eventBody = buildRoutineEvent(section, timeZone);
+  const dateKey = formatDateForCalendar(date);
+  await deleteLegacyRecurringRoutineEvents({ section, calendarId, accessToken });
+  const existingIds = await findExistingRoutineEvents({ section, calendarId, accessToken, dateKey });
+  const eventBody = buildRoutineEvent(section, timeZone, date);
   const baseUrl = `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events`;
   const idsToUpdate = existingIds.length ? existingIds : [undefined];
 
@@ -125,31 +136,52 @@ async function upsertRoutineEvent({
   }
 }
 
-async function findExistingRoutineEvents({
+async function deleteLegacyRecurringRoutineEvents({
   section,
   calendarId,
   accessToken
 }: {
-  section: RoutineSection;
+  section: SyncSection;
   calendarId: string;
   accessToken: string;
+}) {
+  const legacyEvents = await listRoutineEvents({
+    calendarId,
+    accessToken,
+    privateExtendedProperties: [`rotinaSectionKey=${section.key}`]
+  });
+  const baseUrl = `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events`;
+
+  await Promise.all(
+    legacyEvents
+      .filter((event) => event.recurrence?.length)
+      .map((event) =>
+        fetch(`${baseUrl}/${encodeURIComponent(event.id)}`, {
+          method: "DELETE",
+          headers: { Authorization: `Bearer ${accessToken}` }
+        })
+      )
+  );
+}
+
+async function findExistingRoutineEvents({
+  section,
+  calendarId,
+  accessToken,
+  dateKey
+}: {
+  section: SyncSection;
+  calendarId: string;
+  accessToken: string;
+  dateKey: string;
 }) {
   const ids = new Set<string>();
   const byPrivateProperty = await listRoutineEvents({
     calendarId,
     accessToken,
-    privateExtendedProperty: `rotinaSectionKey=${section.key}`
+    privateExtendedProperties: [`rotinaSectionKey=${section.key}`, `rotinaDate=${dateKey}`]
   });
   byPrivateProperty.forEach((event) => ids.add(event.id));
-
-  const byTitle = await listRoutineEvents({
-    calendarId,
-    accessToken,
-    q: `Rotina: ${section.label}`
-  });
-  byTitle
-    .filter((event) => event.summary === `Rotina: ${section.label}`)
-    .forEach((event) => ids.add(event.id));
 
   return [...ids];
 }
@@ -157,16 +189,16 @@ async function findExistingRoutineEvents({
 async function listRoutineEvents({
   calendarId,
   accessToken,
-  privateExtendedProperty,
+  privateExtendedProperties,
   q
 }: {
   calendarId: string;
   accessToken: string;
-  privateExtendedProperty?: string;
+  privateExtendedProperties?: string[];
   q?: string;
 }) {
   const url = new URL(`https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events`);
-  if (privateExtendedProperty) url.searchParams.set("privateExtendedProperty", privateExtendedProperty);
+  privateExtendedProperties?.forEach((property) => url.searchParams.append("privateExtendedProperty", property));
   if (q) url.searchParams.set("q", q);
   url.searchParams.set("maxResults", "10");
   url.searchParams.set("singleEvents", "false");
@@ -182,19 +214,21 @@ async function listRoutineEvents({
   return payload.items ?? [];
 }
 
-function buildRoutineEvent(section: RoutineSection, timeZone: string) {
+function buildRoutineEvent(section: SyncSection, timeZone: string, date: Date) {
   const range = parseTimeRange(section.time);
   if (!range) throw new Error(`A seção ${section.label} não tem horário válido.`);
 
-  const start = nextDateForWeekday(new Date(), firstWeekdayForSection(section));
-  const startDate = formatDateForCalendar(start);
-  const recurrenceDays = recurrenceDaysForSection(section);
+  const startDate = formatDateForCalendar(date);
+  const completedCount = section.items.filter((item) => item.completed).length;
+  const allCompleted = section.items.length > 0 && completedCount === section.items.length;
 
   return {
-    summary: `Rotina: ${section.label}`,
+    summary: `${allCompleted ? "✅" : "⬜"} Rotina: ${section.label} (${completedCount}/${section.items.length})`,
     description: [
       section.note,
-      section.items.length ? "Atividades: " + section.items.map((item) => item.label).join(", ") : undefined
+      section.items.length
+        ? section.items.map((item) => `${item.completed ? "✅" : "⬜"} ${item.label}`).join("\n")
+        : undefined
     ]
       .filter(Boolean)
       .join("\n\n"),
@@ -206,14 +240,14 @@ function buildRoutineEvent(section: RoutineSection, timeZone: string) {
       dateTime: `${startDate}T${range.end}:00`,
       timeZone
     },
-    recurrence: [`RRULE:FREQ=WEEKLY;BYDAY=${recurrenceDays.join(",")}`],
     reminders: {
       useDefault: false,
       overrides: [{ method: "popup", minutes: reminderMinutes }]
     },
     extendedProperties: {
       private: {
-        rotinaSectionKey: section.key
+        rotinaSectionKey: section.key,
+        rotinaDate: startDate
       }
     }
   };
@@ -225,28 +259,15 @@ function parseTimeRange(time: string) {
   return { start: match[1], end: match[2] };
 }
 
-function firstWeekdayForSection(section: RoutineSection) {
-  const days = daysForSection(section);
-  return days[0] ?? 1;
-}
-
-function recurrenceDaysForSection(section: RoutineSection) {
-  return daysForSection(section).map((day) => ["SU", "MO", "TU", "WE", "TH", "FR", "SA"][day]);
-}
-
-function daysForSection(section: RoutineSection) {
+function daysForSection(section: SyncSection) {
   if (section.days?.length) return [...section.days].sort();
   const explicitDays = new Set(section.items.flatMap((item) => item.days ?? []));
   if (explicitDays.size > 0) return [...explicitDays].sort();
   return [0, 1, 2, 3, 4, 5, 6];
 }
 
-function nextDateForWeekday(date: Date, weekday: number) {
-  const next = new Date(date);
-  next.setHours(0, 0, 0, 0);
-  const delta = (weekday - next.getDay() + 7) % 7;
-  next.setDate(next.getDate() + delta);
-  return next;
+function isSectionScheduledForDay(section: SyncSection, weekday: number) {
+  return daysForSection(section).includes(weekday as 0 | 1 | 2 | 3 | 4 | 5 | 6);
 }
 
 function formatDateForCalendar(date: Date) {

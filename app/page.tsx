@@ -252,6 +252,7 @@ export default function HomePage() {
   const [calendarLoading, setCalendarLoading] = useState(true);
   const [calendarError, setCalendarError] = useState("");
   const notificationTimers = useRef<number[]>([]);
+  const calendarSyncTimer = useRef<number | undefined>(undefined);
   const [browserNotificationsEnabled, setBrowserNotificationsEnabled] = useState(false);
   const [notificationPermission, setNotificationPermission] = useState<NotificationPermission | "unsupported">("default");
   const [manualMeetings, setManualMeetings] = useState<ManualMeeting[]>([]);
@@ -297,6 +298,21 @@ export default function HomePage() {
   useEffect(() => {
     localStorage.setItem("rotina_preferences", JSON.stringify(routinePrefs));
   }, [routinePrefs]);
+
+  useEffect(() => {
+    if (!hydrated || calendar?.source !== "oauth") return;
+
+    window.clearTimeout(calendarSyncTimer.current);
+    calendarSyncTimer.current = window.setTimeout(() => {
+      fetch("/api/calendar/routine-reminders", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sections: buildReminderSections() })
+      }).catch(() => undefined);
+    }, 800);
+
+    return () => window.clearTimeout(calendarSyncTimer.current);
+  }, [calendar?.source, hydrated, routinePrefs, state]);
 
   useEffect(() => {
     let alive = true;
@@ -536,7 +552,10 @@ export default function HomePage() {
     return routineSections.map((section) => ({
       ...section,
       time: getSectionTime(section.key, section.time),
-      items: getPersonalizedItems(section).map((item) => ({ label: item.label }))
+      items: getPersonalizedItems(section).map((item) => ({
+        label: item.label,
+        completed: (state[section.key] ?? []).map(String).includes(item.key)
+      }))
     }));
   }
 
@@ -922,7 +941,7 @@ function AgendaPanel({
     time: string;
     note?: string;
     days?: Array<0 | 1 | 2 | 3 | 4 | 5 | 6>;
-    items: Array<{ label: string }>;
+    items: Array<{ label: string; completed?: boolean; days?: Array<0 | 1 | 2 | 3 | 4 | 5 | 6> }>;
     references?: string[];
   }>;
 }) {
@@ -1010,7 +1029,7 @@ function AgendaPanel({
       {calendar?.source === "oauth" && (
         <div className="calendarActions">
           <button className="syncButton" onClick={syncRoutineReminders} disabled={syncing}>
-            {syncing ? "Criando notificações..." : "Criar notificações da rotina"}
+          {syncing ? "Sincronizando tarefas..." : "Sincronizar tarefas de hoje"}
           </button>
           <a className="disconnectLink" href="/api/auth/google/logout">
             Desconectar Google Calendar
