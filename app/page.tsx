@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type MutableRefObject } from "react";
 import {
   ArrowUpRight,
   Bell,
@@ -253,6 +253,7 @@ export default function HomePage() {
   const [calendarError, setCalendarError] = useState("");
   const notificationTimers = useRef<number[]>([]);
   const calendarSyncTimer = useRef<number | undefined>(undefined);
+  const calendarSyncInProgress = useRef(false);
   const [browserNotificationsEnabled, setBrowserNotificationsEnabled] = useState(false);
   const [notificationPermission, setNotificationPermission] = useState<NotificationPermission | "unsupported">("default");
   const [manualMeetings, setManualMeetings] = useState<ManualMeeting[]>([]);
@@ -304,11 +305,17 @@ export default function HomePage() {
 
     window.clearTimeout(calendarSyncTimer.current);
     calendarSyncTimer.current = window.setTimeout(() => {
+      if (calendarSyncInProgress.current) return;
+      calendarSyncInProgress.current = true;
       fetch("/api/calendar/routine-reminders", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ sections: buildCalendarSections() })
-      }).catch(() => undefined);
+      })
+        .catch(() => undefined)
+        .finally(() => {
+          calendarSyncInProgress.current = false;
+        });
     }, 800);
 
     return () => window.clearTimeout(calendarSyncTimer.current);
@@ -646,6 +653,7 @@ export default function HomePage() {
               error={calendarError}
               manualEvents={manualEvents}
               getReminderSections={buildCalendarSections}
+              calendarSyncInProgress={calendarSyncInProgress}
             />
           </section>
 
@@ -931,7 +939,8 @@ function AgendaPanel({
   loading,
   error,
   manualEvents,
-  getReminderSections
+  getReminderSections,
+  calendarSyncInProgress
 }: {
   calendar: CalendarResponse | null;
   loading: boolean;
@@ -950,6 +959,7 @@ function AgendaPanel({
     items: Array<{ label: string; completed?: boolean; days?: Array<0 | 1 | 2 | 3 | 4 | 5 | 6> }>;
     references?: string[];
   }>;
+  calendarSyncInProgress: MutableRefObject<boolean>;
 }) {
   const [syncing, setSyncing] = useState(false);
   const [syncMessage, setSyncMessage] = useState("");
@@ -962,6 +972,12 @@ function AgendaPanel({
   );
 
   async function syncRoutineReminders() {
+    if (calendarSyncInProgress.current) {
+      setSyncMessage("Aguarde a sincronização atual terminar e tente novamente.");
+      return;
+    }
+
+    calendarSyncInProgress.current = true;
     setSyncing(true);
     setSyncMessage("");
 
@@ -982,6 +998,7 @@ function AgendaPanel({
     } catch {
       setSyncMessage("Não consegui criar as notificações.");
     } finally {
+      calendarSyncInProgress.current = false;
       setSyncing(false);
     }
   }

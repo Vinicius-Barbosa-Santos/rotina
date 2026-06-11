@@ -2,6 +2,8 @@ import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { routineSections, type RoutineSection } from "@/lib/routine";
 
+export const maxDuration = 60;
+
 type GoogleEventListResponse = {
   items?: Array<{ id: string; summary?: string; recurrence?: string[] }>;
 };
@@ -19,6 +21,8 @@ type RefreshResponse = {
 class GoogleCalendarAuthError extends Error {}
 
 const reminderMinutes = 10;
+const googleRequestRetries = 5;
+const googleRetryDelayMs = 750;
 
 export async function POST(request: Request) {
   try {
@@ -76,16 +80,18 @@ export async function POST(request: Request) {
       }
     }
 
-    for (const dateBatch of chunk(dates, 5)) {
+    const syncTasks = dates.flatMap((date) =>
+      sourceSections
+        .filter((section) => parseTimeRange(section.time) && isSectionScheduledForDay(section, date.getUTCDay()))
+        .map((section) => ({ date, section }))
+    );
+
+    for (const taskBatch of chunk(syncTasks, 3)) {
       await Promise.all(
-        dateBatch.flatMap((date) =>
-          sourceSections
-            .filter((section) => parseTimeRange(section.time) && isSectionScheduledForDay(section, date.getUTCDay()))
-            .map(async (section) => {
-              await upsertRoutineEvent({ section, calendarId, accessToken, timeZone, date });
-              synced.push(`${formatDateForCalendar(date)}:${section.label}`);
-            })
-        )
+        taskBatch.map(async ({ date, section }) => {
+          await upsertRoutineEvent({ section, calendarId, accessToken, timeZone, date });
+          synced.push(`${formatDateForCalendar(date)}:${section.label}`);
+        })
       );
     }
 
@@ -133,7 +139,7 @@ async function upsertRoutineEvent({
 
   for (const existingId of idsToUpdate) {
     const url = existingId ? `${baseUrl}/${encodeURIComponent(existingId)}` : baseUrl;
-    const response = await fetch(url, {
+    const response = await googleCalendarFetch(url, {
       method: existingId ? "PATCH" : "POST",
       headers: {
         Authorization: `Bearer ${accessToken}`,
@@ -144,7 +150,7 @@ async function upsertRoutineEvent({
 
     if (!response.ok) {
       const errorText = await response.text();
-      throw new Error(`Não consegui sincronizar ${section.label} (${response.status}): ${errorText}`);
+      throwGoogleCalendarError(response.status, errorText, `sincronizar ${section.label}`);
     }
   }
 }
@@ -165,16 +171,21 @@ async function deleteLegacyRecurringRoutineEvents({
   });
   const baseUrl = `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events`;
 
-  await Promise.all(
-    legacyEvents
-      .filter((event) => event.recurrence?.length)
-      .map((event) =>
-        fetch(`${baseUrl}/${encodeURIComponent(event.id)}`, {
+  for (const eventBatch of chunk(legacyEvents.filter((event) => event.recurrence?.length), 3)) {
+    await Promise.all(
+      eventBatch.map(async (event) => {
+        const response = await googleCalendarFetch(`${baseUrl}/${encodeURIComponent(event.id)}`, {
           method: "DELETE",
           headers: { Authorization: `Bearer ${accessToken}` }
-        })
-      )
-  );
+        });
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          throwGoogleCalendarError(response.status, errorText, `remover a rotina antiga de ${section.label}`);
+        }
+      })
+    );
+  }
 }
 
 async function findExistingRoutineEvents({
@@ -217,11 +228,14 @@ async function listRoutineEvents({
   url.searchParams.set("singleEvents", "false");
   url.searchParams.set("fields", "items(id,summary,recurrence)");
 
-  const response = await fetch(url, {
+  const response = await googleCalendarFetch(url, {
     headers: { Authorization: `Bearer ${accessToken}` }
   });
 
-  if (!response.ok) return [];
+  if (!response.ok) {
+    const errorText = await response.text();
+    throwGoogleCalendarError(response.status, errorText, "consultar eventos da rotina");
+  }
 
   const payload = (await response.json()) as GoogleEventListResponse;
   return payload.items ?? [];
@@ -306,6 +320,49 @@ function chunk<T>(items: T[], size: number) {
   return Array.from({ length: Math.ceil(items.length / size) }, (_, index) =>
     items.slice(index * size, index * size + size)
   );
+}
+
+async function googleCalendarFetch(input: string | URL, init?: RequestInit) {
+  for (let attempt = 0; attempt < googleRequestRetries; attempt += 1) {
+    const response = await fetch(input, init);
+    const shouldRetry = await isGoogleRateLimitResponse(response);
+
+    if (!shouldRetry || attempt === googleRequestRetries - 1) {
+      return response;
+    }
+
+    const retryAfterSeconds = Number(response.headers.get("retry-after") ?? "0");
+    const delay = retryAfterSeconds > 0
+      ? retryAfterSeconds * 1000
+      : googleRetryDelayMs * 2 ** attempt;
+    await wait(delay);
+  }
+
+  throw new Error("Não consegui acessar o Google Calendar.");
+}
+
+async function isGoogleRateLimitResponse(response: Response) {
+  if (response.status === 429) return true;
+  if (response.status !== 403) return false;
+
+  const errorText = await response.clone().text();
+  return errorText.includes("rateLimitExceeded") || errorText.includes("userRateLimitExceeded");
+}
+
+function throwGoogleCalendarError(status: number, errorText: string, action: string): never {
+  if (status === 401) {
+    throw new GoogleCalendarAuthError();
+  }
+
+  if (status === 403 || status === 429) {
+    throw new Error("O Google Calendar está temporariamente ocupado. Aguarde alguns segundos e tente novamente.");
+  }
+
+  throw new Error(`Não consegui ${action} no Google Calendar (${status}): ${errorText}`);
+}
+
+function wait(milliseconds: number) {
+  return new Promise((resolve) => setTimeout(resolve, milliseconds));
 }
 
 function formatDateInTimeZone(date: Date, timeZone: string) {
