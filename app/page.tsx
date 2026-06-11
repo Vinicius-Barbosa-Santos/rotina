@@ -307,7 +307,7 @@ export default function HomePage() {
       fetch("/api/calendar/routine-reminders", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ sections: buildReminderSections() })
+        body: JSON.stringify({ sections: buildCalendarSections() })
       }).catch(() => undefined);
     }, 800);
 
@@ -548,12 +548,18 @@ export default function HomePage() {
     }));
   }
 
-  function buildReminderSections() {
+  function buildCalendarSections() {
     return routineSections.map((section) => ({
       ...section,
       time: getSectionTime(section.key, section.time),
-      items: getPersonalizedItems(section).map((item) => ({
+      items: [
+        ...section.items
+          .map((item, index) => ({ ...item, key: String(index), index }))
+          .filter((item) => !(routinePrefs.hiddenItems[section.key] ?? []).includes(item.index)),
+        ...(routinePrefs.customItems[section.key] ?? []).map((item) => ({ ...item, key: item.id }))
+      ].map((item) => ({
         label: item.label,
+        days: "days" in item ? item.days : undefined,
         completed: (state[section.key] ?? []).map(String).includes(item.key)
       }))
     }));
@@ -639,7 +645,7 @@ export default function HomePage() {
               loading={calendarLoading}
               error={calendarError}
               manualEvents={manualEvents}
-              getReminderSections={buildReminderSections}
+              getReminderSections={buildCalendarSections}
             />
           </section>
 
@@ -963,7 +969,7 @@ function AgendaPanel({
       const response = await fetch("/api/calendar/routine-reminders", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ sections: getReminderSections() })
+        body: JSON.stringify({ sections: getReminderSections(), rangeDays: 30 })
       });
       const payload = (await response.json()) as { count?: number; message?: string };
 
@@ -972,7 +978,7 @@ function AgendaPanel({
         return;
       }
 
-      setSyncMessage(`Notificações criadas para ${payload.count ?? 0} blocos da rotina.`);
+      setSyncMessage(`Rotina geral sincronizada: ${payload.count ?? 0} blocos nos próximos 30 dias.`);
     } catch {
       setSyncMessage("Não consegui criar as notificações.");
     } finally {
@@ -1029,7 +1035,7 @@ function AgendaPanel({
       {calendar?.source === "oauth" && (
         <div className="calendarActions">
           <button className="syncButton" onClick={syncRoutineReminders} disabled={syncing}>
-          {syncing ? "Sincronizando tarefas..." : "Sincronizar tarefas de hoje"}
+          {syncing ? "Sincronizando rotina..." : "Sincronizar rotina geral"}
           </button>
           <a className="disconnectLink" href="/api/auth/google/logout">
             Desconectar Google Calendar

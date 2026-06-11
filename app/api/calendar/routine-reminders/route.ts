@@ -62,17 +62,31 @@ export async function POST(request: Request) {
 
     const calendarId = process.env.GOOGLE_CALENDAR_ID || "primary";
     const timeZone = process.env.CALENDAR_TIMEZONE || "America/Sao_Paulo";
-    const body = await request.json().catch(() => undefined) as { sections?: SyncSection[] } | undefined;
+    const body = await request.json().catch(() => undefined) as
+      | { sections?: SyncSection[]; rangeDays?: number }
+      | undefined;
     const sourceSections = body?.sections?.length ? body.sections : routineSections;
-    const today = new Date();
-    const timedSections = sourceSections.filter(
-      (section) => parseTimeRange(section.time) && isSectionScheduledForDay(section, today.getDay())
-    );
+    const rangeDays = Math.min(Math.max(body?.rangeDays ?? 1, 1), 30);
+    const dates = getCalendarDates(rangeDays, timeZone);
     const synced: string[] = [];
 
-    for (const section of timedSections) {
-      await upsertRoutineEvent({ section, calendarId, accessToken, timeZone, date: today });
-      synced.push(section.label);
+    if (rangeDays > 1) {
+      for (const section of sourceSections) {
+        await deleteLegacyRecurringRoutineEvents({ section, calendarId, accessToken });
+      }
+    }
+
+    for (const dateBatch of chunk(dates, 5)) {
+      await Promise.all(
+        dateBatch.flatMap((date) =>
+          sourceSections
+            .filter((section) => parseTimeRange(section.time) && isSectionScheduledForDay(section, date.getUTCDay()))
+            .map(async (section) => {
+              await upsertRoutineEvent({ section, calendarId, accessToken, timeZone, date });
+              synced.push(`${formatDateForCalendar(date)}:${section.label}`);
+            })
+        )
+      );
     }
 
     return NextResponse.json({
@@ -112,7 +126,6 @@ async function upsertRoutineEvent({
   date: Date;
 }) {
   const dateKey = formatDateForCalendar(date);
-  await deleteLegacyRecurringRoutineEvents({ section, calendarId, accessToken });
   const existingIds = await findExistingRoutineEvents({ section, calendarId, accessToken, dateKey });
   const eventBody = buildRoutineEvent(section, timeZone, date);
   const baseUrl = `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events`;
@@ -202,7 +215,7 @@ async function listRoutineEvents({
   if (q) url.searchParams.set("q", q);
   url.searchParams.set("maxResults", "10");
   url.searchParams.set("singleEvents", "false");
-  url.searchParams.set("fields", "items(id,summary)");
+  url.searchParams.set("fields", "items(id,summary,recurrence)");
 
   const response = await fetch(url, {
     headers: { Authorization: `Bearer ${accessToken}` }
@@ -219,15 +232,17 @@ function buildRoutineEvent(section: SyncSection, timeZone: string, date: Date) {
   if (!range) throw new Error(`A seção ${section.label} não tem horário válido.`);
 
   const startDate = formatDateForCalendar(date);
-  const completedCount = section.items.filter((item) => item.completed).length;
-  const allCompleted = section.items.length > 0 && completedCount === section.items.length;
+  const items = section.items.filter((item) => !item.days?.length || item.days.includes(date.getUTCDay() as 0 | 1 | 2 | 3 | 4 | 5 | 6));
+  const isToday = startDate === formatDateInTimeZone(new Date(), timeZone);
+  const completedCount = isToday ? items.filter((item) => item.completed).length : 0;
+  const allCompleted = items.length > 0 && completedCount === items.length;
 
   return {
-    summary: `${allCompleted ? "✅" : "⬜"} Rotina: ${section.label} (${completedCount}/${section.items.length})`,
+    summary: `${allCompleted ? "✅" : "⬜"} Rotina: ${section.label} (${completedCount}/${items.length})`,
     description: [
       section.note,
-      section.items.length
-        ? section.items.map((item) => `${item.completed ? "✅" : "⬜"} ${item.label}`).join("\n")
+      items.length
+        ? items.map((item) => `${isToday && item.completed ? "✅" : "⬜"} ${item.label}`).join("\n")
         : undefined
     ]
       .filter(Boolean)
@@ -271,7 +286,35 @@ function isSectionScheduledForDay(section: SyncSection, weekday: number) {
 }
 
 function formatDateForCalendar(date: Date) {
-  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+  return `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, "0")}-${String(
+    date.getUTCDate()
+  ).padStart(2, "0")}`;
+}
+
+function getCalendarDates(rangeDays: number, timeZone: string) {
+  const [year, month, day] = formatDateInTimeZone(new Date(), timeZone).split("-").map(Number);
+  const start = new Date(Date.UTC(year, month - 1, day, 12));
+
+  return Array.from({ length: rangeDays }, (_, index) => {
+    const date = new Date(start);
+    date.setUTCDate(start.getUTCDate() + index);
+    return date;
+  });
+}
+
+function chunk<T>(items: T[], size: number) {
+  return Array.from({ length: Math.ceil(items.length / size) }, (_, index) =>
+    items.slice(index * size, index * size + size)
+  );
+}
+
+function formatDateInTimeZone(date: Date, timeZone: string) {
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit"
+  }).format(date);
 }
 
 async function refreshGoogleAccessToken(refreshToken: string) {
