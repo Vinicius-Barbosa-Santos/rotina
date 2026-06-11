@@ -213,7 +213,7 @@ async function fetchGoogleCalendarEventsWithToken({
   day: Date;
   timeZone: string;
 }) {
-  const { timeMin, timeMax } = getDayRange(day);
+  const { timeMin, timeMax } = getDayRange(day, timeZone);
   const url = getGoogleCalendarEventsUrl({ calendarId, timeMin, timeMax, timeZone });
   const response = await fetch(url, {
     cache: "no-store",
@@ -268,7 +268,7 @@ async function fetchGoogleCalendarEvents({
   day: Date;
   timeZone: string;
 }) {
-  const { timeMin, timeMax } = getDayRange(day);
+  const { timeMin, timeMax } = getDayRange(day, timeZone);
   const url = getGoogleCalendarEventsUrl({ calendarId, timeMin, timeMax, timeZone });
   url.searchParams.set("key", apiKey);
 
@@ -331,14 +331,55 @@ function getGoogleCalendarEventsUrl({
   return url;
 }
 
-function getDayRange(day: Date) {
-  const start = new Date(day);
-  start.setHours(0, 0, 0, 0);
-  const end = new Date(start);
-  end.setDate(end.getDate() + 1);
+function getDayRange(day: Date, timeZone: string) {
+  const dateKey = formatDateInTimeZone(day, timeZone);
+  const nextDate = new Date(`${dateKey}T12:00:00Z`);
+  nextDate.setUTCDate(nextDate.getUTCDate() + 1);
+  const nextDateKey = formatUtcDate(nextDate);
 
   return {
-    timeMin: start.toISOString(),
-    timeMax: end.toISOString()
+    timeMin: zonedMidnightToUtc(dateKey, timeZone).toISOString(),
+    timeMax: zonedMidnightToUtc(nextDateKey, timeZone).toISOString()
   };
+}
+
+function formatDateInTimeZone(date: Date, timeZone: string) {
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit"
+  }).format(date);
+}
+
+function formatUtcDate(date: Date) {
+  return `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, "0")}-${String(
+    date.getUTCDate()
+  ).padStart(2, "0")}`;
+}
+
+function zonedMidnightToUtc(dateKey: string, timeZone: string) {
+  const [year, month, day] = dateKey.split("-").map(Number);
+  const estimate = new Date(Date.UTC(year, month - 1, day));
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hourCycle: "h23"
+  }).formatToParts(estimate);
+  const values = Object.fromEntries(parts.map((part) => [part.type, part.value]));
+  const representedAsUtc = Date.UTC(
+    Number(values.year),
+    Number(values.month) - 1,
+    Number(values.day),
+    Number(values.hour),
+    Number(values.minute),
+    Number(values.second)
+  );
+  const offset = representedAsUtc - estimate.getTime();
+  return new Date(estimate.getTime() - offset);
 }
