@@ -1,12 +1,5 @@
 import { NextResponse } from "next/server";
-
-type GoogleTokenResponse = {
-  access_token?: string;
-  refresh_token?: string;
-  expires_in?: number;
-  error?: string;
-  error_description?: string;
-};
+import { exchangeGoogleAuthorizationCode, GoogleCalendarAuthError, setGoogleTokenCookies } from "@/lib/google-auth";
 
 export async function GET(request: Request) {
   const clientId = process.env.GOOGLE_CLIENT_ID;
@@ -32,50 +25,20 @@ export async function GET(request: Request) {
     return NextResponse.json({ message: "Callback OAuth inválido." }, { status: 400 });
   }
 
-  const tokenResponse = await fetch("https://oauth2.googleapis.com/token", {
-    method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: new URLSearchParams({
-      client_id: clientId,
-      client_secret: clientSecret,
-      redirect_uri: redirectUri,
-      grant_type: "authorization_code",
-      code
-    })
-  });
-  const token = (await tokenResponse.json()) as GoogleTokenResponse;
-
-  if (!tokenResponse.ok || !token.access_token) {
+  try {
+    const token = await exchangeGoogleAuthorizationCode(code, redirectUri);
+    const response = NextResponse.redirect(new URL("/", request.url));
+    response.cookies.delete("google_oauth_state");
+    setGoogleTokenCookies(response.cookies, token);
+    return response;
+  } catch (error) {
     return NextResponse.json(
-      { message: token.error_description ?? token.error ?? "Não consegui conectar o Google Calendar." },
+      {
+        message: error instanceof GoogleCalendarAuthError
+          ? error.message
+          : "Não consegui conectar o Google Calendar."
+      },
       { status: 502 }
     );
   }
-
-  const response = NextResponse.redirect(new URL("/", request.url));
-  const commonCookieOptions = {
-    httpOnly: true,
-    sameSite: "lax" as const,
-    secure: process.env.NODE_ENV === "production",
-    path: "/"
-  };
-
-  response.cookies.delete("google_oauth_state");
-  response.cookies.set("google_access_token", token.access_token, {
-    ...commonCookieOptions,
-    maxAge: token.expires_in ?? 3600
-  });
-  response.cookies.set("google_token_expires_at", String(Date.now() + ((token.expires_in ?? 3600) - 60) * 1000), {
-    ...commonCookieOptions,
-    maxAge: token.expires_in ?? 3600
-  });
-
-  if (token.refresh_token) {
-    response.cookies.set("google_refresh_token", token.refresh_token, {
-      ...commonCookieOptions,
-      maxAge: 60 * 60 * 24 * 90
-    });
-  }
-
-  return response;
 }

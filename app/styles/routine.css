@@ -1,0 +1,292 @@
+.sectionEditor {
+  padding: 10px 16px 4px;
+}
+
+.sectionEditor label {
+  display: grid;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.sectionEditor input {
+  width: min(180px, 100%);
+  border: 1px solid var(--line-2);
+  border-radius: 8px;
+  background: var(--panel-2);
+  color: var(--text);
+  padding: 9px 10px;
+  outline: none;
+}
+
+.sectionEditor input:focus {
+  border-color: var(--blue);
+}
+
+.checkItem {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  width: 100%;
+  min-height: 42px;
+  padding: 9px 16px;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+}
+
+.checkItem:hover {
+  background: var(--panel-2);
+}
+
+.checkItem.done {
+  opacity: 0.6;
+}
+
+.checkItem.done > span:last-child {
+  color: var(--muted);
+  text-decoration: line-through;
+}
+
+.customTask.done .taskCheckButton span:last-child {
+  color: var(--muted);
+  text-decoration: line-through;
+}
+
+.taskForm {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 40px;
+  gap: 8px;
+  padding: 12px 16px 8px;
+}
+
+.sectionTaskForm {
+  padding-top: 8px;
+}
+
+.taskForm input {
+  min-width: 0;
+  border: 1px solid var(--line-2);
+  border-radius: 8px;
+  background: var(--panel-2);
+  color: var(--text);
+  padding: 10px 11px;
+  outline: none;
+}
+
+.meetingForm {
+  display: grid;
+  gap: 10px;
+  padding: 12px 16px 10px;
+}
+
+.meetingForm input {
+  min-width: 0;
+  width: 100%;
+  border: 1px solid var(--line-2);
+  border-radius: 8px;
+  background: var(--panel-2);
+  color: var(--text);
+  padding: 10px 11px;
+  outline: none;
+}
+
+.meetingForm input:focus {
+  border-color: var(--blue);
+}
+
+.timeFields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.timeFields label {
+  display: grid;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.dayToggleGroup {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.dayToggle {
+  min-height: 32px;
+  padding: 0 9px;
+  border: 1px solid var(--line-2);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.dayToggle:hover,
+.dayToggle.selected {
+  border-color: rgba(106, 167, 255, 0.55);
+  background: rgba(106, 167, 255, 0.13);
+  color: var(--text);
+}
+
+.meetingSubmit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  width: fit-content;
+  border: 0;
+  border-radius: 8px;
+  padding: 9px 11px;
+  background: var(--blue);
+  color: #0d1012;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.meetingItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 48px;
+  padding: 10px 16px;
+  border-top: 1px solid var(--line);
+}
+
+.meetingItem div {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.meetingItem strong {
+  overflow-wrap: anywhere;
+  font-size: 14px;
+}
+
+.meetingItem small {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.taskForm input:focus {
+  border-color: var(--green);
+}
+
+.taskForm button,
+.deleteTaskButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: 1px solid var(--line-2);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.taskForm button:hover,
+.deleteTaskButton:hover {
+  background: var(--panel-2);
+  color: var(--text);
+}
+
+.customTask {
+  justify-content: space-between;
+  cursor: default;
+}
+
+.taskCheckButton {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+
+.taskCheckButton span:last-child {
+  overflow-wrap: anywhere;
+}
+
+.deleteTaskButton {
+  width: auto;
+  height: 32px;
+  padding: 0 9px;
+  flex: 0 0 auto;
+  font-size: 12px;
+}
+
+.checkCircle {
+  display: grid;
+  place-items: center;
+  width: 21px;
+  height: 21px;
+  border: 1px solid var(--line-2);
+  border-radius: 999px;
+  color: #101112;
+  flex: 0 0 auto;
+}
+
+.done .checkCircle {
+  border-color: var(--green);
+  background: var(--green);
+}
+
+.resetButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin: 5px 16px 10px;
+  padding: 7px 10px;
+  border: 1px solid var(--line-2);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.resetButton:hover {
+  color: var(--text);
+  background: var(--panel-2);
+}
+
+.emptySection {
+  margin: 10px 16px 14px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.025);
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.referenceList {
+  display: grid;
+  gap: 8px;
+  margin: 10px 16px 16px;
+  padding: 0;
+  list-style-position: inside;
+  color: var(--text);
+}
+
+.referenceList li {
+  padding: 9px 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.025);
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.35;
+}

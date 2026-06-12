@@ -1,5 +1,5 @@
-import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
+import { clearGoogleAuthCookies, getGoogleAccessToken, GoogleCalendarAuthError } from "@/lib/google-auth";
 import { routineSections, type RoutineSection } from "@/lib/routine";
 
 export const maxDuration = 60;
@@ -12,50 +12,13 @@ type SyncSection = Omit<RoutineSection, "items"> & {
   items: Array<{ label: string; completed?: boolean; days?: Array<0 | 1 | 2 | 3 | 4 | 5 | 6> }>;
 };
 
-type RefreshResponse = {
-  access_token?: string;
-  expires_in?: number;
-  error_description?: string;
-};
-
-class GoogleCalendarAuthError extends Error {}
-
 const reminderMinutes = 10;
 const googleRequestRetries = 5;
 const googleRetryDelayMs = 750;
 
 export async function POST(request: Request) {
   try {
-    const cookieStore = await cookies();
-    const refreshToken = cookieStore.get("google_refresh_token")?.value;
-    let accessToken = cookieStore.get("google_access_token")?.value;
-    const expiresAt = Number(cookieStore.get("google_token_expires_at")?.value ?? "0");
-
-    if (!accessToken && !refreshToken) {
-      return NextResponse.json(
-        { message: "Conecte seu Google Calendar antes de criar notificações." },
-        { status: 401 }
-      );
-    }
-
-    if ((!accessToken || expiresAt < Date.now()) && refreshToken) {
-      const refreshed = await refreshGoogleAccessToken(refreshToken);
-      accessToken = refreshed.accessToken;
-      cookieStore.set("google_access_token", refreshed.accessToken, {
-        httpOnly: true,
-        sameSite: "lax",
-        secure: process.env.NODE_ENV === "production",
-        path: "/",
-        maxAge: refreshed.expiresIn
-      });
-      cookieStore.set("google_token_expires_at", String(Date.now() + (refreshed.expiresIn - 60) * 1000), {
-        httpOnly: true,
-        sameSite: "lax",
-        secure: process.env.NODE_ENV === "production",
-        path: "/",
-        maxAge: refreshed.expiresIn
-      });
-    }
+    const accessToken = await getGoogleAccessToken();
 
     if (!accessToken) {
       return NextResponse.json(
@@ -372,40 +335,4 @@ function formatDateInTimeZone(date: Date, timeZone: string) {
     month: "2-digit",
     day: "2-digit"
   }).format(date);
-}
-
-async function refreshGoogleAccessToken(refreshToken: string) {
-  const clientId = process.env.GOOGLE_CLIENT_ID;
-  const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
-
-  if (!clientId || !clientSecret) {
-    throw new Error("OAuth do Google não está configurado.");
-  }
-
-  const response = await fetch("https://oauth2.googleapis.com/token", {
-    method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: new URLSearchParams({
-      client_id: clientId,
-      client_secret: clientSecret,
-      refresh_token: refreshToken,
-      grant_type: "refresh_token"
-    })
-  });
-  const payload = (await response.json()) as RefreshResponse;
-
-  if (!response.ok || !payload.access_token) {
-    throw new GoogleCalendarAuthError(payload.error_description ?? "Não consegui renovar o acesso ao Google Calendar.");
-  }
-
-  return {
-    accessToken: payload.access_token,
-    expiresIn: payload.expires_in ?? 3600
-  };
-}
-
-function clearGoogleAuthCookies(response: NextResponse) {
-  response.cookies.delete("google_access_token");
-  response.cookies.delete("google_refresh_token");
-  response.cookies.delete("google_token_expires_at");
 }

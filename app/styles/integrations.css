@@ -1,0 +1,171 @@
+.agendaState,
+.agendaItem {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+}
+
+.agendaState {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.agendaState code {
+  color: var(--text);
+  font-size: 12px;
+}
+
+.agendaState.danger {
+  color: #ffb199;
+}
+
+.agendaConnect {
+  align-items: flex-start;
+  flex-direction: column;
+}
+
+.connectButton,
+.disconnectLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  width: fit-content;
+  border-radius: 8px;
+  text-decoration: none;
+}
+
+.connectButton {
+  padding: 8px 10px;
+  background: var(--green);
+  color: #0d1012;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.calendarActions {
+  display: grid;
+  gap: 7px;
+}
+
+.calendarActions span {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.notificationActions {
+  display: grid;
+  gap: 8px;
+}
+
+.notificationActions span {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.notificationButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  width: fit-content;
+  border: 0;
+  border-radius: 8px;
+  padding: 8px 10px;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text);
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.notificationButton.active {
+  background: var(--green);
+  color: #0d1012;
+}
+
+.syncButton {
+  width: fit-content;
+  border: 0;
+  border-radius: 8px;
+  padding: 8px 10px;
+  background: var(--blue);
+  color: #0d1012;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.syncButton:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+
+.disconnectLink {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.disconnectLink:hover {
+  color: var(--text);
+}
+
+.spin {
+  animation: spin 0.9s linear infinite;
+}
+
+.agendaList {
+  display: grid;
+  gap: 9px;
+}
+
+.agendaItem {
+  display: grid;
+  gap: 7px;
+  padding: 12px;
+}
+
+.agendaTime {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.agendaItem strong {
+  line-height: 1.25;
+}
+
+.agendaItem small,
+.noLink {
+  color: var(--soft);
+  font-size: 12px;
+}
+
+.agendaItem a {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  width: fit-content;
+  margin-top: 2px;
+  color: #0d1012;
+  background: var(--green);
+  border-radius: 8px;
+  padding: 7px 9px;
+  text-decoration: none;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

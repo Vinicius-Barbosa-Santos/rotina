@@ -1,10 +1,8 @@
-import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { mapGoogleCalendarEvents, parseCalendarEvents, type GoogleCalendarApiEvent } from "@/lib/calendar";
+import { clearGoogleAuthCookies, getGoogleAccessToken, GoogleCalendarAuthError } from "@/lib/google-auth";
 
 export const dynamic = "force-dynamic";
-
-class GoogleCalendarAuthError extends Error {}
 
 export async function GET(request: Request) {
   const calendarUrl = process.env.CALENDAR_ICS_URL;
@@ -29,39 +27,7 @@ export async function GET(request: Request) {
 
   try {
     if (oauthConfigured) {
-      const cookieStore = await cookies();
-      const refreshToken = cookieStore.get("google_refresh_token")?.value;
-      let accessToken = cookieStore.get("google_access_token")?.value;
-      const expiresAt = Number(cookieStore.get("google_token_expires_at")?.value ?? "0");
-
-      if (!accessToken && !refreshToken) {
-        return NextResponse.json({
-          configured: true,
-          authRequired: true,
-          source: "oauth",
-          events: [],
-          message: "Conecte seu Google Calendar para carregar sua agenda."
-        });
-      }
-
-      if ((!accessToken || expiresAt < Date.now()) && refreshToken) {
-        const refreshed = await refreshGoogleAccessToken(refreshToken);
-        accessToken = refreshed.accessToken;
-        cookieStore.set("google_access_token", refreshed.accessToken, {
-          httpOnly: true,
-          sameSite: "lax",
-          secure: process.env.NODE_ENV === "production",
-          path: "/",
-          maxAge: refreshed.expiresIn
-        });
-        cookieStore.set("google_token_expires_at", String(Date.now() + (refreshed.expiresIn - 60) * 1000), {
-          httpOnly: true,
-          sameSite: "lax",
-          secure: process.env.NODE_ENV === "production",
-          path: "/",
-          maxAge: refreshed.expiresIn
-        });
-      }
+      const accessToken = await getGoogleAccessToken();
 
       if (!accessToken) {
         return NextResponse.json({
@@ -166,42 +132,6 @@ function getGoogleCalendarIds() {
     .filter(Boolean);
 }
 
-async function refreshGoogleAccessToken(refreshToken: string) {
-  const clientId = process.env.GOOGLE_CLIENT_ID;
-  const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
-
-  if (!clientId || !clientSecret) {
-    throw new Error("OAuth do Google não está configurado.");
-  }
-
-  const response = await fetch("https://oauth2.googleapis.com/token", {
-    method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: new URLSearchParams({
-      client_id: clientId,
-      client_secret: clientSecret,
-      refresh_token: refreshToken,
-      grant_type: "refresh_token"
-    })
-  });
-  const payload = (await response.json()) as { access_token?: string; expires_in?: number; error_description?: string };
-
-  if (!response.ok || !payload.access_token) {
-    throw new GoogleCalendarAuthError(payload.error_description ?? "Não consegui renovar o acesso ao Google Calendar.");
-  }
-
-  return {
-    accessToken: payload.access_token,
-    expiresIn: payload.expires_in ?? 3600
-  };
-}
-
-function clearGoogleAuthCookies(response: NextResponse) {
-  response.cookies.delete("google_access_token");
-  response.cookies.delete("google_refresh_token");
-  response.cookies.delete("google_token_expires_at");
-}
-
 async function fetchGoogleCalendarEventsWithToken({
   calendarId,
   accessToken,
@@ -221,7 +151,7 @@ async function fetchGoogleCalendarEventsWithToken({
   });
 
   if (!response.ok) {
-    if (response.status === 401 || response.status === 403) {
+    if (response.status === 401) {
       throw new GoogleCalendarAuthError("Google Calendar precisa ser conectado novamente.");
     }
 
