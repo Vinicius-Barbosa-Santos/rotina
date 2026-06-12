@@ -87,7 +87,8 @@ export default function HomePage() {
   const [routinePrefs, setRoutinePrefs] = useState<RoutinePrefs>({
     hiddenItems: {},
     customItems: {},
-    timeOverrides: {}
+    timeOverrides: {},
+    labelOverrides: {}
   });
   const [newRoutineItems, setNewRoutineItems] = useState<Record<string, string>>({});
   const [streak, setStreak] = useState(0);
@@ -107,7 +108,8 @@ export default function HomePage() {
     setRoutinePrefs({
       hiddenItems: savedPrefs.hiddenItems ?? {},
       customItems: savedPrefs.customItems ?? {},
-      timeOverrides: savedPrefs.timeOverrides ?? {}
+      timeOverrides: savedPrefs.timeOverrides ?? {},
+      labelOverrides: savedPrefs.labelOverrides ?? {}
     });
 
     setHydrated(true);
@@ -315,12 +317,12 @@ export default function HomePage() {
       .filter(({ index }) => !hidden.has(index))
       .map(({ item, index }) => ({
         key: String(index),
-        label: item.label,
+        label: routinePrefs.labelOverrides[section.key]?.[String(index)] ?? item.label,
         defaultIndex: index
       }));
     const custom = (routinePrefs.customItems[section.key] ?? []).map((item) => ({
       key: item.id,
-      label: item.label,
+      label: routinePrefs.labelOverrides[section.key]?.[item.id] ?? item.label,
       customId: item.id
     }));
 
@@ -333,9 +335,17 @@ export default function HomePage() {
 
   function deleteRoutineItem(sectionKey: string, item: { key: string; defaultIndex?: number; customId?: string }) {
     setRoutinePrefs((current) => {
+      const nextSectionLabels = { ...(current.labelOverrides[sectionKey] ?? {}) };
+      delete nextSectionLabels[item.key];
+      const labelOverrides = {
+        ...current.labelOverrides,
+        [sectionKey]: nextSectionLabels
+      };
+
       if (typeof item.defaultIndex === "number") {
         return {
           ...current,
+          labelOverrides,
           hiddenItems: {
             ...current.hiddenItems,
             [sectionKey]: [...new Set([...(current.hiddenItems[sectionKey] ?? []), item.defaultIndex])]
@@ -345,6 +355,7 @@ export default function HomePage() {
 
       return {
         ...current,
+        labelOverrides,
         customItems: {
           ...current.customItems,
           [sectionKey]: (current.customItems[sectionKey] ?? []).filter((customItem) => customItem.id !== item.customId)
@@ -370,6 +381,22 @@ export default function HomePage() {
     setNewRoutineItems((current) => ({ ...current, [sectionKey]: "" }));
   }
 
+  function updateRoutineItemLabel(sectionKey: string, itemKey: string, label: string) {
+    const nextLabel = label.trim();
+    if (!nextLabel) return;
+
+    setRoutinePrefs((current) => ({
+      ...current,
+      labelOverrides: {
+        ...current.labelOverrides,
+        [sectionKey]: {
+          ...(current.labelOverrides[sectionKey] ?? {}),
+          [itemKey]: nextLabel
+        }
+      }
+    }));
+  }
+
   function updateSectionTime(sectionKey: string, value: string) {
     setRoutinePrefs((current) => ({
       ...current,
@@ -390,7 +417,7 @@ export default function HomePage() {
           .filter((item) => !(routinePrefs.hiddenItems[section.key] ?? []).includes(item.index)),
         ...(routinePrefs.customItems[section.key] ?? []).map((item) => ({ ...item, key: item.id }))
       ].map((item) => ({
-        label: item.label,
+        label: routinePrefs.labelOverrides[section.key]?.[item.key] ?? item.label,
         days: "days" in item ? item.days : undefined,
         completed: (state[section.key] ?? []).map(String).includes(item.key)
       }))
@@ -581,6 +608,7 @@ export default function HomePage() {
                   onToggleSection={() => toggleSection(section.key)}
                   onToggleItem={(key) => toggleItem(section.key, key)}
                   onDeleteItem={(item) => deleteRoutineItem(section.key, item)}
+                  onEditItem={(item, label) => updateRoutineItemLabel(section.key, item.key, label)}
                   onNewItemChange={(value) => setNewRoutineItems((current) => ({ ...current, [section.key]: value }))}
                   onAddItem={() => addRoutineItem(section.key)}
                   onTimeChange={(value) => updateSectionTime(section.key, value)}

@@ -180,7 +180,9 @@
 }
 
 .taskForm button,
-.deleteTaskButton {
+.deleteTaskButton,
+.editTaskButton,
+.taskEditForm button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -193,7 +195,9 @@
 }
 
 .taskForm button:hover,
-.deleteTaskButton:hover {
+.deleteTaskButton:hover,
+.editTaskButton:hover,
+.taskEditForm button:hover {
   background: var(--panel-2);
   color: var(--text);
 }
@@ -225,6 +229,44 @@
   padding: 0 9px;
   flex: 0 0 auto;
   font-size: 12px;
+}
+
+.taskItemActions {
+  display: flex;
+  gap: 6px;
+  flex: 0 0 auto;
+}
+
+.editTaskButton {
+  width: 32px;
+  height: 32px;
+  flex: 0 0 auto;
+}
+
+.taskEditForm {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 32px 32px;
+  gap: 6px;
+  width: 100%;
+}
+
+.taskEditForm input {
+  min-width: 0;
+  border: 1px solid var(--green);
+  border-radius: 8px;
+  background: var(--panel-2);
+  color: var(--text);
+  padding: 7px 9px;
+  outline: none;
+}
+
+.taskEditForm button {
+  height: 32px;
+}
+
+.taskEditForm button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
 }
 
 .checkCircle {

@@ -1,7 +1,7 @@
 "use client";
 
-import type { FormEvent } from "react";
-import { Check, ChevronDown, Plus, RotateCcw, Trash2 } from "lucide-react";
+import { useState, type FormEvent } from "react";
+import { Check, CheckIcon, ChevronDown, Pencil, Plus, RotateCcw, Trash2, X } from "lucide-react";
 import { getSectionScheduleLabel, type RoutineSection } from "@/lib/routine";
 import type { PersonalizedRoutineItem } from "@/lib/types";
 import EnglishTutor from "../EnglishTutor";
@@ -17,6 +17,7 @@ type RoutineSectionCardProps = {
   onToggleSection: () => void;
   onToggleItem: (key: string) => void;
   onDeleteItem: (item: PersonalizedRoutineItem) => void;
+  onEditItem: (item: PersonalizedRoutineItem, label: string) => void;
   onNewItemChange: (value: string) => void;
   onAddItem: () => void;
   onTimeChange: (value: string) => void;
@@ -33,16 +34,36 @@ export default function RoutineSectionCard({
   onToggleSection,
   onToggleItem,
   onDeleteItem,
+  onEditItem,
   onNewItemChange,
   onAddItem,
   onTimeChange,
   onClear
 }: RoutineSectionCardProps) {
   const pct = items.length ? Math.round((doneItems.size / items.length) * 100) : 0;
+  const [editingItemKey, setEditingItemKey] = useState<string | null>(null);
+  const [editingLabel, setEditingLabel] = useState("");
 
   function handleAddItem(event: FormEvent) {
     event.preventDefault();
     onAddItem();
+  }
+
+  function startEditing(item: PersonalizedRoutineItem) {
+    setEditingItemKey(item.key);
+    setEditingLabel(item.label);
+  }
+
+  function cancelEditing() {
+    setEditingItemKey(null);
+    setEditingLabel("");
+  }
+
+  function saveEditing(item: PersonalizedRoutineItem) {
+    const nextLabel = editingLabel.trim();
+    if (!nextLabel) return;
+    onEditItem(item, nextLabel);
+    cancelEditing();
   }
 
   return (
@@ -78,16 +99,47 @@ export default function RoutineSectionCard({
           )}
           {items.map((item) => {
             const checked = doneItems.has(item.key);
+            const isEditing = editingItemKey === item.key;
             return (
               <div className={checked ? "checkItem customTask done" : "checkItem customTask"} key={`${section.key}-${item.key}`}>
-                <button className="taskCheckButton" onClick={() => onToggleItem(item.key)}>
-                  <span className="checkCircle">{checked && <Check size={13} aria-hidden />}</span>
-                  <span>{item.label}</span>
-                </button>
-                <button className="deleteTaskButton" onClick={() => onDeleteItem(item)} aria-label={`Excluir ${item.label}`}>
-                  <Trash2 size={15} aria-hidden />
-                  <span>Excluir</span>
-                </button>
+                {isEditing ? (
+                  <form
+                    className="taskEditForm"
+                    onSubmit={(event) => {
+                      event.preventDefault();
+                      saveEditing(item);
+                    }}
+                  >
+                    <input
+                      autoFocus
+                      value={editingLabel}
+                      onChange={(event) => setEditingLabel(event.target.value)}
+                      aria-label={`Editar ${item.label}`}
+                    />
+                    <button type="submit" aria-label={`Salvar ${item.label}`} disabled={!editingLabel.trim()}>
+                      <CheckIcon size={15} aria-hidden />
+                    </button>
+                    <button type="button" onClick={cancelEditing} aria-label="Cancelar edição">
+                      <X size={15} aria-hidden />
+                    </button>
+                  </form>
+                ) : (
+                  <>
+                    <button className="taskCheckButton" onClick={() => onToggleItem(item.key)}>
+                      <span className="checkCircle">{checked && <Check size={13} aria-hidden />}</span>
+                      <span>{item.label}</span>
+                    </button>
+                    <span className="taskItemActions">
+                      <button className="editTaskButton" onClick={() => startEditing(item)} aria-label={`Editar ${item.label}`}>
+                        <Pencil size={15} aria-hidden />
+                      </button>
+                      <button className="deleteTaskButton" onClick={() => onDeleteItem(item)} aria-label={`Excluir ${item.label}`}>
+                        <Trash2 size={15} aria-hidden />
+                        <span>Excluir</span>
+                      </button>
+                    </span>
+                  </>
+                )}
               </div>
             );
           })}

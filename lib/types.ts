@@ -44,6 +44,7 @@ export type RoutinePrefs = {
   hiddenItems: Record<string, number[]>;
   customItems: Record<string, RoutineCustomItem[]>;
   timeOverrides: Record<string, string>;
+  labelOverrides: Record<string, Record<string, string>>;
 };
 
 export type PersonalizedRoutineItem = {
