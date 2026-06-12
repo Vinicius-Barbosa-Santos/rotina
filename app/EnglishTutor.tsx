@@ -2,25 +2,20 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Download, Loader2, Mic, Send, Sparkles, Trash2, Volume2, VolumeX } from "lucide-react";
-
-type TutorMessage = {
-  id: string;
-  role: "user" | "assistant";
-  content: string;
-};
+import {
+  requestAudioTranscription,
+  requestTutor,
+  welcomeTutorMessage,
+  type TutorMessage
+} from "@/lib/english-tutor";
+import { readStorageJson } from "@/lib/storage";
 
 const conversationKey = "rotina_english_tutor_conversation";
 const summaryKey = "rotina_english_tutor_summary";
 const pronunciationNotesKey = "rotina_english_tutor_pronunciation_notes";
 
-const welcomeMessage: TutorMessage = {
-  id: "welcome",
-  role: "assistant",
-  content: "Hi! Let's practice a developer daily. What did you work on yesterday, and what will you work on today?"
-};
-
 export default function EnglishTutor() {
-  const [messages, setMessages] = useState<TutorMessage[]>([welcomeMessage]);
+  const [messages, setMessages] = useState<TutorMessage[]>([welcomeTutorMessage]);
   const [input, setInput] = useState("");
   const [summary, setSummary] = useState("");
   const [pronunciationNotes, setPronunciationNotes] = useState<string[]>([]);
@@ -37,25 +32,11 @@ export default function EnglishTutor() {
   const audioChunksRef = useRef<Blob[]>([]);
 
   useEffect(() => {
-    const savedMessages = localStorage.getItem(conversationKey);
     const savedSummary = localStorage.getItem(summaryKey);
-    const savedPronunciationNotes = localStorage.getItem(pronunciationNotesKey);
 
-    if (savedMessages) {
-      try {
-        setMessages(JSON.parse(savedMessages) as TutorMessage[]);
-      } catch {
-        localStorage.removeItem(conversationKey);
-      }
-    }
+    setMessages(readStorageJson<TutorMessage[]>(conversationKey, [welcomeTutorMessage]));
     if (savedSummary) setSummary(savedSummary);
-    if (savedPronunciationNotes) {
-      try {
-        setPronunciationNotes(JSON.parse(savedPronunciationNotes) as string[]);
-      } catch {
-        localStorage.removeItem(pronunciationNotesKey);
-      }
-    }
+    setPronunciationNotes(readStorageJson<string[]>(pronunciationNotesKey, []));
     setSpeechSupported("speechSynthesis" in window && "mediaDevices" in navigator && "MediaRecorder" in window);
 
     return () => {
@@ -112,7 +93,7 @@ export default function EnglishTutor() {
   function clearConversation() {
     stopRecording();
     window.speechSynthesis?.cancel();
-    setMessages([welcomeMessage]);
+    setMessages([welcomeTutorMessage]);
     setSummary("");
     setPronunciationNotes([]);
     setError("");
@@ -130,7 +111,7 @@ export default function EnglishTutor() {
     const nextEnabled = !voiceEnabled;
     setVoiceEnabled(nextEnabled);
     setError("");
-    if (nextEnabled) speak(messages.at(-1)?.content ?? welcomeMessage.content);
+    if (nextEnabled) speak(messages.at(-1)?.content ?? welcomeTutorMessage.content);
     else window.speechSynthesis.cancel();
   }
 
@@ -344,51 +325,6 @@ export default function EnglishTutor() {
   );
 }
 
-async function requestTutor(mode: "chat" | "summary", messages: TutorMessage[], pronunciationNotes: string[] = []) {
-  const response = await fetch("/api/english-tutor", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      mode,
-      pronunciationNotes,
-      messages: messages.map(({ role, content }) => ({ role, content }))
-    })
-  });
-  const payload = (await response.json()) as { text?: string; message?: string };
-
-  if (!response.ok || !payload.text) {
-    throw new Error(payload.message ?? "Não consegui falar com a tutora.");
-  }
-
-  return payload.text;
-}
-
 function getSupportedAudioMimeType() {
   return ["audio/webm;codecs=opus", "audio/webm", "audio/mp4"].find((type) => MediaRecorder.isTypeSupported(type));
-}
-
-async function requestAudioTranscription(audio: Blob) {
-  if (audio.size > 8 * 1024 * 1024) throw new Error("O áudio ficou muito longo. Grave uma resposta mais curta.");
-
-  const data = await blobToBase64(audio);
-  const response = await fetch("/api/english-tutor", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      mode: "transcribe",
-      audio: { data, mimeType: audio.type || "audio/webm" }
-    })
-  });
-  const payload = (await response.json()) as { text?: string; pronunciationFeedback?: string; message?: string };
-  if (!response.ok || !payload.text) throw new Error(payload.message ?? "Não consegui transcrever o áudio.");
-  return { text: payload.text, pronunciationFeedback: payload.pronunciationFeedback ?? "" };
-}
-
-function blobToBase64(blob: Blob) {
-  return new Promise<string>((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onloadend = () => resolve(String(reader.result).split(",")[1] ?? "");
-    reader.onerror = () => reject(new Error("Não consegui ler a gravação."));
-    reader.readAsDataURL(blob);
-  });
 }

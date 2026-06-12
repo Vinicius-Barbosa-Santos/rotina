@@ -1,156 +1,26 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState, type MutableRefObject } from "react";
-import {
-  ArrowUpRight,
-  Bell,
-  BookOpen,
-  Briefcase,
-  CalendarDays,
-  Check,
-  ChevronDown,
-  CircleDollarSign,
-  ClipboardList,
-  Code2,
-  Dumbbell,
-  Home,
-  Heart,
-  Loader2,
-  Moon,
-  Plus,
-  Rocket,
-  RotateCcw,
-  Sparkles,
-  Sunrise,
-  Target,
-  Trash2,
-  TrendingUp,
-  Users
-} from "lucide-react";
-import { getSectionScheduleLabel, getVisibleItems, routineSections } from "@/lib/routine";
-import EnglishTutor from "./EnglishTutor";
-
-type CalendarEvent = {
-  id: string;
-  title: string;
-  startsAt: string;
-  endsAt: string;
-  allDay: boolean;
-  location?: string;
-  meetingUrl?: string;
-  provider?: string;
-  calendarId?: string;
-};
-
-type CalendarResponse = {
-  configured: boolean;
-  authRequired?: boolean;
-  source?: string;
-  timeZone?: string;
-  events: CalendarEvent[];
-  message?: string;
-};
-
-type RoutineDoneKey = number | string;
-type RoutineState = Record<string, RoutineDoneKey[]>;
-
-type ManualMeeting = {
-  id: string;
-  title: string;
-  startTime: string;
-  endTime: string;
-  meetingUrl: string;
-  days: number[];
-};
-
-type RoutineCustomItem = {
-  id: string;
-  label: string;
-};
-
-type RoutinePrefs = {
-  hiddenItems: Record<string, number[]>;
-  customItems: Record<string, RoutineCustomItem[]>;
-  timeOverrides: Record<string, string>;
-};
-
-type RoutineNotificationSection = {
-  key: string;
-  label: string;
-  startsAt: Date;
-  items: string[];
-};
-
-const iconMap = {
-  Mind: Sparkles,
-  Sun: Sunrise,
-  EN: Sparkles,
-  Fit: Dumbbell,
-  Job: Briefcase,
-  Home,
-  Cash: CircleDollarSign,
-  Code: Code2,
-  Rocket,
-  Growth: TrendingUp,
-  Heart,
-  Review: BookOpen,
-  Target,
-  People: Users,
-  Admin: ClipboardList,
-  Night: Moon
-};
-
-const weekDays = [
-  { value: 1, label: "Seg" },
-  { value: 2, label: "Ter" },
-  { value: 3, label: "Qua" },
-  { value: 4, label: "Qui" },
-  { value: 5, label: "Sex" },
-  { value: 6, label: "Sáb" },
-  { value: 0, label: "Dom" }
-];
-
-const defaultMeetingForm = {
-  title: "",
-  startTime: "10:15",
-  endTime: "11:00",
-  meetingUrl: "",
-  days: [1, 2, 3, 4, 5]
-};
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Bell, CalendarDays, Loader2 } from "lucide-react";
+import { getVisibleItems, routineSections } from "@/lib/routine";
+import { dateKey, formatDate, formatShortDate, todayKey } from "@/lib/date";
+import { defaultMeetingForm, getManualMeetingEvents } from "@/lib/manual-meetings";
+import { readStorageJson } from "@/lib/storage";
+import type {
+  CalendarResponse,
+  ManualMeeting,
+  PersonalizedRoutineItem,
+  RoutineNotificationSection,
+  RoutinePrefs,
+  RoutineState
+} from "@/lib/types";
+import AgendaPanel from "./components/AgendaPanel";
+import ManualMeetingsCard from "./components/ManualMeetingsCard";
+import RoutineSectionCard from "./components/RoutineSectionCard";
+import { RoutineIcon } from "./components/RoutineIcon";
 
 const notificationPreferenceKey = "rotina_browser_notifications";
 const notifiedSectionsKey = "rotina_notified_sections";
-
-function todayKey() {
-  const now = new Date();
-  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(
-    now.getDate()
-  ).padStart(2, "0")}`;
-}
-
-function formatDate(date: Date) {
-  return new Intl.DateTimeFormat("pt-BR", {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-    year: "numeric"
-  }).format(date);
-}
-
-function formatShortDate(date: Date) {
-  return new Intl.DateTimeFormat("pt-BR", {
-    weekday: "short",
-    day: "numeric",
-    month: "short"
-  }).format(date);
-}
-
-function formatTime(value: string) {
-  return new Intl.DateTimeFormat("pt-BR", {
-    hour: "2-digit",
-    minute: "2-digit"
-  }).format(new Date(value));
-}
 
 function getSectionStartDate(time: string, date = new Date()) {
   const match = time.match(/^(\d{1,2}):(\d{2})/);
@@ -166,32 +36,20 @@ function getSectionStartDate(time: string, date = new Date()) {
 }
 
 function readNotifiedSectionKeys() {
-  try {
-    const stored = JSON.parse(localStorage.getItem(notifiedSectionsKey) || "{}") as Record<string, string[]>;
-    return new Set(stored[todayKey()] ?? []);
-  } catch {
-    return new Set<string>();
-  }
+  const stored = readStorageJson<Record<string, string[]>>(notifiedSectionsKey, {});
+  return new Set(stored[todayKey()] ?? []);
 }
 
 function saveNotifiedSectionKey(sectionKey: string) {
-  try {
-    const stored = JSON.parse(localStorage.getItem(notifiedSectionsKey) || "{}") as Record<string, string[]>;
-    const today = todayKey();
-    const nextKeys = new Set(stored[today] ?? []);
-    nextKeys.add(sectionKey);
-    localStorage.setItem(notifiedSectionsKey, JSON.stringify({ [today]: Array.from(nextKeys) }));
-  } catch {
-    localStorage.setItem(notifiedSectionsKey, JSON.stringify({ [todayKey()]: [sectionKey] }));
-  }
+  const stored = readStorageJson<Record<string, string[]>>(notifiedSectionsKey, {});
+  const today = todayKey();
+  const nextKeys = new Set(stored[today] ?? []);
+  nextKeys.add(sectionKey);
+  localStorage.setItem(notifiedSectionsKey, JSON.stringify({ ...stored, [today]: Array.from(nextKeys) }));
 }
 
 function readCompletedDates() {
-  try {
-    return JSON.parse(localStorage.getItem("rotina_completed_dates") || "[]") as string[];
-  } catch {
-    return [];
-  }
+  return readStorageJson<string[]>("rotina_completed_dates", []);
 }
 
 function calculateStreak(dates: string[]) {
@@ -210,38 +68,6 @@ function calculateStreak(dates: string[]) {
   }
 
   return count;
-}
-
-function dateKey(date: Date) {
-  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
-}
-
-function buildManualMeetingEvent(meeting: ManualMeeting, date: Date): CalendarEvent {
-  const [startHour, startMinute] = meeting.startTime.split(":").map(Number);
-  const [endHour, endMinute] = meeting.endTime.split(":").map(Number);
-  const startsAt = new Date(date);
-  startsAt.setHours(startHour || 0, startMinute || 0, 0, 0);
-  const endsAt = new Date(date);
-  endsAt.setHours(endHour || 0, endMinute || 0, 0, 0);
-
-  return {
-    id: `manual:${meeting.id}`,
-    title: meeting.title,
-    startsAt: startsAt.toISOString(),
-    endsAt: endsAt.toISOString(),
-    allDay: false,
-    meetingUrl: meeting.meetingUrl || undefined,
-    provider: "Manual",
-    calendarId: "manual"
-  };
-}
-
-function getManualMeetingEvents(meetings: ManualMeeting[], date = new Date()) {
-  const day = date.getDay();
-  return meetings
-    .filter((meeting) => meeting.days.includes(day))
-    .map((meeting) => buildManualMeetingEvent(meeting, date))
-    .sort((a, b) => a.startsAt.localeCompare(b.startsAt));
 }
 
 export default function HomePage() {
@@ -267,8 +93,7 @@ export default function HomePage() {
   const [streak, setStreak] = useState(0);
 
   useEffect(() => {
-    const saved = localStorage.getItem(`rotina_next_${todayKey()}`);
-    if (saved) setState(JSON.parse(saved) as RoutineState);
+    setState(readStorageJson<RoutineState>(`rotina_next_${todayKey()}`, {}));
 
     if ("Notification" in window) {
       setNotificationPermission(Notification.permission);
@@ -277,13 +102,13 @@ export default function HomePage() {
       setNotificationPermission("unsupported");
     }
 
-    const savedMeetings = localStorage.getItem("rotina_manual_meetings");
-    if (savedMeetings) setManualMeetings(JSON.parse(savedMeetings) as ManualMeeting[]);
-
-    const savedPrefs = localStorage.getItem("rotina_preferences");
-    if (savedPrefs) {
-      setRoutinePrefs(JSON.parse(savedPrefs) as RoutinePrefs);
-    }
+    setManualMeetings(readStorageJson<ManualMeeting[]>("rotina_manual_meetings", []));
+    const savedPrefs = readStorageJson<Partial<RoutinePrefs>>("rotina_preferences", {});
+    setRoutinePrefs({
+      hiddenItems: savedPrefs.hiddenItems ?? {},
+      customItems: savedPrefs.customItems ?? {},
+      timeOverrides: savedPrefs.timeOverrides ?? {}
+    });
 
     setHydrated(true);
   }, []);
@@ -484,7 +309,7 @@ export default function HomePage() {
     return routinePrefs.timeOverrides[sectionKey] ?? fallback;
   }
 
-  function getPersonalizedItems(section: (typeof routineSections)[number], date = new Date()) {
+  function getPersonalizedItems(section: (typeof routineSections)[number], date = new Date()): PersonalizedRoutineItem[] {
     const hidden = new Set(routinePrefs.hiddenItems[section.key] ?? []);
     const defaultItems = getVisibleItems(section, date)
       .filter(({ index }) => !hidden.has(index))
@@ -701,11 +526,10 @@ export default function HomePage() {
               const done = (state[section.key] ?? []).filter((key) => visibleKeys.has(String(key))).length;
               const total = visibleItems.length;
               const pct = total ? Math.round((done / total) * 100) : 0;
-              const Icon = iconMap[section.icon as keyof typeof iconMap] ?? Sparkles;
 
               return (
                 <a key={section.key} href={`#${section.key}`} className="navItem">
-                  <Icon size={16} aria-hidden />
+                  <RoutineIcon name={section.icon} />
                   <span>{section.shortLabel}</span>
                   <i>
                     <b style={{ width: `${pct}%`, background: section.color }} />
@@ -729,366 +553,44 @@ export default function HomePage() {
           </div>
 
           <div className="sections">
-            <article className="routineCard" id="meetings">
-              <span className="sectionProgress" style={{ width: "100%", background: "var(--blue)" }} />
-              <div className="sectionHeader staticHeader">
-                <span className="iconBadge" style={{ color: "var(--blue)", background: "rgba(106, 167, 255, 0.12)" }}>
-                  <CalendarDays size={17} aria-hidden />
-                </span>
-                <span className="sectionTitle">
-                  <strong>Reuniões recorrentes</strong>
-                  <small>cadastradas por você</small>
-                </span>
-                <span className="sectionActions">
-                  <span className="countBadge" style={{ color: "var(--blue)", background: "rgba(106, 167, 255, 0.12)" }}>
-                    {manualEvents.length}/{manualMeetings.length}
-                  </span>
-                </span>
-              </div>
-              <div className="checklist">
-                <form
-                  className="meetingForm"
-                  onSubmit={(event) => {
-                    event.preventDefault();
-                    addManualMeeting();
-                  }}
-                >
-                  <input
-                    value={newMeeting.title}
-                    onChange={(event) => setNewMeeting((current) => ({ ...current, title: event.target.value }))}
-                    placeholder="Nome da reunião"
-                  />
-                  <div className="timeFields">
-                    <label>
-                      Início
-                      <input
-                        type="time"
-                        value={newMeeting.startTime}
-                        onChange={(event) => setNewMeeting((current) => ({ ...current, startTime: event.target.value }))}
-                      />
-                    </label>
-                    <label>
-                      Fim
-                      <input
-                        type="time"
-                        value={newMeeting.endTime}
-                        onChange={(event) => setNewMeeting((current) => ({ ...current, endTime: event.target.value }))}
-                      />
-                    </label>
-                  </div>
-                  <input
-                    value={newMeeting.meetingUrl}
-                    onChange={(event) => setNewMeeting((current) => ({ ...current, meetingUrl: event.target.value }))}
-                    placeholder="Link da reunião"
-                  />
-                  <div className="dayToggleGroup" aria-label="Dias da reunião">
-                    {weekDays.map((day) => (
-                      <button
-                        className={newMeeting.days.includes(day.value) ? "dayToggle selected" : "dayToggle"}
-                        key={day.value}
-                        type="button"
-                        onClick={() => toggleMeetingDay(day.value)}
-                      >
-                        {day.label}
-                      </button>
-                    ))}
-                  </div>
-                  <button className="meetingSubmit" type="submit">
-                    <Plus size={16} aria-hidden />
-                    Criar reunião
-                  </button>
-                </form>
-
-                {manualMeetings.length === 0 && <div className="emptySection">Nenhuma reunião recorrente cadastrada.</div>}
-                {manualMeetings.map((meeting) => (
-                  <div className="meetingItem" key={meeting.id}>
-                    <div>
-                      <strong>{meeting.title}</strong>
-                      <small>
-                        {meeting.startTime}-{meeting.endTime} ·{" "}
-                        {weekDays.filter((day) => meeting.days.includes(day.value)).map((day) => day.label).join(", ")}
-                      </small>
-                    </div>
-                    <button
-                      className="deleteTaskButton"
-                      onClick={() => deleteManualMeeting(meeting.id)}
-                      aria-label={`Excluir ${meeting.title}`}
-                    >
-                      <Trash2 size={15} aria-hidden />
-                      <span>Excluir</span>
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </article>
+            <ManualMeetingsCard
+              meetings={manualMeetings}
+              todayCount={manualEvents.length}
+              form={newMeeting}
+              setForm={setNewMeeting}
+              onToggleDay={toggleMeetingDay}
+              onCreate={addManualMeeting}
+              onDelete={deleteManualMeeting}
+            />
 
             {routineSections.map((section) => {
               const visibleItems = getPersonalizedItems(section);
               const visibleKeys = new Set(visibleItems.map((item) => item.key));
               const doneItems = new Set((state[section.key] ?? []).filter((key) => visibleKeys.has(String(key))).map(String));
-              const pct = visibleItems.length ? Math.round((doneItems.size / visibleItems.length) * 100) : 0;
               const isOpen = openSections.has(section.key);
-              const Icon = iconMap[section.icon as keyof typeof iconMap] ?? Sparkles;
 
               return (
-                <article className="routineCard" id={section.key} key={section.key}>
-                  <span className="sectionProgress" style={{ width: `${pct}%`, background: section.color }} />
-                  <button className="sectionHeader" onClick={() => toggleSection(section.key)}>
-                    <span className="iconBadge" style={{ color: section.color, background: section.bg }}>
-                      <Icon size={17} aria-hidden />
-                    </span>
-                    <span className="sectionTitle">
-                      <strong>{section.label}</strong>
-                      <small>{getSectionTime(section.key, section.time)} · {getSectionScheduleLabel(section)}</small>
-                    </span>
-                    <span className="sectionActions">
-                      <span className="countBadge" style={{ color: section.color, background: section.bg }}>
-                        {visibleItems.length ? `${doneItems.size}/${visibleItems.length}` : "ref"}
-                      </span>
-                      <ChevronDown className={isOpen ? "chevron open" : "chevron"} size={18} aria-hidden />
-                    </span>
-                  </button>
-
-                  {isOpen && (
-                    <div className="checklist">
-                      {section.note && <p className="sectionNote">{section.note}</p>}
-                      {section.key === "english" && <EnglishTutor />}
-                      {!section.references?.length && (
-                        <div className="sectionEditor">
-                          <label>
-                            Horário
-                            <input
-                              value={getSectionTime(section.key, section.time)}
-                              onChange={(event) => updateSectionTime(section.key, event.target.value)}
-                              placeholder="09:00-10:00"
-                            />
-                          </label>
-                        </div>
-                      )}
-                      {visibleItems.map((item) => {
-                        const checked = doneItems.has(item.key);
-                        return (
-                          <div className={checked ? "checkItem customTask done" : "checkItem customTask"} key={`${section.key}-${item.key}`}>
-                            <button className="taskCheckButton" onClick={() => toggleItem(section.key, item.key)}>
-                              <span className="checkCircle">{checked && <Check size={13} aria-hidden />}</span>
-                              <span>{item.label}</span>
-                            </button>
-                            <button
-                              className="deleteTaskButton"
-                              onClick={() => deleteRoutineItem(section.key, item)}
-                              aria-label={`Excluir ${item.label}`}
-                            >
-                              <Trash2 size={15} aria-hidden />
-                              <span>Excluir</span>
-                            </button>
-                          </div>
-                        );
-                      })}
-                      {!section.references?.length && (
-                        <form
-                          className="taskForm sectionTaskForm"
-                          onSubmit={(event) => {
-                            event.preventDefault();
-                            addRoutineItem(section.key);
-                          }}
-                        >
-                          <input
-                            value={newRoutineItems[section.key] ?? ""}
-                            onChange={(event) =>
-                              setNewRoutineItems((current) => ({ ...current, [section.key]: event.target.value }))
-                            }
-                            placeholder={`Adicionar tarefa em ${section.label}`}
-                          />
-                          <button type="submit" aria-label="Adicionar tarefa">
-                            <Plus size={16} aria-hidden />
-                          </button>
-                        </form>
-                      )}
-                      {visibleItems.length === 0 && !section.references?.length && (
-                        <div className="emptySection">
-                          Nada programado para hoje. Esta seção aparece em {getSectionScheduleLabel(section)}.
-                        </div>
-                      )}
-                      {section.references?.length ? (
-                        <ol className="referenceList">
-                          {section.references.map((reference) => (
-                            <li key={reference}>{reference}</li>
-                          ))}
-                        </ol>
-                      ) : null}
-                      {doneItems.size > 0 && (
-                        <button className="resetButton" onClick={() => clearSection(section.key)}>
-                          <RotateCcw size={14} aria-hidden />
-                          limpar seção
-                        </button>
-                      )}
-                    </div>
-                  )}
-                </article>
+                <RoutineSectionCard
+                  key={section.key}
+                  section={section}
+                  items={visibleItems}
+                  doneItems={doneItems}
+                  isOpen={isOpen}
+                  time={getSectionTime(section.key, section.time)}
+                  newItem={newRoutineItems[section.key] ?? ""}
+                  onToggleSection={() => toggleSection(section.key)}
+                  onToggleItem={(key) => toggleItem(section.key, key)}
+                  onDeleteItem={(item) => deleteRoutineItem(section.key, item)}
+                  onNewItemChange={(value) => setNewRoutineItems((current) => ({ ...current, [section.key]: value }))}
+                  onAddItem={() => addRoutineItem(section.key)}
+                  onTimeChange={(value) => updateSectionTime(section.key, value)}
+                  onClear={() => clearSection(section.key)}
+                />
               );
             })}
           </div>
         </section>
       </div>
     </main>
-  );
-}
-
-function AgendaPanel({
-  calendar,
-  loading,
-  error,
-  manualEvents,
-  getReminderSections,
-  calendarSyncInProgress
-}: {
-  calendar: CalendarResponse | null;
-  loading: boolean;
-  error: string;
-  manualEvents: CalendarEvent[];
-  getReminderSections: () => Array<{
-    key: string;
-    label: string;
-    shortLabel: string;
-    icon: string;
-    color: string;
-    bg: string;
-    time: string;
-    note?: string;
-    days?: Array<0 | 1 | 2 | 3 | 4 | 5 | 6>;
-    items: Array<{ label: string; completed?: boolean; days?: Array<0 | 1 | 2 | 3 | 4 | 5 | 6> }>;
-    references?: string[];
-  }>;
-  calendarSyncInProgress: MutableRefObject<boolean>;
-}) {
-  const [syncing, setSyncing] = useState(false);
-  const [syncMessage, setSyncMessage] = useState("");
-  const events = useMemo(
-    () =>
-      [...manualEvents, ...(calendar?.events ?? [])]
-        .filter((event) => Boolean(event.meetingUrl))
-        .sort((a, b) => a.startsAt.localeCompare(b.startsAt)),
-    [calendar?.events, manualEvents]
-  );
-
-  async function syncRoutineReminders() {
-    if (calendarSyncInProgress.current) {
-      setSyncMessage("Aguarde a sincronização atual terminar e tente novamente.");
-      return;
-    }
-
-    calendarSyncInProgress.current = true;
-    setSyncing(true);
-    setSyncMessage("");
-
-    try {
-      const response = await fetch("/api/calendar/routine-reminders", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ sections: getReminderSections(), rangeDays: 30 })
-      });
-      const payload = (await response.json()) as { count?: number; message?: string };
-
-      if (!response.ok) {
-        setSyncMessage(payload.message ?? "Não consegui criar as notificações.");
-        return;
-      }
-
-      setSyncMessage(`Rotina geral sincronizada: ${payload.count ?? 0} blocos nos próximos 30 dias.`);
-    } catch {
-      setSyncMessage("Não consegui criar as notificações.");
-    } finally {
-      calendarSyncInProgress.current = false;
-      setSyncing(false);
-    }
-  }
-
-  if (loading && manualEvents.length === 0) {
-    return (
-      <div className="agendaState">
-        <Loader2 className="spin" size={18} aria-hidden />
-        <span>Carregando agenda</span>
-      </div>
-    );
-  }
-
-  if (error && manualEvents.length === 0) return <div className="agendaState danger">{error}</div>;
-
-  if (!calendar?.configured && manualEvents.length === 0) {
-    return (
-      <div className="agendaState">
-        Defina o OAuth do Google ou <code>CALENDAR_ICS_URL</code> para conectar sua agenda.
-      </div>
-    );
-  }
-
-  if (calendar?.authRequired && manualEvents.length === 0) {
-    return (
-      <div className="agendaState agendaConnect">
-        <span>{calendar.message ?? "Conecte seu Google Calendar para carregar sua agenda."}</span>
-        <a className="connectButton" href="/api/auth/google">
-          Conectar Google Calendar
-          <ArrowUpRight size={14} aria-hidden />
-        </a>
-      </div>
-    );
-  }
-
-  if (events.length === 0) {
-    return (
-      <div className="agendaState agendaConnect">
-        <span>Nenhum evento para hoje.</span>
-        {calendar?.source === "oauth" && (
-          <a className="disconnectLink" href="/api/auth/google/logout">
-            Desconectar Google Calendar
-          </a>
-        )}
-      </div>
-    );
-  }
-
-  return (
-    <div className="agendaList">
-      {calendar?.source === "oauth" && (
-        <div className="calendarActions">
-          <button className="syncButton" onClick={syncRoutineReminders} disabled={syncing}>
-          {syncing ? "Sincronizando rotina..." : "Sincronizar rotina geral"}
-          </button>
-          <a className="disconnectLink" href="/api/auth/google/logout">
-            Desconectar Google Calendar
-          </a>
-          {syncMessage && <span>{syncMessage}</span>}
-        </div>
-      )}
-      {error && <div className="agendaState danger">{error}</div>}
-      {calendar?.authRequired && (
-        <div className="agendaState agendaConnect">
-          <span>{calendar.message ?? "Conecte sua agenda externa."}</span>
-          <a className="connectButton" href="/api/auth/google">
-            Conectar Google Calendar
-            <ArrowUpRight size={14} aria-hidden />
-          </a>
-        </div>
-      )}
-      {events.map((event) => (
-        <article className="agendaItem" key={event.id}>
-          <div className="agendaTime">
-            <CalendarDays size={15} aria-hidden />
-            <span>{event.allDay ? "dia todo" : `${formatTime(event.startsAt)}-${formatTime(event.endsAt)}`}</span>
-          </div>
-          <strong>{event.title}</strong>
-          {event.calendarId === "manual" && <small>reunião manual</small>}
-          {event.location && <small>{event.location}</small>}
-          {event.meetingUrl ? (
-            <a href={event.meetingUrl} target="_blank" rel="noreferrer">
-              Entrar na reunião
-              <ArrowUpRight size={14} aria-hidden />
-            </a>
-          ) : (
-            <span className="noLink">sem link detectado</span>
-          )}
-        </article>
-      ))}
-    </div>
   );
 }

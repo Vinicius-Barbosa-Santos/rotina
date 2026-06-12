@@ -1,0 +1,65 @@
+import type { RoutineSection, Weekday } from "@/lib/routine";
+
+export type CalendarEvent = {
+  id: string;
+  title: string;
+  startsAt: string;
+  endsAt: string;
+  allDay: boolean;
+  location?: string;
+  meetingUrl?: string;
+  provider?: string;
+  calendarId?: string;
+};
+
+export type CalendarResponse = {
+  configured: boolean;
+  authRequired?: boolean;
+  source?: string;
+  timeZone?: string;
+  events: CalendarEvent[];
+  message?: string;
+};
+
+export type RoutineDoneKey = number | string;
+export type RoutineState = Record<string, RoutineDoneKey[]>;
+
+export type ManualMeeting = {
+  id: string;
+  title: string;
+  startTime: string;
+  endTime: string;
+  meetingUrl: string;
+  days: number[];
+};
+
+export type MeetingForm = Omit<ManualMeeting, "id">;
+
+export type RoutineCustomItem = {
+  id: string;
+  label: string;
+};
+
+export type RoutinePrefs = {
+  hiddenItems: Record<string, number[]>;
+  customItems: Record<string, RoutineCustomItem[]>;
+  timeOverrides: Record<string, string>;
+};
+
+export type PersonalizedRoutineItem = {
+  key: string;
+  label: string;
+  defaultIndex?: number;
+  customId?: string;
+};
+
+export type RoutineNotificationSection = {
+  key: string;
+  label: string;
+  startsAt: Date;
+  items: string[];
+};
+
+export type CalendarSyncSection = Omit<RoutineSection, "items"> & {
+  items: Array<{ label: string; completed?: boolean; days?: Weekday[] }>;
+};
