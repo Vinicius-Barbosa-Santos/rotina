@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { getGoogleAccessToken } from "@/lib/google-auth";
 import { formatTelegramReport, isRoutineReport } from "@/lib/telegram-report";
 
 export async function POST(request: Request) {
@@ -9,6 +10,14 @@ export async function POST(request: Request) {
     return NextResponse.json(
       { message: "Configure TELEGRAM_BOT_TOKEN e TELEGRAM_CHAT_ID para enviar relatórios." },
       { status: 503 }
+    );
+  }
+
+  const googleAccessToken = await getGoogleAccessToken();
+  if (!googleAccessToken) {
+    return NextResponse.json(
+      { message: "Conecte seu Google Calendar antes de enviar relatórios pelo Telegram." },
+      { status: 401 }
     );
   }
 
