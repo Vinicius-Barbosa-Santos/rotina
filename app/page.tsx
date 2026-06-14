@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Bell, CalendarDays, Loader2 } from "lucide-react";
+import { Bell, CalendarDays, Flame, Loader2 } from "lucide-react";
 import { getVisibleItems, routineSections } from "@/lib/routine";
 import { dateKey, formatDate, formatShortDate, todayKey } from "@/lib/date";
 import { defaultMeetingForm, getManualMeetingEvents } from "@/lib/manual-meetings";
@@ -12,15 +12,43 @@ import type {
   PersonalizedRoutineItem,
   RoutineNotificationSection,
   RoutinePrefs,
-  RoutineState
+  RoutineState,
+  TelegramReportPeriod,
+  TelegramRoutineReport
 } from "@/lib/types";
 import AgendaPanel from "./components/AgendaPanel";
 import ManualMeetingsCard from "./components/ManualMeetingsCard";
 import RoutineSectionCard from "./components/RoutineSectionCard";
+import TelegramReports from "./components/TelegramReports";
 import { RoutineIcon } from "./components/RoutineIcon";
 
 const notificationPreferenceKey = "rotina_browser_notifications";
 const notifiedSectionsKey = "rotina_notified_sections";
+const telegramReportSentKey = "rotina_telegram_reports_sent";
+const telegramAutomaticKey = "rotina_telegram_automatic";
+
+function getReportDates(period: TelegramReportPeriod, now = new Date()) {
+  const end = new Date(now);
+  end.setHours(12, 0, 0, 0);
+  const start = new Date(end);
+
+  if (period === "weekly") start.setDate(start.getDate() - 6);
+  if (period === "monthly") start.setDate(1);
+
+  const dates: Date[] = [];
+  const cursor = new Date(start);
+  while (cursor <= end) {
+    dates.push(new Date(cursor));
+    cursor.setDate(cursor.getDate() + 1);
+  }
+  return dates;
+}
+
+function isLastDayOfMonth(date: Date) {
+  const tomorrow = new Date(date);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  return tomorrow.getMonth() !== date.getMonth();
+}
 
 function getSectionStartDate(time: string, date = new Date()) {
   const match = time.match(/^(\d{1,2}):(\d{2})/);
@@ -80,6 +108,8 @@ export default function HomePage() {
   const notificationTimers = useRef<number[]>([]);
   const calendarSyncTimer = useRef<number | undefined>(undefined);
   const calendarSyncInProgress = useRef(false);
+  const telegramAutoCheckDone = useRef(false);
+  const telegramSendingInProgress = useRef(false);
   const [browserNotificationsEnabled, setBrowserNotificationsEnabled] = useState(false);
   const [notificationPermission, setNotificationPermission] = useState<NotificationPermission | "unsupported">("default");
   const [manualMeetings, setManualMeetings] = useState<ManualMeeting[]>([]);
@@ -92,6 +122,9 @@ export default function HomePage() {
   });
   const [newRoutineItems, setNewRoutineItems] = useState<Record<string, string>>({});
   const [streak, setStreak] = useState(0);
+  const [telegramAutomaticEnabled, setTelegramAutomaticEnabled] = useState(false);
+  const [telegramSending, setTelegramSending] = useState<TelegramReportPeriod | null>(null);
+  const [telegramMessage, setTelegramMessage] = useState("");
 
   useEffect(() => {
     setState(readStorageJson<RoutineState>(`rotina_next_${todayKey()}`, {}));
@@ -104,6 +137,7 @@ export default function HomePage() {
     }
 
     setManualMeetings(readStorageJson<ManualMeeting[]>("rotina_manual_meetings", []));
+    setTelegramAutomaticEnabled(localStorage.getItem(telegramAutomaticKey) === "true");
     const savedPrefs = readStorageJson<Partial<RoutinePrefs>>("rotina_preferences", {});
     setRoutinePrefs({
       hiddenItems: savedPrefs.hiddenItems ?? {},
@@ -252,6 +286,33 @@ export default function HomePage() {
     localStorage.setItem("rotina_completed_dates", JSON.stringify(sortedDates));
     setStreak(calculateStreak(sortedDates));
   }, [totals.done, totals.total]);
+
+  useEffect(() => {
+    if (!hydrated || !telegramAutomaticEnabled || telegramAutoCheckDone.current) return;
+    telegramAutoCheckDone.current = true;
+
+    const timer = window.setTimeout(async () => {
+      const now = new Date();
+      if (now.getHours() < 20) return;
+
+      const sent = readStorageJson<Record<string, boolean>>(telegramReportSentKey, {});
+      const dueReports: TelegramReportPeriod[] = ["daily"];
+      if (now.getDay() === 0) dueReports.push("weekly");
+      if (isLastDayOfMonth(now)) dueReports.push("monthly");
+
+      for (const period of dueReports) {
+        const key = `${period}-${todayKey()}`;
+        if (sent[key]) continue;
+        const wasSent = await sendTelegramReport(period, true);
+        if (wasSent) {
+          sent[key] = true;
+          localStorage.setItem(telegramReportSentKey, JSON.stringify(sent));
+        }
+      }
+    }, 1500);
+
+    return () => window.clearTimeout(timer);
+  }, [hydrated, telegramAutomaticEnabled]);
 
   function toggleItem(sectionKey: string, key: string) {
     setState((current) => {
@@ -424,6 +485,67 @@ export default function HomePage() {
     }));
   }
 
+  function buildTelegramReport(period: TelegramReportPeriod): TelegramRoutineReport {
+    const days = getReportDates(period).flatMap((date) => {
+      const key = dateKey(date);
+      const storageKey = `rotina_next_${key}`;
+      const isToday = key === todayKey();
+      const storedState = isToday ? state : readStorageJson<RoutineState | null>(storageKey, null);
+      if (!isToday && storedState === null) return [];
+      const dayState = storedState ?? {};
+      const sections = routineSections
+        .map((section) => {
+          const items = getPersonalizedItems(section, date);
+          const visibleKeys = new Set(items.map((item) => item.key));
+          const done = (dayState[section.key] ?? []).filter((itemKey) => visibleKeys.has(String(itemKey))).length;
+          return { label: section.label, done, total: items.length };
+        })
+        .filter((section) => section.total > 0);
+
+      return [{
+        date: key,
+        done: sections.reduce((sum, section) => sum + section.done, 0),
+        total: sections.reduce((sum, section) => sum + section.total, 0),
+        sections
+      }];
+    });
+
+    return { period, streak, generatedAt: new Date().toISOString(), days };
+  }
+
+  async function sendTelegramReport(period: TelegramReportPeriod, automatic = false) {
+    if (telegramSendingInProgress.current) return false;
+    telegramSendingInProgress.current = true;
+    setTelegramSending(period);
+    if (!automatic) setTelegramMessage("");
+
+    try {
+      const response = await fetch("/api/reports/telegram", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(buildTelegramReport(period))
+      });
+      const payload = (await response.json()) as { message?: string };
+      if (!response.ok) throw new Error(payload.message ?? "Não consegui enviar o relatório.");
+      setTelegramMessage(`Relatório ${period === "daily" ? "diário" : period === "weekly" ? "semanal" : "mensal"} enviado.`);
+      return true;
+    } catch (error) {
+      setTelegramMessage(error instanceof Error ? error.message : "Não consegui enviar o relatório.");
+      return false;
+    } finally {
+      telegramSendingInProgress.current = false;
+      setTelegramSending(null);
+    }
+  }
+
+  function toggleTelegramAutomaticReports() {
+    setTelegramAutomaticEnabled((current) => {
+      const next = !current;
+      localStorage.setItem(telegramAutomaticKey, String(next));
+      return next;
+    });
+  }
+
   async function toggleBrowserNotifications() {
     if (!("Notification" in window)) {
       setNotificationPermission("unsupported");
@@ -486,9 +608,11 @@ export default function HomePage() {
                 <strong>{totals.pending}</strong>
                 <span>restantes</span>
               </div>
-              <div>
-                <strong>{streak}</strong>
-                <span>streak</span>
+              <div className="streakStat" aria-label={`${streak} dias de sequência`}>
+                <strong>
+                  <Flame size={19} aria-hidden />
+                  {streak}
+                </strong>
               </div>
               <div>
                 <strong>{visibleAgendaEvents.length}</strong>
@@ -530,6 +654,17 @@ export default function HomePage() {
                       : "Receba um aviso quando cada bloco começar."}
               </span>
             </div>
+          </section>
+
+          <section className="sideBlock">
+            <p className="sideLabel">telegram</p>
+            <TelegramReports
+              automaticEnabled={telegramAutomaticEnabled}
+              sending={telegramSending}
+              message={telegramMessage}
+              onSend={sendTelegramReport}
+              onToggleAutomatic={toggleTelegramAutomaticReports}
+            />
           </section>
 
           <section className="sideBlock navList">

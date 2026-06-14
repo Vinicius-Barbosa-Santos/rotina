@@ -69,6 +69,66 @@
   line-height: 1.35;
 }
 
+.telegramReports {
+  display: grid;
+  gap: 8px;
+}
+
+.telegramReportButtons {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.telegramReportButtons button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 8px 5px;
+  background: var(--panel);
+  color: var(--text);
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.telegramReportButtons button:hover {
+  border-color: #229ed9;
+  color: #7acdf2;
+}
+
+.telegramReportButtons button:disabled {
+  cursor: wait;
+  opacity: 0.6;
+}
+
+.telegramAutomatic {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 8px;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.telegramAutomatic.active {
+  border-color: rgba(34, 158, 217, 0.55);
+  background: rgba(34, 158, 217, 0.12);
+  color: #7acdf2;
+}
+
+.telegramReports > span {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.35;
+}
+
 .notificationButton {
   display: inline-flex;
   align-items: center;

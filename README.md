@@ -16,6 +16,7 @@ Aplicação Next.js + React para organizar rotina diária, acompanhar progresso,
 - Leitura de múltiplos calendários Google.
 - Detecção de links de reunião em eventos do calendário.
 - Criação/atualização de notificações da rotina no Google Calendar.
+- Relatórios diário, semanal e mensal enviados pelo Telegram.
 - Logo e metadados configurados para deploy.
 
 ## Stack
@@ -165,6 +166,9 @@ GOOGLE_REDIRECT_URI="https://seu-projeto.vercel.app/api/auth/google/callback"
 
 GEMINI_API_KEY="cole-sua-chave-gemini-aqui"
 GEMINI_ENGLISH_TUTOR_MODEL="gemini-2.5-flash"
+
+TELEGRAM_BOT_TOKEN="cole-o-token-do-bot-aqui"
+TELEGRAM_CHAT_ID="cole-o-chat-id-aqui"
 ```
 
 7. Faça o deploy.
@@ -194,6 +198,17 @@ A seção **Inglês** inclui uma conversa com IA que:
 Crie uma chave gratuita no Google AI Studio e configure `GEMINI_API_KEY` na Vercel. A chave fica somente no servidor e nunca é enviada ao navegador.
 
 O modelo padrão é o `gemini-2.5-flash`. No plano gratuito, o Google pode usar o conteúdo enviado para melhorar seus produtos; evite inserir informações confidenciais.
+
+## Relatórios pelo Telegram
+
+1. No Telegram, converse com `@BotFather` e use `/newbot`.
+2. Copie o token criado para `TELEGRAM_BOT_TOKEN`.
+3. Envie uma mensagem para o novo bot.
+4. Abra `https://api.telegram.org/botSEU_TOKEN/getUpdates` e copie o valor de `message.chat.id` para `TELEGRAM_CHAT_ID`.
+5. Configure as duas variáveis na Vercel e faça um novo deploy.
+6. No app, envie um relatório de teste e ative os envios automáticos.
+
+Os relatórios automáticos são enviados ao abrir o app depois das 20h: diariamente, aos domingos e no último dia do mês. Como o histórico fica salvo no navegador, o app precisa ser aberto para realizar o envio.
 
 ## Alternativas de calendário
 

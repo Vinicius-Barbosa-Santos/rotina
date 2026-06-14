@@ -64,3 +64,23 @@ export type RoutineNotificationSection = {
 export type CalendarSyncSection = Omit<RoutineSection, "items"> & {
   items: Array<{ label: string; completed?: boolean; days?: Weekday[] }>;
 };
+
+export type TelegramReportPeriod = "daily" | "weekly" | "monthly";
+
+export type RoutineReportDay = {
+  date: string;
+  done: number;
+  total: number;
+  sections: Array<{
+    label: string;
+    done: number;
+    total: number;
+  }>;
+};
+
+export type TelegramRoutineReport = {
+  period: TelegramReportPeriod;
+  streak: number;
+  generatedAt: string;
+  days: RoutineReportDay[];
+};

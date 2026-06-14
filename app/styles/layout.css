@@ -40,6 +40,23 @@
   font-size: 20px;
 }
 
+.statsGrid .streakStat {
+  display: grid;
+  place-items: center;
+}
+
+.streakStat strong {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+}
+
+.streakStat svg {
+  color: #ff8a3d;
+  fill: #ff8a3d;
+}
+
 .statsGrid span {
   color: var(--muted);
   font-size: 11px;
