@@ -5,6 +5,12 @@ import { Bell, CalendarDays, Flame, Loader2 } from "lucide-react";
 import { getVisibleItems, routineSections } from "@/lib/routine";
 import { dateKey, formatDate, formatShortDate, todayKey } from "@/lib/date";
 import { defaultMeetingForm, getManualMeetingEvents } from "@/lib/manual-meetings";
+import {
+  calculateProgressStreak,
+  getProgressReportDates,
+  progressTrackingStartDate,
+  resetProgressHistory
+} from "@/lib/progress-history";
 import { readStorageJson } from "@/lib/storage";
 import type {
   CalendarResponse,
@@ -26,23 +32,6 @@ const notificationPreferenceKey = "rotina_browser_notifications";
 const notifiedSectionsKey = "rotina_notified_sections";
 const telegramReportSentKey = "rotina_telegram_reports_sent";
 const telegramAutomaticKey = "rotina_telegram_automatic";
-
-function getReportDates(period: TelegramReportPeriod, now = new Date()) {
-  const end = new Date(now);
-  end.setHours(12, 0, 0, 0);
-  const start = new Date(end);
-
-  if (period === "weekly") start.setDate(start.getDate() - 6);
-  if (period === "monthly") start.setDate(1);
-
-  const dates: Date[] = [];
-  const cursor = new Date(start);
-  while (cursor <= end) {
-    dates.push(new Date(cursor));
-    cursor.setDate(cursor.getDate() + 1);
-  }
-  return dates;
-}
 
 function isLastDayOfMonth(date: Date) {
   const tomorrow = new Date(date);
@@ -80,24 +69,6 @@ function readCompletedDates() {
   return readStorageJson<string[]>("rotina_completed_dates", []);
 }
 
-function calculateStreak(dates: string[]) {
-  const completed = new Set(dates);
-  const cursor = new Date();
-  cursor.setHours(0, 0, 0, 0);
-
-  if (!completed.has(todayKey())) {
-    cursor.setDate(cursor.getDate() - 1);
-  }
-
-  let count = 0;
-  while (completed.has(dateKey(cursor))) {
-    count += 1;
-    cursor.setDate(cursor.getDate() - 1);
-  }
-
-  return count;
-}
-
 export default function HomePage() {
   const [hydrated, setHydrated] = useState(false);
   const [state, setState] = useState<RoutineState>({});
@@ -127,6 +98,7 @@ export default function HomePage() {
   const [telegramMessage, setTelegramMessage] = useState("");
 
   useEffect(() => {
+    resetProgressHistory(localStorage);
     setState(readStorageJson<RoutineState>(`rotina_next_${todayKey()}`, {}));
 
     if ("Notification" in window) {
@@ -150,16 +122,19 @@ export default function HomePage() {
   }, []);
 
   useEffect(() => {
+    if (!hydrated) return;
     localStorage.setItem(`rotina_next_${todayKey()}`, JSON.stringify(state));
-  }, [state]);
+  }, [hydrated, state]);
 
   useEffect(() => {
+    if (!hydrated) return;
     localStorage.setItem("rotina_manual_meetings", JSON.stringify(manualMeetings));
-  }, [manualMeetings]);
+  }, [hydrated, manualMeetings]);
 
   useEffect(() => {
+    if (!hydrated) return;
     localStorage.setItem("rotina_preferences", JSON.stringify(routinePrefs));
-  }, [routinePrefs]);
+  }, [hydrated, routinePrefs]);
 
   useEffect(() => {
     if (!hydrated || calendar?.source !== "oauth") return;
@@ -274,18 +249,19 @@ export default function HomePage() {
   }, [browserNotificationsEnabled, notificationPermission, routineNotificationSections]);
 
   useEffect(() => {
-    const storedDates = readCompletedDates();
+    if (!hydrated) return;
+    const storedDates = readCompletedDates().filter((date) => date >= progressTrackingStartDate);
     const isComplete = totals.total > 0 && totals.done === totals.total;
     const today = todayKey();
     const nextDates = new Set(storedDates);
 
-    if (isComplete) nextDates.add(today);
+    if (isComplete && today >= progressTrackingStartDate) nextDates.add(today);
     else nextDates.delete(today);
 
     const sortedDates = [...nextDates].sort();
     localStorage.setItem("rotina_completed_dates", JSON.stringify(sortedDates));
-    setStreak(calculateStreak(sortedDates));
-  }, [totals.done, totals.total]);
+    setStreak(calculateProgressStreak(sortedDates));
+  }, [hydrated, totals.done, totals.total]);
 
   useEffect(() => {
     if (!hydrated || !telegramAutomaticEnabled || telegramAutoCheckDone.current) return;
@@ -293,7 +269,7 @@ export default function HomePage() {
 
     const timer = window.setTimeout(async () => {
       const now = new Date();
-      if (now.getHours() < 20) return;
+      if (todayKey() < progressTrackingStartDate || now.getHours() < 20) return;
 
       const sent = readStorageJson<Record<string, boolean>>(telegramReportSentKey, {});
       const dueReports: TelegramReportPeriod[] = ["daily"];
@@ -486,7 +462,7 @@ export default function HomePage() {
   }
 
   function buildTelegramReport(period: TelegramReportPeriod): TelegramRoutineReport {
-    const days = getReportDates(period).flatMap((date) => {
+    const days = getProgressReportDates(period).flatMap((date) => {
       const key = dateKey(date);
       const storageKey = `rotina_next_${key}`;
       const isToday = key === todayKey();
@@ -514,6 +490,10 @@ export default function HomePage() {
   }
 
   async function sendTelegramReport(period: TelegramReportPeriod, automatic = false) {
+    if (todayKey() < progressTrackingStartDate) {
+      setTelegramMessage("Os relatórios começam em 15 de junho de 2026.");
+      return false;
+    }
     if (telegramSendingInProgress.current) return false;
     telegramSendingInProgress.current = true;
     setTelegramSending(period);

@@ -7,3 +7,4 @@ out
 dist
 *.log
 .npm-cache
+.idea/vcs.xml

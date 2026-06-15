@@ -139,6 +139,8 @@ As reuniões aparecem no painel **Agenda** do dia com botão **Entrar na reuniã
 
 Os dados de rotina personalizados ficam salvos no navegador via `localStorage`.
 
+O histórico de progresso, streak e relatórios atuais começa em **15 de junho de 2026**. A primeira abertura desta versão remove somente o histórico anterior, preservando tarefas personalizadas, horários, reuniões e integrações.
+
 Chaves usadas:
 
 - `rotina_preferences`

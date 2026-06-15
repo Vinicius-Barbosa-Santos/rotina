@@ -13,7 +13,7 @@ export async function POST(request: Request) {
     );
   }
 
-  const googleAccessToken = await getGoogleAccessToken();
+  const googleAccessToken = await getGoogleAccessToken().catch(() => undefined);
   if (!googleAccessToken) {
     return NextResponse.json(
       { message: "Conecte seu Google Calendar antes de enviar relatórios pelo Telegram." },
