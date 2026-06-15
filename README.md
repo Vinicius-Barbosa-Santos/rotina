@@ -1,258 +1,223 @@
-# Minha Rotina
+<div align="center">
+  <img src="./public/minha-rotina-logo.png" alt="Logo Minha Rotina" width="150" />
 
-Aplicação Next.js + React para organizar rotina diária, acompanhar progresso, criar reuniões recorrentes manuais e visualizar eventos do Google Calendar com links de reunião.
+  # Minha Rotina
+
+  **Uma central pessoal para organizar o dia, acompanhar consistência e transformar progresso em motivação.**
+
+  [Acessar aplicação](https://rotina-seven.vercel.app/) · [Funcionalidades](#funcionalidades) · [Rodar localmente](#rodar-localmente)
+
+  ![Next.js](https://img.shields.io/badge/Next.js-15-000000?style=flat-square&logo=nextdotjs)
+  ![React](https://img.shields.io/badge/React-18-61DAFB?style=flat-square&logo=react&logoColor=000000)
+  ![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?style=flat-square&logo=typescript&logoColor=ffffff)
+  ![Vercel](https://img.shields.io/badge/Deploy-Vercel-000000?style=flat-square&logo=vercel)
+</div>
+
+![Prévia da aplicação Minha Rotina](./public/minha-rotina-preview.jpg)
+
+## Sobre o produto
+
+Minha Rotina nasceu para reunir, em uma única experiência, o planejamento diário, compromissos, desenvolvimento profissional, saúde e aprendizado contínuo.
+
+Em vez de usar vários aplicativos isolados, a aplicação organiza tarefas por blocos de horário, acompanha o progresso do dia, mantém um streak de consistência e conecta a rotina com Google Calendar, Telegram e uma tutora de inglês com IA.
 
 ## Funcionalidades
 
-- Rotina diária em português com blocos por horário.
-- Dias úteis, sábado e domingo com rotinas diferentes.
-- Checklist por seção.
-- Progresso do dia e streak diário.
-- Personalização local de tarefas da rotina.
-- Edição de horário dos blocos.
-- Exclusão de tarefas dos blocos.
-- Reuniões recorrentes manuais com nome, horário, dias da semana e link.
-- Integração com Google Calendar via OAuth.
-- Leitura de múltiplos calendários Google.
-- Detecção de links de reunião em eventos do calendário.
-- Criação/atualização de notificações da rotina no Google Calendar.
-- Relatórios diário, semanal e mensal enviados pelo Telegram.
-- Logo e metadados configurados para deploy.
+### Organização da rotina
+
+- Rotinas diferentes para dias úteis, sábado e domingo.
+- Blocos por horário para vida pessoal, inglês, trabalho, carreira, saúde, crescimento e finanças.
+- Checklist diário com progresso geral e progresso por seção.
+- Streak para acompanhar dias completamente concluídos.
+- Edição de nomes, horários e tarefas.
+- Criação e exclusão de tarefas personalizadas.
+- Persistência do histórico no navegador.
+
+### Agenda e notificações
+
+- Login seguro com Google OAuth.
+- Leitura de múltiplos Google Calendars.
+- Agenda lateral mostrando somente eventos com links de reunião.
+- Detecção de Google Meet, Microsoft Teams, Zoom e outros provedores.
+- Cadastro manual de reuniões recorrentes.
+- Sincronização da rotina com o Google Calendar.
+- Eventos da rotina com status de conclusão e lembrete antes do início.
+- Avisos do próprio navegador quando um bloco da rotina começa.
+
+### Inglês com inteligência artificial
+
+- Conversação voltada ao cotidiano de desenvolvimento de software.
+- Prática de daily, bugs, tarefas, code review e entrevistas.
+- Respostas faladas pela tutora e entrada por microfone em navegadores compatíveis.
+- Correções durante a conversa.
+- Relatório da sessão com gramática, comunicação, vocabulário técnico e próximos focos.
+- Geração de arquivo com o relatório da prática.
+
+### Relatórios pelo Telegram
+
+- Relatórios diário, semanal e mensal.
+- Progresso geral e detalhamento por seção.
+- Streak atual e mensagem motivacional.
+- Envios manuais pelos botões do app.
+- Envios automáticos ao abrir o app depois das 20h.
+- Proteção do endpoint por sessão do Google Calendar.
+
+## Como funciona
+
+```mermaid
+flowchart LR
+    A["Checklist e personalizações"] --> B["Histórico local"]
+    B --> C["Progresso e streak"]
+    B --> D["Relatórios do Telegram"]
+    A --> E["Google Calendar"]
+    F["Gemini"] --> G["Tutora de inglês"]
+    G --> H["Relatório de aprendizado"]
+```
+
+As personalizações e o histórico ficam no `localStorage` do navegador. Tokens privados e chamadas externas ficam protegidos nas rotas de servidor do Next.js.
 
 ## Stack
 
-- Next.js 15
-- React 18
-- TypeScript
-- CSS puro
-- Lucide React
-- Google Calendar API
+| Área | Tecnologia |
+| --- | --- |
+| Aplicação | Next.js 15, React 18 e TypeScript |
+| Interface | CSS modularizado e Lucide React |
+| Inteligência artificial | Google Gemini |
+| Agenda | Google Calendar API e OAuth 2.0 |
+| Relatórios | Telegram Bot API |
+| Testes | Node Test Runner |
+| Deploy | Vercel |
+
+## Estrutura principal
+
+```text
+app/
+  api/                 Rotas de autenticação, calendário, IA e Telegram
+  components/          Componentes reutilizáveis da interface
+  styles/              Estilos separados por responsabilidade
+  EnglishTutor.tsx     Experiência de prática de inglês
+  page.tsx             Composição e estado da página principal
+lib/
+  calendar.ts          Leitura e normalização de eventos
+  google-auth.ts       Autenticação e renovação de tokens Google
+  progress-history.ts  Reset, datas de relatório e streak
+  routine.ts           Definição das rotinas
+  telegram-report.ts   Validação e formatação dos relatórios
+tests/                 Testes automatizados
+```
 
 ## Rodar localmente
 
-Instale as dependências:
+### Pré-requisitos
+
+- Node.js 20 ou superior.
+- Projeto OAuth configurado no Google Cloud.
+- Chave do Gemini para utilizar a tutora de inglês.
+- Bot do Telegram para utilizar os relatórios.
+
+### Instalação
 
 ```bash
+git clone https://github.com/Vinicius-Barbosa-Santos/rotina.git
+cd rotina
 npm install
-```
-
-Crie o arquivo `.env.local`:
-
-```bash
 cp .env.example .env.local
-```
-
-Rode o projeto:
-
-```bash
 npm run dev
 ```
 
-Abra:
-
-```text
-http://localhost:3000
-```
+Abra [http://localhost:3000](http://localhost:3000).
 
 ## Variáveis de ambiente
 
-Configuração recomendada para Google Calendar privado:
+```env
+CALENDAR_TIMEZONE=America/Sao_Paulo
+NEXT_PUBLIC_SITE_URL=http://localhost:3000
 
-```bash
-CALENDAR_TIMEZONE="America/Sao_Paulo"
-NEXT_PUBLIC_SITE_URL="http://localhost:3000"
+GOOGLE_CALENDAR_IDS=primary
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+GOOGLE_REDIRECT_URI=http://localhost:3000/api/auth/google/callback
 
-GOOGLE_CALENDAR_IDS="primary,vinicius.santos@cd2.com.br"
-GOOGLE_CLIENT_ID="cole-o-client-id-aqui"
-GOOGLE_CLIENT_SECRET="cole-o-client-secret-aqui"
-GOOGLE_REDIRECT_URI="http://localhost:3000/api/auth/google/callback"
+GEMINI_API_KEY=
+GEMINI_ENGLISH_TUTOR_MODEL=gemini-2.5-flash
+GEMINI_ENGLISH_TUTOR_FALLBACK_MODEL=gemini-2.5-flash-lite
+
+TELEGRAM_BOT_TOKEN=
+TELEGRAM_CHAT_ID=
 ```
 
-`GOOGLE_CALENDAR_IDS` aceita um ou mais calendários separados por vírgula. Use `primary` para o calendário principal da conta conectada.
+Nunca envie o `.env.local` para o GitHub. Em produção, configure as variáveis diretamente no painel da Vercel.
 
-## Google Calendar OAuth
+## Configurar integrações
 
-No Google Cloud:
+### Google Calendar
 
-1. Crie ou selecione um projeto.
-2. Ative a **Google Calendar API**.
-3. Configure a tela de consentimento OAuth.
-4. Crie um cliente OAuth do tipo **Aplicativo da Web**.
-5. Para rodar localmente, adicione:
+1. Ative a Google Calendar API no Google Cloud.
+2. Configure a tela de consentimento OAuth.
+3. Crie um cliente OAuth do tipo **Aplicativo da Web**.
+4. Adicione a origem e o callback locais ou da Vercel.
+5. Configure `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` e `GOOGLE_REDIRECT_URI`.
+
+Exemplo de callback em produção:
 
 ```text
-Origem JavaScript autorizada:
-http://localhost:3000
-
-URI de redirecionamento autorizada:
-http://localhost:3000/api/auth/google/callback
+https://seu-projeto.vercel.app/api/auth/google/callback
 ```
 
-Depois coloque o `GOOGLE_CLIENT_ID` e `GOOGLE_CLIENT_SECRET` no `.env.local`.
+`GOOGLE_CALENDAR_IDS` aceita múltiplos IDs separados por vírgula. Use `primary` para o calendário principal da conta conectada.
 
-## Calendários Google
+### Gemini
 
-Para usar mais de uma agenda, configure:
+1. Crie uma chave no Google AI Studio.
+2. Configure `GEMINI_API_KEY`.
+3. Use `gemini-2.5-flash` como modelo principal.
 
-```bash
-GOOGLE_CALENDAR_IDS="primary,id-do-calendario-2"
-```
+A chave fica somente no servidor. Evite enviar informações confidenciais durante as práticas.
 
-Para encontrar o ID de uma agenda:
+### Telegram
 
-1. Abra o Google Calendar.
-2. Passe o mouse sobre a agenda.
-3. Clique nos três pontos.
-4. Acesse **Configurações e compartilhamento**.
-5. Vá em **Integrar agenda**.
-6. Copie o **ID da agenda**.
+1. Converse com `@BotFather` e crie um bot usando `/newbot`.
+2. Abra o novo bot, clique em **Start** e envie uma mensagem.
+3. Consulte `https://api.telegram.org/botSEU_TOKEN/getUpdates`.
+4. Copie `message.chat.id` para `TELEGRAM_CHAT_ID`.
+5. Configure o token e o Chat ID na Vercel.
 
-## Notificações da rotina
+O token do bot é secreto e nunca deve ser publicado.
 
-Depois de conectar o Google Calendar no app, use o botão **Criar notificações da rotina**.
+## Persistência e relatórios
 
-O app cria ou atualiza eventos recorrentes no calendário com:
+O histórico atual começa em **15 de junho de 2026**. O reset preserva tarefas personalizadas, horários, reuniões e integrações.
 
-- título `Rotina: Nome do bloco`;
-- horário configurado no app;
-- dias da semana da seção;
-- lembrete popup 10 minutos antes;
-- lista de tarefas do bloco na descrição.
-
-Se você alterar horários ou tarefas, clique novamente no botão para sincronizar.
-
-## Reuniões recorrentes manuais
-
-Use a seção **Reuniões recorrentes** para cadastrar reuniões que não vêm do Google Calendar.
-
-Você informa:
-
-- nome da reunião;
-- horário de início;
-- horário de fim;
-- link;
-- dias da semana.
-
-As reuniões aparecem no painel **Agenda** do dia com botão **Entrar na reunião**.
-
-## Persistência
-
-Os dados de rotina personalizados ficam salvos no navegador via `localStorage`.
-
-O histórico de progresso, streak e relatórios atuais começa em **15 de junho de 2026**. A primeira abertura desta versão remove somente o histórico anterior, preservando tarefas personalizadas, horários, reuniões e integrações.
-
-Chaves usadas:
+Chaves principais utilizadas no navegador:
 
 - `rotina_preferences`
 - `rotina_manual_meetings`
 - `rotina_completed_dates`
 - `rotina_next_YYYY-MM-DD`
+- `rotina_telegram_reports_sent`
 
-## Deploy na Vercel
+Como o histórico ainda é local, os relatórios automáticos são enviados quando o app é aberto depois das 20h. Para enviar com o app fechado e sincronizar múltiplos dispositivos, o próximo passo é persistir os dados em um banco.
 
-1. Suba o projeto para o GitHub.
-2. Na Vercel, clique em **Add New Project**.
-3. Importe o repositório.
-4. Framework: **Next.js**.
-5. Build command: `npm run build`.
-6. Adicione as variáveis de ambiente:
+## Qualidade
 
 ```bash
-CALENDAR_TIMEZONE="America/Sao_Paulo"
-NEXT_PUBLIC_SITE_URL="https://seu-projeto.vercel.app"
-
-GOOGLE_CALENDAR_IDS="primary,vinicius.santos@cd2.com.br"
-GOOGLE_CLIENT_ID="cole-o-client-id-aqui"
-GOOGLE_CLIENT_SECRET="cole-o-client-secret-aqui"
-GOOGLE_REDIRECT_URI="https://seu-projeto.vercel.app/api/auth/google/callback"
-
-GEMINI_API_KEY="cole-sua-chave-gemini-aqui"
-GEMINI_ENGLISH_TUTOR_MODEL="gemini-2.5-flash"
-
-TELEGRAM_BOT_TOKEN="cole-o-token-do-bot-aqui"
-TELEGRAM_CHAT_ID="cole-o-chat-id-aqui"
-```
-
-7. Faça o deploy.
-
-Depois do deploy, volte no Google Cloud e adicione:
-
-```text
-Origem JavaScript autorizada:
-https://seu-projeto.vercel.app
-
-URI de redirecionamento autorizada:
-https://seu-projeto.vercel.app/api/auth/google/callback
-```
-
-Depois faça um novo deploy ou redeploy na Vercel.
-
-## Prática de inglês com IA
-
-A seção **Inglês** inclui uma conversa com IA que:
-
-- simula comunicação do dia a dia de desenvolvimento, como daily, bugs, tarefas, code review e entrevistas;
-- lê as respostas em inglês e permite responder pelo microfone em navegadores compatíveis;
-- apresenta correções curtas durante a prática;
-- gera um relatório com comunicação, erros, acertos, vocabulário técnico e próximo foco;
-- salva o histórico somente no dispositivo atual.
-
-Crie uma chave gratuita no Google AI Studio e configure `GEMINI_API_KEY` na Vercel. A chave fica somente no servidor e nunca é enviada ao navegador.
-
-O modelo padrão é o `gemini-2.5-flash`. No plano gratuito, o Google pode usar o conteúdo enviado para melhorar seus produtos; evite inserir informações confidenciais.
-
-## Relatórios pelo Telegram
-
-1. No Telegram, converse com `@BotFather` e use `/newbot`.
-2. Copie o token criado para `TELEGRAM_BOT_TOKEN`.
-3. Envie uma mensagem para o novo bot.
-4. Abra `https://api.telegram.org/botSEU_TOKEN/getUpdates` e copie o valor de `message.chat.id` para `TELEGRAM_CHAT_ID`.
-5. Configure as duas variáveis na Vercel e faça um novo deploy.
-6. No app, envie um relatório de teste e ative os envios automáticos.
-
-Os relatórios automáticos são enviados ao abrir o app depois das 20h: diariamente, aos domingos e no último dia do mês. Como o histórico fica salvo no navegador, o app precisa ser aberto para realizar o envio.
-
-## Alternativas de calendário
-
-### API key
-
-Funciona melhor para calendário público ou compartilhado para leitura.
-
-```bash
-GOOGLE_CALENDAR_IDS="primary"
-GOOGLE_API_KEY="cole-sua-api-key-aqui"
-CALENDAR_TIMEZONE="America/Sao_Paulo"
-```
-
-Para calendário privado, prefira OAuth.
-
-### Feed `.ics`
-
-Também é possível usar uma URL `.ics`:
-
-```bash
-CALENDAR_ICS_URL="cole-a-url-ics-aqui"
-CALENDAR_TIMEZONE="America/Sao_Paulo"
-```
-
-## Logo
-
-A logo do app fica em:
-
-```text
-public/minha-rotina-logo.png
-```
-
-Ela é usada no topo da interface, favicon e metadados sociais.
-
-## Scripts
-
-```bash
-npm run dev
+npm test
 npm run build
-npm run start
 ```
 
-## Observações
+Os testes cobrem datas, rotina, calendário, validação de relatórios, reset de histórico e cálculo do streak.
 
-O app não lê diretamente o Calendar do Mac nem aplicativos desktop quando publicado na web. Para deploy online, use Google Calendar, feed `.ics` ou reuniões recorrentes manuais.
+## Próximos passos
+
+- Persistência em banco de dados.
+- Autenticação própria e perfis de usuário.
+- Sincronização entre computador e celular.
+- Relatórios automáticos mesmo com o app fechado.
+- Histórico visual com gráficos semanais e mensais.
+- Interações com tarefas diretamente pelo Telegram.
+
+## Deploy
+
+O projeto está conectado ao GitHub e publicado automaticamente pela Vercel a cada push na branch `master`.
+
+Produção: [https://rotina-seven.vercel.app/](https://rotina-seven.vercel.app/)
