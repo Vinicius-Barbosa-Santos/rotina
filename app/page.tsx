@@ -13,7 +13,6 @@ import {
 } from "@/lib/progress-history";
 import {
   buildLocalSyncSnapshot,
-  mergeSyncSnapshots,
   normalizeRoutinePrefs,
   notificationPreferenceKey,
   notifiedSectionsKey,
@@ -25,6 +24,7 @@ import {
   telegramReportSentKey,
   writeSyncSnapshotToStorage
 } from "@/lib/routine-dashboard-storage";
+import { resolveInitialSyncSnapshot } from "@/lib/routine-sync-selection";
 import { readStorageJson } from "@/lib/storage";
 import type {
   CalendarResponse,
@@ -698,7 +698,10 @@ export default function HomePage() {
         return true;
       }
 
-      const nextSnapshot = mergeLocal ? mergeSyncSnapshots(buildLocalSyncSnapshot(), remote) : remote;
+      const initialSync = mergeLocal
+        ? resolveInitialSyncSnapshot(buildLocalSyncSnapshot(), remote)
+        : { snapshot: remote, shouldSave: false };
+      const nextSnapshot = initialSync.snapshot;
       applyingRemoteSync.current = !mergeLocal;
       writeSyncSnapshotToStorage(nextSnapshot);
       setState(nextSnapshot.states[todayKey()] ?? {});
@@ -714,7 +717,9 @@ export default function HomePage() {
         }, 0);
       }
 
-      if (mergeLocal) await saveRoutineSyncSnapshot(nextSnapshot);
+      if (initialSync.shouldSave) {
+        await saveRoutineSyncSnapshot(nextSnapshot);
+      }
       return true;
     } catch {
       setSyncMessage("Não consegui buscar o banco agora. Seus dados continuam salvos neste aparelho.");
