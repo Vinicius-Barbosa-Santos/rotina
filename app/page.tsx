@@ -20,6 +20,7 @@ import type {
   RoutinePrefs,
   RoutineState,
   ProgressPoint,
+  RoutineSyncSnapshot,
   TelegramReportPeriod,
   TelegramRoutineReport
 } from "@/lib/types";
@@ -34,6 +35,8 @@ const notificationPreferenceKey = "rotina_browser_notifications";
 const notifiedSectionsKey = "rotina_notified_sections";
 const telegramReportSentKey = "rotina_telegram_reports_sent";
 const telegramAutomaticKey = "rotina_telegram_automatic";
+const routineStatePrefix = "rotina_next_";
+const syncSaveDelay = 900;
 
 function isLastDayOfMonth(date: Date) {
   const tomorrow = new Date(date);
@@ -71,8 +74,81 @@ function readCompletedDates() {
   return readStorageJson<string[]>("rotina_completed_dates", []);
 }
 
+function normalizeRoutinePrefs(savedPrefs: Partial<RoutinePrefs>): RoutinePrefs {
+  return {
+    hiddenItems: savedPrefs.hiddenItems ?? {},
+    customItems: savedPrefs.customItems ?? {},
+    timeOverrides: savedPrefs.timeOverrides ?? {},
+    labelOverrides: savedPrefs.labelOverrides ?? {}
+  };
+}
+
+function readRoutineStatesFromStorage() {
+  const states: Record<string, RoutineState> = {};
+
+  for (let index = 0; index < localStorage.length; index += 1) {
+    const key = localStorage.key(index);
+    if (!key?.startsWith(routineStatePrefix)) continue;
+    states[key.replace(routineStatePrefix, "")] = readStorageJson<RoutineState>(key, {});
+  }
+
+  return states;
+}
+
+function buildLocalSyncSnapshot(): RoutineSyncSnapshot {
+  return {
+    version: 1,
+    updatedAt: new Date().toISOString(),
+    states: readRoutineStatesFromStorage(),
+    completedDates: readCompletedDates().filter((date) => date >= progressTrackingStartDate).sort(),
+    routinePrefs: normalizeRoutinePrefs(readStorageJson<Partial<RoutinePrefs>>("rotina_preferences", {})),
+    manualMeetings: readStorageJson<ManualMeeting[]>("rotina_manual_meetings", []),
+    telegramAutomaticEnabled: localStorage.getItem(telegramAutomaticKey) === "true",
+    telegramReportsSent: readStorageJson<Record<string, boolean>>(telegramReportSentKey, {})
+  };
+}
+
+function mergeSyncSnapshots(local: RoutineSyncSnapshot, remote?: RoutineSyncSnapshot | null): RoutineSyncSnapshot {
+  if (!remote) return local;
+
+  return {
+    version: 1,
+    updatedAt: new Date().toISOString(),
+    states: { ...remote.states, ...local.states },
+    completedDates: [...new Set([...remote.completedDates, ...local.completedDates])]
+      .filter((date) => date >= progressTrackingStartDate)
+      .sort(),
+    routinePrefs: hasRoutinePrefsData(local.routinePrefs) ? local.routinePrefs : remote.routinePrefs,
+    manualMeetings: local.manualMeetings.length ? local.manualMeetings : remote.manualMeetings,
+    telegramAutomaticEnabled: local.telegramAutomaticEnabled || remote.telegramAutomaticEnabled,
+    telegramReportsSent: { ...remote.telegramReportsSent, ...local.telegramReportsSent }
+  };
+}
+
+function hasRoutinePrefsData(prefs: RoutinePrefs) {
+  return Boolean(
+    Object.keys(prefs.hiddenItems).length ||
+      Object.keys(prefs.customItems).length ||
+      Object.keys(prefs.timeOverrides).length ||
+      Object.keys(prefs.labelOverrides).length
+  );
+}
+
+function writeSyncSnapshotToStorage(snapshot: RoutineSyncSnapshot) {
+  Object.entries(snapshot.states).forEach(([date, dayState]) => {
+    localStorage.setItem(`${routineStatePrefix}${date}`, JSON.stringify(dayState));
+  });
+  localStorage.setItem("rotina_completed_dates", JSON.stringify(snapshot.completedDates));
+  localStorage.setItem("rotina_preferences", JSON.stringify(snapshot.routinePrefs));
+  localStorage.setItem("rotina_manual_meetings", JSON.stringify(snapshot.manualMeetings));
+  localStorage.setItem(telegramAutomaticKey, String(snapshot.telegramAutomaticEnabled));
+  localStorage.setItem(telegramReportSentKey, JSON.stringify(snapshot.telegramReportsSent));
+}
+
 export default function HomePage() {
   const [hydrated, setHydrated] = useState(false);
+  const [syncReady, setSyncReady] = useState(false);
+  const [syncMessage, setSyncMessage] = useState("");
   const [state, setState] = useState<RoutineState>({});
   const [openSections, setOpenSections] = useState(() => new Set(routineSections.map((item) => item.key)));
   const [calendar, setCalendar] = useState<CalendarResponse | null>(null);
@@ -80,6 +156,7 @@ export default function HomePage() {
   const [calendarError, setCalendarError] = useState("");
   const notificationTimers = useRef<number[]>([]);
   const calendarSyncTimer = useRef<number | undefined>(undefined);
+  const routineSyncTimer = useRef<number | undefined>(undefined);
   const calendarSyncInProgress = useRef(false);
   const telegramAutoCheckDone = useRef(false);
   const telegramSendingInProgress = useRef(false);
@@ -101,7 +178,7 @@ export default function HomePage() {
 
   useEffect(() => {
     resetProgressHistory(localStorage);
-    setState(readStorageJson<RoutineState>(`rotina_next_${todayKey()}`, {}));
+    setState(readStorageJson<RoutineState>(`${routineStatePrefix}${todayKey()}`, {}));
 
     if ("Notification" in window) {
       setNotificationPermission(Notification.permission);
@@ -112,31 +189,93 @@ export default function HomePage() {
 
     setManualMeetings(readStorageJson<ManualMeeting[]>("rotina_manual_meetings", []));
     setTelegramAutomaticEnabled(localStorage.getItem(telegramAutomaticKey) === "true");
-    const savedPrefs = readStorageJson<Partial<RoutinePrefs>>("rotina_preferences", {});
-    setRoutinePrefs({
-      hiddenItems: savedPrefs.hiddenItems ?? {},
-      customItems: savedPrefs.customItems ?? {},
-      timeOverrides: savedPrefs.timeOverrides ?? {},
-      labelOverrides: savedPrefs.labelOverrides ?? {}
-    });
+    setRoutinePrefs(normalizeRoutinePrefs(readStorageJson<Partial<RoutinePrefs>>("rotina_preferences", {})));
 
     setHydrated(true);
   }, []);
 
   useEffect(() => {
-    if (!hydrated) return;
-    localStorage.setItem(`rotina_next_${todayKey()}`, JSON.stringify(state));
-  }, [hydrated, state]);
+    if (!hydrated || syncReady) return;
+    let alive = true;
+
+    async function loadRoutineSync() {
+      const localSnapshot = buildLocalSyncSnapshot();
+
+      try {
+        const response = await fetch("/api/routine-sync", { cache: "no-store" });
+        const payload = (await response.json()) as {
+          configured?: boolean;
+          authRequired?: boolean;
+          data?: RoutineSyncSnapshot;
+          message?: string;
+        };
+
+        if (!alive) return;
+
+        if (!response.ok || !payload.configured || payload.authRequired) {
+          setSyncMessage(payload.message ?? "Sincronização local ativa.");
+          setSyncReady(true);
+          return;
+        }
+
+        const merged = mergeSyncSnapshots(localSnapshot, payload.data);
+        writeSyncSnapshotToStorage(merged);
+        setState(merged.states[todayKey()] ?? {});
+        setManualMeetings(merged.manualMeetings);
+        setRoutinePrefs(merged.routinePrefs);
+        setTelegramAutomaticEnabled(merged.telegramAutomaticEnabled);
+        setSyncMessage("Dados sincronizados entre seus dispositivos.");
+        setSyncReady(true);
+
+        await saveRoutineSyncSnapshot(merged);
+      } catch {
+        if (!alive) return;
+        setSyncMessage("Sincronização local ativa.");
+        setSyncReady(true);
+      }
+    }
+
+    loadRoutineSync();
+    return () => {
+      alive = false;
+    };
+  }, [hydrated, syncReady]);
 
   useEffect(() => {
-    if (!hydrated) return;
+    if (!hydrated || !syncReady) return;
+    localStorage.setItem(`${routineStatePrefix}${todayKey()}`, JSON.stringify(state));
+  }, [hydrated, state, syncReady]);
+
+  useEffect(() => {
+    if (!hydrated || !syncReady) return;
     localStorage.setItem("rotina_manual_meetings", JSON.stringify(manualMeetings));
-  }, [hydrated, manualMeetings]);
+  }, [hydrated, manualMeetings, syncReady]);
 
   useEffect(() => {
-    if (!hydrated) return;
+    if (!hydrated || !syncReady) return;
     localStorage.setItem("rotina_preferences", JSON.stringify(routinePrefs));
-  }, [hydrated, routinePrefs]);
+  }, [hydrated, routinePrefs, syncReady]);
+
+  useEffect(() => {
+    if (!hydrated || !syncReady) return;
+
+    window.clearTimeout(routineSyncTimer.current);
+    routineSyncTimer.current = window.setTimeout(() => {
+      void saveRoutineSyncSnapshot({
+        ...buildLocalSyncSnapshot(),
+        states: {
+          ...readRoutineStatesFromStorage(),
+          [todayKey()]: state
+        },
+        routinePrefs,
+        manualMeetings,
+        telegramAutomaticEnabled,
+        updatedAt: new Date().toISOString()
+      });
+    }, syncSaveDelay);
+
+    return () => window.clearTimeout(routineSyncTimer.current);
+  }, [hydrated, manualMeetings, routinePrefs, state, syncReady, telegramAutomaticEnabled]);
 
   useEffect(() => {
     if (!hydrated || calendar?.source !== "oauth") return;
@@ -259,7 +398,7 @@ export default function HomePage() {
   }, [browserNotificationsEnabled, notificationPermission, routineNotificationSections]);
 
   useEffect(() => {
-    if (!hydrated) return;
+    if (!hydrated || !syncReady) return;
     const storedDates = readCompletedDates().filter((date) => date >= progressTrackingStartDate);
     const isComplete = totals.total > 0 && totals.done === totals.total;
     const today = todayKey();
@@ -271,7 +410,7 @@ export default function HomePage() {
     const sortedDates = [...nextDates].sort();
     localStorage.setItem("rotina_completed_dates", JSON.stringify(sortedDates));
     setStreak(calculateProgressStreak(sortedDates));
-  }, [hydrated, totals.done, totals.total]);
+  }, [hydrated, syncReady, totals.done, totals.total]);
 
   useEffect(() => {
     if (!hydrated || !telegramAutomaticEnabled || telegramAutoCheckDone.current) return;
@@ -474,7 +613,7 @@ export default function HomePage() {
   function buildTelegramReport(period: TelegramReportPeriod): TelegramRoutineReport {
     const days = getProgressReportDates(period).flatMap((date) => {
       const key = dateKey(date);
-      const storageKey = `rotina_next_${key}`;
+      const storageKey = `${routineStatePrefix}${key}`;
       const isToday = key === todayKey();
       const storedState = isToday ? state : readStorageJson<RoutineState | null>(storageKey, null);
       if (!isToday && storedState === null) return [];
@@ -502,7 +641,7 @@ export default function HomePage() {
   function buildProgressPoint(date: Date): ProgressPoint {
     const key = dateKey(date);
     const isToday = key === todayKey();
-    const dayState = isToday ? state : readStorageJson<RoutineState>(`rotina_next_${key}`, {});
+    const dayState = isToday ? state : readStorageJson<RoutineState>(`${routineStatePrefix}${key}`, {});
     const totals = routineSections.reduce(
       (result, section) => {
         const items = getPersonalizedItems(section, date);
@@ -558,6 +697,27 @@ export default function HomePage() {
       localStorage.setItem(telegramAutomaticKey, String(next));
       return next;
     });
+  }
+
+  async function saveRoutineSyncSnapshot(snapshot: RoutineSyncSnapshot) {
+    try {
+      const response = await fetch("/api/routine-sync", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(snapshot)
+      });
+      const payload = (await response.json()) as { configured?: boolean; message?: string };
+      if (!payload.configured) {
+        setSyncMessage("Sincronização local ativa.");
+        return false;
+      }
+      if (!response.ok) throw new Error(payload.message ?? "Não consegui sincronizar.");
+      setSyncMessage("Dados sincronizados entre seus dispositivos.");
+      return true;
+    } catch {
+      setSyncMessage("Não consegui salvar no banco agora. Seus dados continuam salvos neste aparelho.");
+      return false;
+    }
   }
 
   async function toggleBrowserNotifications() {
@@ -679,6 +839,11 @@ export default function HomePage() {
               onSend={sendTelegramReport}
               onToggleAutomatic={toggleTelegramAutomaticReports}
             />
+          </section>
+
+          <section className="sideBlock">
+            <p className="sideLabel">sincronização</p>
+            <p className="syncStatus">{syncMessage || "Preparando sincronização..."}</p>
           </section>
 
           <section className="sideBlock navList">

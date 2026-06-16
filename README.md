@@ -31,7 +31,7 @@ Em vez de usar vários aplicativos isolados, a aplicação organiza tarefas por 
 - Streak para acompanhar dias completamente concluídos.
 - Edição de nomes, horários e tarefas.
 - Criação e exclusão de tarefas personalizadas.
-- Persistência do histórico no navegador.
+- Sincronização do histórico entre computador, celular e PWA quando o Supabase está configurado.
 
 ### Agenda e notificações
 
@@ -68,14 +68,15 @@ Em vez de usar vários aplicativos isolados, a aplicação organiza tarefas por 
 ```mermaid
 flowchart LR
     A["Checklist e personalizações"] --> B["Histórico local"]
-    B --> C["Progresso e streak"]
-    B --> D["Relatórios do Telegram"]
-    A --> E["Google Calendar"]
+    B --> C["Supabase"]
+    C --> D["Progresso e streak"]
+    C --> E["Relatórios do Telegram"]
+    A --> I["Google Calendar"]
     F["Gemini"] --> G["Tutora de inglês"]
     G --> H["Relatório de aprendizado"]
 ```
 
-As personalizações e o histórico ficam no `localStorage` do navegador. Tokens privados e chamadas externas ficam protegidos nas rotas de servidor do Next.js.
+As personalizações e o histórico funcionam no `localStorage` do navegador e, quando o Supabase está configurado, são sincronizados no banco. Tokens privados e chamadas externas ficam protegidos nas rotas de servidor do Next.js.
 
 ## Stack
 
@@ -86,6 +87,7 @@ As personalizações e o histórico ficam no `localStorage` do navegador. Tokens
 | Inteligência artificial | Google Gemini |
 | Agenda | Google Calendar API e OAuth 2.0 |
 | Relatórios | Telegram Bot API |
+| Sincronização | Supabase |
 | Testes | Node Test Runner |
 | Deploy | Vercel |
 
@@ -145,6 +147,10 @@ GEMINI_ENGLISH_TUTOR_FALLBACK_MODEL=gemini-2.5-flash-lite
 
 TELEGRAM_BOT_TOKEN=
 TELEGRAM_CHAT_ID=
+
+SUPABASE_URL=
+SUPABASE_SERVICE_ROLE_KEY=
+ROUTINE_SYNC_ID=vinicius-main
 ```
 
 Nunca envie o `.env.local` para o GitHub. Em produção, configure as variáveis diretamente no painel da Vercel.
@@ -185,6 +191,26 @@ A chave fica somente no servidor. Evite enviar informações confidenciais duran
 
 O token do bot é secreto e nunca deve ser publicado.
 
+### Supabase
+
+1. Crie um projeto no Supabase.
+2. Abra o editor SQL.
+3. Rode o SQL abaixo:
+
+```sql
+create table if not exists public.routine_sync (
+  id text primary key,
+  data jsonb not null default '{}'::jsonb,
+  updated_at timestamptz not null default now()
+);
+```
+
+4. Copie a URL do projeto para `SUPABASE_URL`.
+5. Copie a chave `service_role` para `SUPABASE_SERVICE_ROLE_KEY`.
+6. Use `ROUTINE_SYNC_ID=vinicius-main` para manter uma única rotina pessoal sincronizada.
+
+A chave `service_role` deve ficar somente no servidor, dentro da Vercel ou do `.env.local`.
+
 ## Persistência e relatórios
 
 O histórico atual começa em **15 de junho de 2026**. O reset preserva tarefas personalizadas, horários, reuniões e integrações.
@@ -197,7 +223,7 @@ Chaves principais utilizadas no navegador:
 - `rotina_next_YYYY-MM-DD`
 - `rotina_telegram_reports_sent`
 
-Como o histórico ainda é local, os relatórios automáticos são enviados quando o app é aberto depois das 20h. Para enviar com o app fechado e sincronizar múltiplos dispositivos, o próximo passo é persistir os dados em um banco.
+Com o Supabase configurado, o mesmo histórico passa a aparecer no computador, celular e PWA. Os relatórios automáticos ainda são enviados quando o app é aberto depois das 20h; para enviar com o app totalmente fechado, o próximo passo é criar uma rotina agendada no servidor.
 
 ## Qualidade
 
@@ -210,9 +236,7 @@ Os testes cobrem datas, rotina, calendário, validação de relatórios, reset d
 
 ## Próximos passos
 
-- Persistência em banco de dados.
 - Autenticação própria e perfis de usuário.
-- Sincronização entre computador e celular.
 - Relatórios automáticos mesmo com o app fechado.
 - Interações com tarefas diretamente pelo Telegram.
 

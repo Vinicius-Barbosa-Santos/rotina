@@ -93,3 +93,14 @@ export type ProgressPoint = {
   total: number;
   pct: number;
 };
+
+export type RoutineSyncSnapshot = {
+  version: 1;
+  updatedAt: string;
+  states: Record<string, RoutineState>;
+  completedDates: string[];
+  routinePrefs: RoutinePrefs;
+  manualMeetings: ManualMeeting[];
+  telegramAutomaticEnabled: boolean;
+  telegramReportsSent: Record<string, boolean>;
+};
