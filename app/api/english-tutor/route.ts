@@ -104,7 +104,7 @@ export async function POST(request: Request) {
   });
   if (!response.ok) {
     return NextResponse.json(
-      { message: payload?.error?.message ?? "Não consegui falar com a tutora agora." },
+      { message: getGeminiErrorMessage(payload, "Não consegui falar com a tutora agora.") },
       { status: response.status }
     );
   }
@@ -167,7 +167,7 @@ Return a JSON object with:
   });
   if (!response.ok) {
     return NextResponse.json(
-      { message: payload?.error?.message ?? "Não consegui transcrever a gravação." },
+      { message: getGeminiErrorMessage(payload, "Não consegui transcrever a gravação.") },
       { status: response.status }
     );
   }
@@ -211,6 +211,29 @@ async function requestGemini({ apiKey, body }: { apiKey: string; body: Record<st
 function shouldTryFallback(status: number, payload?: GeminiResponse) {
   const message = payload?.error?.message?.toLowerCase() ?? "";
   return status === 429 || status === 503 || message.includes("high demand") || message.includes("overloaded");
+}
+
+function getGeminiErrorMessage(payload: GeminiResponse | undefined, fallback: string) {
+  const message = payload?.error?.message ?? "";
+  const lowerMessage = message.toLowerCase();
+  const retryMatch = message.match(/retry in ([\d.]+)s/i);
+  const retrySeconds = retryMatch ? Math.ceil(Number(retryMatch[1])) : null;
+
+  if (
+    lowerMessage.includes("quota exceeded") ||
+    lowerMessage.includes("rate limit") ||
+    lowerMessage.includes("free_tier_requests")
+  ) {
+    return retrySeconds
+      ? `O Gemini atingiu um limite temporário. Tente novamente em cerca de ${retrySeconds} segundos.`
+      : "O Gemini atingiu o limite temporário do plano gratuito. Tente novamente em alguns minutos.";
+  }
+
+  if (lowerMessage.includes("high demand") || lowerMessage.includes("overloaded")) {
+    return "O Gemini está com alta demanda agora. Tente novamente em alguns minutos.";
+  }
+
+  return message || fallback;
 }
 
 function allowRequest(request: Request) {
