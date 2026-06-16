@@ -8,6 +8,7 @@
   top: 73px;
   height: calc(100vh - 73px);
   overflow: auto;
+  scrollbar-gutter: stable;
   padding: 22px 18px;
   border-right: 1px solid var(--line);
 }
@@ -156,14 +157,25 @@
 }
 
 .evolutionChartCard {
+  position: relative;
   min-width: 0;
-  padding: 14px;
+  overflow: hidden;
+  padding: 15px;
   border: 1px solid var(--line);
   border-radius: 8px;
   background: var(--panel);
 }
 
+.evolutionChartCard::before {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  content: "";
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.035), transparent 42%);
+}
+
 .evolutionChartHeader {
+  position: relative;
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
@@ -193,10 +205,12 @@
 }
 
 .evolutionBars {
+  position: relative;
   display: grid;
-  align-items: end;
-  gap: 7px;
-  min-height: 136px;
+  align-items: stretch;
+  gap: 8px;
+  min-height: 132px;
+  padding-top: 4px;
 }
 
 .evolutionBars.week {
@@ -204,8 +218,8 @@
 }
 
 .evolutionBars.month {
-  grid-template-columns: repeat(auto-fit, minmax(8px, 1fr));
-  gap: 4px;
+  grid-template-columns: repeat(auto-fit, minmax(10px, 1fr));
+  gap: 5px;
 }
 
 .evolutionBar {
@@ -213,16 +227,22 @@
   grid-template-rows: 1fr auto;
   gap: 7px;
   min-width: 0;
-  height: 136px;
+  height: 132px;
 }
 
 .evolutionBarTrack {
   display: flex;
   align-items: flex-end;
   min-height: 0;
+  width: min(100%, 32px);
+  justify-self: center;
   overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.06);
   border-radius: 999px;
-  background: var(--panel-2);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.045), transparent),
+    var(--panel-2);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
 }
 
 .evolutionBarTrack span {
@@ -232,6 +252,8 @@
   min-height: 0;
   border-radius: 999px;
   background: linear-gradient(180deg, var(--green), var(--blue));
+  box-shadow: 0 -8px 24px rgba(82, 201, 142, 0.16);
+  transition: height 0.22s ease;
 }
 
 .evolutionBar small {
@@ -245,6 +267,10 @@
 
 .evolutionBars.month .evolutionBar small {
   font-size: 9px;
+}
+
+.evolutionBars.month .evolutionBarTrack {
+  width: min(100%, 18px);
 }
 
 .sections {
