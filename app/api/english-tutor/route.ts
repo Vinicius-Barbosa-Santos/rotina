@@ -48,15 +48,6 @@ export async function POST(request: Request) {
 
   const body = (await request.json().catch(() => undefined)) as TutorRequest | undefined;
   const mode = body?.mode === "summary" || body?.mode === "transcribe" ? body.mode : "chat";
-  const usageKind = mode === "summary" ? "summary" : mode === "transcribe" ? "transcribe" : "chat";
-  const usage = await recordGeminiUsage(usageKind);
-
-  if (!usage.allowed) {
-    return NextResponse.json(
-      { message: getGeminiUsageLimitMessage(usageKind, usage.limit) },
-      { status: 429 }
-    );
-  }
 
   if (mode === "transcribe") {
     const audioData = body?.audio?.data;
@@ -64,6 +55,9 @@ export async function POST(request: Request) {
     if (!audioData || !mimeType || audioData.length > 12_000_000) {
       return NextResponse.json({ message: "A gravação está vazia ou muito longa." }, { status: 400 });
     }
+
+    const usage = await recordGeminiUsage("transcribe");
+    if (!usage.allowed) return usageLimitResponse("transcribe", usage.limit);
 
     return transcribeAudio({ apiKey, audioData, mimeType });
   }
@@ -74,6 +68,10 @@ export async function POST(request: Request) {
   if (!messages.length) {
     return NextResponse.json({ message: "Escreva uma mensagem para começar." }, { status: 400 });
   }
+
+  const usageKind = mode === "summary" ? "summary" : "chat";
+  const usage = await recordGeminiUsage(usageKind);
+  if (!usage.allowed) return usageLimitResponse(usageKind, usage.limit);
 
   const { response, payload } = await requestGemini({
     apiKey,
@@ -210,7 +208,8 @@ async function requestGemini({ apiKey, body }: { apiKey: string; body: Record<st
 
 function shouldTryFallback(status: number, payload?: GeminiResponse) {
   const message = payload?.error?.message?.toLowerCase() ?? "";
-  return status === 429 || status === 503 || message.includes("high demand") || message.includes("overloaded");
+  if (isQuotaErrorMessage(message)) return false;
+  return status === 503 || message.includes("high demand") || message.includes("overloaded");
 }
 
 function getGeminiErrorMessage(payload: GeminiResponse | undefined, fallback: string) {
@@ -219,11 +218,7 @@ function getGeminiErrorMessage(payload: GeminiResponse | undefined, fallback: st
   const retryMatch = message.match(/retry in ([\d.]+)s/i);
   const retrySeconds = retryMatch ? Math.ceil(Number(retryMatch[1])) : null;
 
-  if (
-    lowerMessage.includes("quota exceeded") ||
-    lowerMessage.includes("rate limit") ||
-    lowerMessage.includes("free_tier_requests")
-  ) {
+  if (isQuotaErrorMessage(lowerMessage)) {
     return retrySeconds
       ? `O Gemini atingiu um limite temporário. Tente novamente em cerca de ${retrySeconds} segundos.`
       : "O Gemini atingiu o limite temporário do plano gratuito. Tente novamente em alguns minutos.";
@@ -234,6 +229,17 @@ function getGeminiErrorMessage(payload: GeminiResponse | undefined, fallback: st
   }
 
   return message || fallback;
+}
+
+function usageLimitResponse(kind: "chat" | "summary" | "transcribe", limit: number) {
+  return NextResponse.json(
+    { message: getGeminiUsageLimitMessage(kind, limit) },
+    { status: 429 }
+  );
+}
+
+function isQuotaErrorMessage(message: string) {
+  return message.includes("quota exceeded") || message.includes("rate limit") || message.includes("free_tier_requests");
 }
 
 function allowRequest(request: Request) {
