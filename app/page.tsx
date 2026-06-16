@@ -114,7 +114,7 @@ function mergeSyncSnapshots(local: RoutineSyncSnapshot, remote?: RoutineSyncSnap
   return {
     version: 1,
     updatedAt: new Date().toISOString(),
-    states: { ...remote.states, ...local.states },
+    states: mergeRoutineStates(local.states, remote.states),
     completedDates: [...new Set([...remote.completedDates, ...local.completedDates])]
       .filter((date) => date >= progressTrackingStartDate)
       .sort(),
@@ -123,6 +123,23 @@ function mergeSyncSnapshots(local: RoutineSyncSnapshot, remote?: RoutineSyncSnap
     telegramAutomaticEnabled: local.telegramAutomaticEnabled || remote.telegramAutomaticEnabled,
     telegramReportsSent: { ...remote.telegramReportsSent, ...local.telegramReportsSent }
   };
+}
+
+function mergeRoutineStates(local: Record<string, RoutineState>, remote: Record<string, RoutineState>) {
+  const states: Record<string, RoutineState> = { ...remote };
+  const dates = new Set([...Object.keys(remote), ...Object.keys(local)]);
+
+  dates.forEach((date) => {
+    const localState = local[date];
+    const remoteState = remote[date];
+    if (!remoteState || getCompletedCount(localState) > 0) states[date] = localState;
+  });
+
+  return states;
+}
+
+function getCompletedCount(dayState?: RoutineState) {
+  return Object.values(dayState ?? {}).reduce((sum, keys) => sum + keys.length, 0);
 }
 
 function hasRoutinePrefsData(prefs: RoutinePrefs) {
