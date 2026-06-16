@@ -37,6 +37,7 @@ const telegramReportSentKey = "rotina_telegram_reports_sent";
 const telegramAutomaticKey = "rotina_telegram_automatic";
 const routineStatePrefix = "rotina_next_";
 const syncSaveDelay = 900;
+const syncRefreshInterval = 60_000;
 
 function isLastDayOfMonth(date: Date) {
   const tomorrow = new Date(date);
@@ -174,6 +175,8 @@ export default function HomePage() {
   const notificationTimers = useRef<number[]>([]);
   const calendarSyncTimer = useRef<number | undefined>(undefined);
   const routineSyncTimer = useRef<number | undefined>(undefined);
+  const lastRoutineSyncAt = useRef("");
+  const applyingRemoteSync = useRef(false);
   const calendarSyncInProgress = useRef(false);
   const telegramAutoCheckDone = useRef(false);
   const telegramSendingInProgress = useRef(false);
@@ -216,40 +219,13 @@ export default function HomePage() {
     let alive = true;
 
     async function loadRoutineSync() {
-      const localSnapshot = buildLocalSyncSnapshot();
-
-      try {
-        const response = await fetch("/api/routine-sync", { cache: "no-store" });
-        const payload = (await response.json()) as {
-          configured?: boolean;
-          authRequired?: boolean;
-          data?: RoutineSyncSnapshot;
-          message?: string;
-        };
-
-        if (!alive) return;
-
-        if (!response.ok || !payload.configured || payload.authRequired) {
-          setSyncMessage(payload.message ?? "Sincronização local ativa.");
-          setSyncReady(true);
-          return;
-        }
-
-        const merged = mergeSyncSnapshots(localSnapshot, payload.data);
-        writeSyncSnapshotToStorage(merged);
-        setState(merged.states[todayKey()] ?? {});
-        setManualMeetings(merged.manualMeetings);
-        setRoutinePrefs(merged.routinePrefs);
-        setTelegramAutomaticEnabled(merged.telegramAutomaticEnabled);
-        setSyncMessage("Dados sincronizados entre seus dispositivos.");
-        setSyncReady(true);
-
-        await saveRoutineSyncSnapshot(merged);
-      } catch {
+      const synced = await refreshRoutineSync({ mergeLocal: true });
+      if (!alive) return;
+      if (!synced) {
         if (!alive) return;
         setSyncMessage("Sincronização local ativa.");
-        setSyncReady(true);
       }
+      setSyncReady(true);
     }
 
     loadRoutineSync();
@@ -293,6 +269,27 @@ export default function HomePage() {
 
     return () => window.clearTimeout(routineSyncTimer.current);
   }, [hydrated, manualMeetings, routinePrefs, state, syncReady, telegramAutomaticEnabled]);
+
+  useEffect(() => {
+    if (!hydrated || !syncReady) return;
+
+    const interval = window.setInterval(() => {
+      if (document.visibilityState === "visible") void refreshRoutineSync();
+    }, syncRefreshInterval);
+
+    function refreshWhenVisible() {
+      if (document.visibilityState === "visible") void refreshRoutineSync();
+    }
+
+    document.addEventListener("visibilitychange", refreshWhenVisible);
+    window.addEventListener("focus", refreshWhenVisible);
+
+    return () => {
+      window.clearInterval(interval);
+      document.removeEventListener("visibilitychange", refreshWhenVisible);
+      window.removeEventListener("focus", refreshWhenVisible);
+    };
+  }, [hydrated, syncReady]);
 
   useEffect(() => {
     if (!hydrated || calendar?.source !== "oauth") return;
@@ -717,6 +714,8 @@ export default function HomePage() {
   }
 
   async function saveRoutineSyncSnapshot(snapshot: RoutineSyncSnapshot) {
+    if (applyingRemoteSync.current) return false;
+
     try {
       const response = await fetch("/api/routine-sync", {
         method: "PUT",
@@ -729,10 +728,57 @@ export default function HomePage() {
         return false;
       }
       if (!response.ok) throw new Error(payload.message ?? "Não consegui sincronizar.");
+      lastRoutineSyncAt.current = snapshot.updatedAt;
       setSyncMessage("Dados sincronizados entre seus dispositivos.");
       return true;
     } catch {
       setSyncMessage("Não consegui salvar no banco agora. Seus dados continuam salvos neste aparelho.");
+      return false;
+    }
+  }
+
+  async function refreshRoutineSync({ mergeLocal = false } = {}) {
+    try {
+      const response = await fetch("/api/routine-sync", { cache: "no-store" });
+      const payload = (await response.json()) as {
+        configured?: boolean;
+        authRequired?: boolean;
+        data?: RoutineSyncSnapshot;
+        message?: string;
+      };
+
+      if (!response.ok || !payload.configured || payload.authRequired) {
+        setSyncMessage(payload.message ?? "Sincronização local ativa.");
+        return false;
+      }
+
+      const remote = payload.data;
+      if (!remote) return false;
+
+      if (!mergeLocal && remote.updatedAt && remote.updatedAt === lastRoutineSyncAt.current) {
+        setSyncMessage("Dados sincronizados entre seus dispositivos.");
+        return true;
+      }
+
+      const nextSnapshot = mergeLocal ? mergeSyncSnapshots(buildLocalSyncSnapshot(), remote) : remote;
+      applyingRemoteSync.current = !mergeLocal;
+      writeSyncSnapshotToStorage(nextSnapshot);
+      setState(nextSnapshot.states[todayKey()] ?? {});
+      setManualMeetings(nextSnapshot.manualMeetings);
+      setRoutinePrefs(nextSnapshot.routinePrefs);
+      setTelegramAutomaticEnabled(nextSnapshot.telegramAutomaticEnabled);
+      lastRoutineSyncAt.current = nextSnapshot.updatedAt;
+      setSyncMessage("Dados sincronizados entre seus dispositivos.");
+      if (!mergeLocal) {
+        window.setTimeout(() => {
+          applyingRemoteSync.current = false;
+        }, 0);
+      }
+
+      if (mergeLocal) await saveRoutineSyncSnapshot(nextSnapshot);
+      return true;
+    } catch {
+      setSyncMessage("Não consegui buscar o banco agora. Seus dados continuam salvos neste aparelho.");
       return false;
     }
   }
