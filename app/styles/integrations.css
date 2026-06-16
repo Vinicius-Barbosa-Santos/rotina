@@ -76,6 +76,82 @@
   line-height: 1.45;
 }
 
+.stackForm {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 36px;
+  gap: 6px;
+}
+
+.stackForm input {
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 9px 10px;
+  background: var(--panel);
+  color: var(--text);
+  font-size: 12px;
+}
+
+.stackForm button {
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 8px;
+  background: var(--green);
+  color: #0d1012;
+  cursor: pointer;
+}
+
+.stackForm button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.stackList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.stackChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  max-width: 100%;
+  border: 1px solid rgba(82, 201, 142, 0.28);
+  border-radius: 999px;
+  padding: 5px 7px 5px 9px;
+  background: rgba(82, 201, 142, 0.11);
+  color: var(--text);
+  font-size: 11px;
+  font-weight: 800;
+  animation: cardRise 180ms ease-out both;
+}
+
+.stackChip button {
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 999px;
+  padding: 2px;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.stackChip button:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text);
+}
+
+.stackEmpty {
+  margin: 8px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.35;
+}
+
 .telegramReports {
   display: grid;
   gap: 8px;

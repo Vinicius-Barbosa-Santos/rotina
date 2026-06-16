@@ -10,7 +10,6 @@
     "test": "node --no-warnings --test --experimental-strip-types tests/*.test.ts"
   },
   "dependencies": {
-    "@netlify/plugin-nextjs": "^5.9.4",
     "lucide-react": "^0.468.0",
     "next": "^15.5.19",
     "react": "^18.3.1",

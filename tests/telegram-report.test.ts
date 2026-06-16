@@ -12,9 +12,9 @@ test("formats a daily Telegram report with section progress", () => {
         date: "2026-06-14",
         done: 3,
         total: 4,
-        sections: [{ label: "Inglês", done: 3, total: 4 }]
-      }
-    ]
+        sections: [{ label: "Inglês", done: 3, total: 4 }],
+      },
+    ],
   });
 
   assert.match(message, /Relatório diário/);
@@ -33,15 +33,15 @@ test("formats an aggregated weekly Telegram report", () => {
         date: "2026-06-13",
         done: 2,
         total: 2,
-        sections: [{ label: "Saúde", done: 2, total: 2 }]
+        sections: [{ label: "Saúde", done: 2, total: 2 }],
       },
       {
         date: "2026-06-14",
         done: 1,
         total: 2,
-        sections: [{ label: "Saúde", done: 1, total: 2 }]
-      }
-    ]
+        sections: [{ label: "Saúde", done: 1, total: 2 }],
+      },
+    ],
   });
 
   assert.match(message, /Relatório semanal/);
@@ -56,8 +56,8 @@ test("rejects malformed Telegram reports", () => {
       period: "daily",
       streak: 1,
       generatedAt: "2026-06-14T23:00:00.000Z",
-      days: [{ date: "invalid", done: 10, total: 2, sections: [] }]
+      days: [{ date: "invalid", done: 10, total: 2, sections: [] }],
     }),
-    false
+    false,
   );
 });

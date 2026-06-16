@@ -101,6 +101,7 @@ export type RoutineSyncSnapshot = {
   completedDates: string[];
   routinePrefs: RoutinePrefs;
   manualMeetings: ManualMeeting[];
+  profileStacks: string[];
   telegramAutomaticEnabled: boolean;
   telegramReportsSent: Record<string, boolean>;
 };

@@ -9,6 +9,7 @@ export type RoutineSyncData = {
   completedDates: string[];
   routinePrefs: RoutinePrefs;
   manualMeetings: ManualMeeting[];
+  profileStacks: string[];
   telegramAutomaticEnabled: boolean;
   telegramReportsSent: Record<string, boolean>;
 };
@@ -28,6 +29,7 @@ export function getDefaultRoutineSyncData(): RoutineSyncData {
       labelOverrides: {}
     },
     manualMeetings: [],
+    profileStacks: [],
     telegramAutomaticEnabled: false,
     telegramReportsSent: {}
   };
@@ -112,6 +114,9 @@ function normalizeRoutineSyncData(data: Partial<RoutineSyncData>): RoutineSyncDa
       labelOverrides: isObject(data.routinePrefs?.labelOverrides) ? data.routinePrefs.labelOverrides : {}
     },
     manualMeetings: Array.isArray(data.manualMeetings) ? data.manualMeetings : [],
+    profileStacks: Array.isArray(data.profileStacks)
+      ? data.profileStacks.filter(isString).map((stack) => stack.trim()).filter(Boolean).slice(0, 20)
+      : [],
     telegramAutomaticEnabled: Boolean(data.telegramAutomaticEnabled),
     telegramReportsSent: isObject(data.telegramReportsSent) ? data.telegramReportsSent as Record<string, boolean> : {}
   };

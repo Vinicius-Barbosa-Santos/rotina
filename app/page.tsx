@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Bell, CalendarDays, Flame, Loader2 } from "lucide-react";
+import { Bell, CalendarDays, Flame, Loader2, Plus, X } from "lucide-react";
 import { getVisibleItems, routineSections } from "@/lib/routine";
 import { dateKey, formatDate, formatShortDate, todayKey } from "@/lib/date";
 import { defaultMeetingForm, getManualMeetingEvents } from "@/lib/manual-meetings";
@@ -35,6 +35,7 @@ const notificationPreferenceKey = "rotina_browser_notifications";
 const notifiedSectionsKey = "rotina_notified_sections";
 const telegramReportSentKey = "rotina_telegram_reports_sent";
 const telegramAutomaticKey = "rotina_telegram_automatic";
+const profileStacksKey = "rotina_profile_stacks";
 const routineStatePrefix = "rotina_next_";
 const syncSaveDelay = 900;
 const syncRefreshInterval = 60_000;
@@ -104,6 +105,7 @@ function buildLocalSyncSnapshot(): RoutineSyncSnapshot {
     completedDates: readCompletedDates().filter((date) => date >= progressTrackingStartDate).sort(),
     routinePrefs: normalizeRoutinePrefs(readStorageJson<Partial<RoutinePrefs>>("rotina_preferences", {})),
     manualMeetings: readStorageJson<ManualMeeting[]>("rotina_manual_meetings", []),
+    profileStacks: readStorageJson<string[]>(profileStacksKey, []),
     telegramAutomaticEnabled: localStorage.getItem(telegramAutomaticKey) === "true",
     telegramReportsSent: readStorageJson<Record<string, boolean>>(telegramReportSentKey, {})
   };
@@ -121,6 +123,7 @@ function mergeSyncSnapshots(local: RoutineSyncSnapshot, remote?: RoutineSyncSnap
       .sort(),
     routinePrefs: hasRoutinePrefsData(local.routinePrefs) ? local.routinePrefs : remote.routinePrefs,
     manualMeetings: local.manualMeetings.length ? local.manualMeetings : remote.manualMeetings,
+    profileStacks: local.profileStacks.length ? local.profileStacks : remote.profileStacks,
     telegramAutomaticEnabled: local.telegramAutomaticEnabled || remote.telegramAutomaticEnabled,
     telegramReportsSent: { ...remote.telegramReportsSent, ...local.telegramReportsSent }
   };
@@ -159,6 +162,7 @@ function writeSyncSnapshotToStorage(snapshot: RoutineSyncSnapshot) {
   localStorage.setItem("rotina_completed_dates", JSON.stringify(snapshot.completedDates));
   localStorage.setItem("rotina_preferences", JSON.stringify(snapshot.routinePrefs));
   localStorage.setItem("rotina_manual_meetings", JSON.stringify(snapshot.manualMeetings));
+  localStorage.setItem(profileStacksKey, JSON.stringify(snapshot.profileStacks));
   localStorage.setItem(telegramAutomaticKey, String(snapshot.telegramAutomaticEnabled));
   localStorage.setItem(telegramReportSentKey, JSON.stringify(snapshot.telegramReportsSent));
 }
@@ -184,6 +188,8 @@ export default function HomePage() {
   const [notificationPermission, setNotificationPermission] = useState<NotificationPermission | "unsupported">("default");
   const [manualMeetings, setManualMeetings] = useState<ManualMeeting[]>([]);
   const [newMeeting, setNewMeeting] = useState(defaultMeetingForm);
+  const [profileStacks, setProfileStacks] = useState<string[]>([]);
+  const [newStack, setNewStack] = useState("");
   const [routinePrefs, setRoutinePrefs] = useState<RoutinePrefs>({
     hiddenItems: {},
     customItems: {},
@@ -208,6 +214,7 @@ export default function HomePage() {
     }
 
     setManualMeetings(readStorageJson<ManualMeeting[]>("rotina_manual_meetings", []));
+    setProfileStacks(readStorageJson<string[]>(profileStacksKey, []));
     setTelegramAutomaticEnabled(localStorage.getItem(telegramAutomaticKey) === "true");
     setRoutinePrefs(normalizeRoutinePrefs(readStorageJson<Partial<RoutinePrefs>>("rotina_preferences", {})));
 
@@ -246,6 +253,11 @@ export default function HomePage() {
 
   useEffect(() => {
     if (!hydrated || !syncReady) return;
+    localStorage.setItem(profileStacksKey, JSON.stringify(profileStacks));
+  }, [hydrated, profileStacks, syncReady]);
+
+  useEffect(() => {
+    if (!hydrated || !syncReady) return;
     localStorage.setItem("rotina_preferences", JSON.stringify(routinePrefs));
   }, [hydrated, routinePrefs, syncReady]);
 
@@ -262,13 +274,14 @@ export default function HomePage() {
         },
         routinePrefs,
         manualMeetings,
+        profileStacks,
         telegramAutomaticEnabled,
         updatedAt: new Date().toISOString()
       });
     }, syncSaveDelay);
 
     return () => window.clearTimeout(routineSyncTimer.current);
-  }, [hydrated, manualMeetings, routinePrefs, state, syncReady, telegramAutomaticEnabled]);
+  }, [hydrated, manualMeetings, profileStacks, routinePrefs, state, syncReady, telegramAutomaticEnabled]);
 
   useEffect(() => {
     if (!hydrated || !syncReady) return;
@@ -505,6 +518,17 @@ export default function HomePage() {
 
   function deleteManualMeeting(id: string) {
     setManualMeetings((meetings) => meetings.filter((meeting) => meeting.id !== id));
+  }
+
+  function addProfileStack() {
+    const stack = newStack.trim();
+    if (!stack) return;
+    setProfileStacks((current) => [...new Set([...current, stack])].slice(0, 20));
+    setNewStack("");
+  }
+
+  function deleteProfileStack(stack: string) {
+    setProfileStacks((current) => current.filter((item) => item !== stack));
   }
 
   function getSectionTime(sectionKey: string, fallback: string) {
@@ -765,6 +789,7 @@ export default function HomePage() {
       writeSyncSnapshotToStorage(nextSnapshot);
       setState(nextSnapshot.states[todayKey()] ?? {});
       setManualMeetings(nextSnapshot.manualMeetings);
+      setProfileStacks(nextSnapshot.profileStacks);
       setRoutinePrefs(nextSnapshot.routinePrefs);
       setTelegramAutomaticEnabled(nextSnapshot.telegramAutomaticEnabled);
       lastRoutineSyncAt.current = nextSnapshot.updatedAt;
@@ -907,6 +932,41 @@ export default function HomePage() {
           <section className="sideBlock">
             <p className="sideLabel">sincronização</p>
             <p className="syncStatus">{syncMessage || "Preparando sincronização..."}</p>
+          </section>
+
+          <section className="sideBlock">
+            <p className="sideLabel">minhas stacks</p>
+            <form
+              className="stackForm"
+              onSubmit={(event) => {
+                event.preventDefault();
+                addProfileStack();
+              }}
+            >
+              <input
+                value={newStack}
+                onChange={(event) => setNewStack(event.target.value)}
+                placeholder="React, Java, AWS..."
+                aria-label="Adicionar stack"
+              />
+              <button type="submit" disabled={!newStack.trim()} aria-label="Adicionar stack">
+                <Plus size={15} aria-hidden />
+              </button>
+            </form>
+            {profileStacks.length ? (
+              <div className="stackList" aria-label="Stacks cadastradas">
+                {profileStacks.map((stack) => (
+                  <span className="stackChip" key={stack}>
+                    {stack}
+                    <button type="button" onClick={() => deleteProfileStack(stack)} aria-label={`Remover ${stack}`}>
+                      <X size={12} aria-hidden />
+                    </button>
+                  </span>
+                ))}
+              </div>
+            ) : (
+              <p className="stackEmpty">Cadastre stacks para personalizar sua rotina futuramente.</p>
+            )}
           </section>
 
           <section className="sideBlock navList">
