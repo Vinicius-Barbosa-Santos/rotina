@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
-import { Bell, CalendarDays, Flame, Loader2, Plus, X } from "lucide-react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Bell, CalendarDays, Flame, Loader2 } from "lucide-react";
 import { getVisibleItems, routineSections } from "@/lib/routine";
 import { dateKey, formatDate, formatShortDate, todayKey } from "@/lib/date";
 import { defaultMeetingForm, getManualMeetingEvents } from "@/lib/manual-meetings";
@@ -11,6 +11,20 @@ import {
   progressTrackingStartDate,
   resetProgressHistory
 } from "@/lib/progress-history";
+import {
+  buildLocalSyncSnapshot,
+  mergeSyncSnapshots,
+  normalizeRoutinePrefs,
+  notificationPreferenceKey,
+  notifiedSectionsKey,
+  profileStacksKey,
+  readCompletedDates,
+  readRoutineStatesFromStorage,
+  routineStatePrefix,
+  telegramAutomaticKey,
+  telegramReportSentKey,
+  writeSyncSnapshotToStorage
+} from "@/lib/routine-dashboard-storage";
 import { readStorageJson } from "@/lib/storage";
 import type {
   CalendarResponse,
@@ -26,17 +40,12 @@ import type {
 } from "@/lib/types";
 import AgendaPanel from "./components/AgendaPanel";
 import ManualMeetingsCard from "./components/ManualMeetingsCard";
+import ProfileStacksCard from "./components/ProfileStacksCard";
 import ProgressCharts from "./components/ProgressCharts";
 import RoutineSectionCard from "./components/RoutineSectionCard";
 import TelegramReports from "./components/TelegramReports";
 import { RoutineIcon } from "./components/RoutineIcon";
 
-const notificationPreferenceKey = "rotina_browser_notifications";
-const notifiedSectionsKey = "rotina_notified_sections";
-const telegramReportSentKey = "rotina_telegram_reports_sent";
-const telegramAutomaticKey = "rotina_telegram_automatic";
-const profileStacksKey = "rotina_profile_stacks";
-const routineStatePrefix = "rotina_next_";
 const syncSaveDelay = 900;
 const syncRefreshInterval = 60_000;
 
@@ -70,101 +79,6 @@ function saveNotifiedSectionKey(sectionKey: string) {
   const nextKeys = new Set(stored[today] ?? []);
   nextKeys.add(sectionKey);
   localStorage.setItem(notifiedSectionsKey, JSON.stringify({ ...stored, [today]: Array.from(nextKeys) }));
-}
-
-function readCompletedDates() {
-  return readStorageJson<string[]>("rotina_completed_dates", []);
-}
-
-function normalizeRoutinePrefs(savedPrefs: Partial<RoutinePrefs>): RoutinePrefs {
-  return {
-    hiddenItems: savedPrefs.hiddenItems ?? {},
-    customItems: savedPrefs.customItems ?? {},
-    timeOverrides: savedPrefs.timeOverrides ?? {},
-    labelOverrides: savedPrefs.labelOverrides ?? {}
-  };
-}
-
-function readRoutineStatesFromStorage() {
-  const states: Record<string, RoutineState> = {};
-
-  for (let index = 0; index < localStorage.length; index += 1) {
-    const key = localStorage.key(index);
-    if (!key?.startsWith(routineStatePrefix)) continue;
-    states[key.replace(routineStatePrefix, "")] = readStorageJson<RoutineState>(key, {});
-  }
-
-  return states;
-}
-
-function buildLocalSyncSnapshot(): RoutineSyncSnapshot {
-  return {
-    version: 1,
-    updatedAt: new Date().toISOString(),
-    states: readRoutineStatesFromStorage(),
-    completedDates: readCompletedDates().filter((date) => date >= progressTrackingStartDate).sort(),
-    routinePrefs: normalizeRoutinePrefs(readStorageJson<Partial<RoutinePrefs>>("rotina_preferences", {})),
-    manualMeetings: readStorageJson<ManualMeeting[]>("rotina_manual_meetings", []),
-    profileStacks: readStorageJson<string[]>(profileStacksKey, []),
-    telegramAutomaticEnabled: localStorage.getItem(telegramAutomaticKey) === "true",
-    telegramReportsSent: readStorageJson<Record<string, boolean>>(telegramReportSentKey, {})
-  };
-}
-
-function mergeSyncSnapshots(local: RoutineSyncSnapshot, remote?: RoutineSyncSnapshot | null): RoutineSyncSnapshot {
-  if (!remote) return local;
-
-  return {
-    version: 1,
-    updatedAt: new Date().toISOString(),
-    states: mergeRoutineStates(local.states, remote.states),
-    completedDates: [...new Set([...remote.completedDates, ...local.completedDates])]
-      .filter((date) => date >= progressTrackingStartDate)
-      .sort(),
-    routinePrefs: hasRoutinePrefsData(local.routinePrefs) ? local.routinePrefs : remote.routinePrefs,
-    manualMeetings: local.manualMeetings.length ? local.manualMeetings : remote.manualMeetings,
-    profileStacks: local.profileStacks.length ? local.profileStacks : remote.profileStacks,
-    telegramAutomaticEnabled: local.telegramAutomaticEnabled || remote.telegramAutomaticEnabled,
-    telegramReportsSent: { ...remote.telegramReportsSent, ...local.telegramReportsSent }
-  };
-}
-
-function mergeRoutineStates(local: Record<string, RoutineState>, remote: Record<string, RoutineState>) {
-  const states: Record<string, RoutineState> = { ...remote };
-  const dates = new Set([...Object.keys(remote), ...Object.keys(local)]);
-
-  dates.forEach((date) => {
-    const localState = local[date];
-    const remoteState = remote[date];
-    if (!remoteState || getCompletedCount(localState) > 0) states[date] = localState;
-  });
-
-  return states;
-}
-
-function getCompletedCount(dayState?: RoutineState) {
-  return Object.values(dayState ?? {}).reduce((sum, keys) => sum + keys.length, 0);
-}
-
-function hasRoutinePrefsData(prefs: RoutinePrefs) {
-  return Boolean(
-    Object.keys(prefs.hiddenItems).length ||
-      Object.keys(prefs.customItems).length ||
-      Object.keys(prefs.timeOverrides).length ||
-      Object.keys(prefs.labelOverrides).length
-  );
-}
-
-function writeSyncSnapshotToStorage(snapshot: RoutineSyncSnapshot) {
-  Object.entries(snapshot.states).forEach(([date, dayState]) => {
-    localStorage.setItem(`${routineStatePrefix}${date}`, JSON.stringify(dayState));
-  });
-  localStorage.setItem("rotina_completed_dates", JSON.stringify(snapshot.completedDates));
-  localStorage.setItem("rotina_preferences", JSON.stringify(snapshot.routinePrefs));
-  localStorage.setItem("rotina_manual_meetings", JSON.stringify(snapshot.manualMeetings));
-  localStorage.setItem(profileStacksKey, JSON.stringify(snapshot.profileStacks));
-  localStorage.setItem(telegramAutomaticKey, String(snapshot.telegramAutomaticEnabled));
-  localStorage.setItem(telegramReportSentKey, JSON.stringify(snapshot.telegramReportsSent));
 }
 
 export default function HomePage() {
@@ -934,40 +848,13 @@ export default function HomePage() {
             <p className="syncStatus">{syncMessage || "Preparando sincronização..."}</p>
           </section>
 
-          <section className="sideBlock">
-            <p className="sideLabel">minhas stacks</p>
-            <form
-              className="stackForm"
-              onSubmit={(event) => {
-                event.preventDefault();
-                addProfileStack();
-              }}
-            >
-              <input
-                value={newStack}
-                onChange={(event) => setNewStack(event.target.value)}
-                placeholder="React, Java, AWS..."
-                aria-label="Adicionar stack"
-              />
-              <button type="submit" disabled={!newStack.trim()} aria-label="Adicionar stack">
-                <Plus size={15} aria-hidden />
-              </button>
-            </form>
-            {profileStacks.length ? (
-              <div className="stackList" aria-label="Stacks cadastradas">
-                {profileStacks.map((stack) => (
-                  <span className="stackChip" key={stack}>
-                    {stack}
-                    <button type="button" onClick={() => deleteProfileStack(stack)} aria-label={`Remover ${stack}`}>
-                      <X size={12} aria-hidden />
-                    </button>
-                  </span>
-                ))}
-              </div>
-            ) : (
-              <p className="stackEmpty">Cadastre stacks para personalizar sua rotina futuramente.</p>
-            )}
-          </section>
+          <ProfileStacksCard
+            stacks={profileStacks}
+            newStack={newStack}
+            onNewStackChange={setNewStack}
+            onAddStack={addProfileStack}
+            onDeleteStack={deleteProfileStack}
+          />
 
           <section className="sideBlock navList">
             <p className="sideLabel">seções</p>
