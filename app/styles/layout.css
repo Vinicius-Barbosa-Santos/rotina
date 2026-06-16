@@ -15,6 +15,23 @@
 
 .sideBlock {
   margin-bottom: 24px;
+  animation: cardRise 340ms ease-out both;
+}
+
+.sideBlock:nth-child(2) {
+  animation-delay: 40ms;
+}
+
+.sideBlock:nth-child(3) {
+  animation-delay: 80ms;
+}
+
+.sideBlock:nth-child(4) {
+  animation-delay: 120ms;
+}
+
+.sideBlock:nth-child(n + 5) {
+  animation-delay: 160ms;
 }
 
 .sideLabel {
@@ -121,6 +138,7 @@
   display: grid;
   gap: 16px;
   margin-bottom: 18px;
+  animation: cardRise 320ms ease-out both;
 }
 
 .dayCard h2 {
@@ -137,7 +155,7 @@
   display: grid;
   gap: 14px;
   margin-bottom: 18px;
-  animation: cardRise 260ms ease-out both;
+  animation: cardRise 320ms ease-out 80ms both;
 }
 
 .evolutionHeader {
@@ -262,7 +280,10 @@
   border-radius: 999px;
   background: linear-gradient(180deg, var(--green), var(--blue));
   box-shadow: 0 -8px 24px rgba(82, 201, 142, 0.16);
-  transition: height 0.22s ease;
+  transform-origin: bottom;
+  animation: chartGrow 520ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: calc(var(--bar-index, 0) * 24ms + 120ms);
+  transition: height 360ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .evolutionBar small {
@@ -293,7 +314,7 @@
   border: 1px solid var(--line);
   border-radius: 8px;
   background: var(--panel);
-  animation: cardRise 260ms ease-out both;
+  animation: cardRise 320ms ease-out both;
   transition:
     border-color 180ms ease,
     transform 180ms ease;
@@ -309,6 +330,9 @@
   top: 0;
   left: 0;
   height: 3px;
+  transition:
+    width 480ms cubic-bezier(0.22, 1, 0.36, 1),
+    background-color 180ms ease;
 }
 
 .sectionHeader {
@@ -378,14 +402,40 @@
 
 .chevron {
   color: var(--soft);
-  transition: transform 0.18s ease;
+  transition:
+    color 180ms ease,
+    transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .chevron.open {
   transform: rotate(180deg);
 }
 
+.checklistShell {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  transform: translateY(-4px);
+  transition:
+    grid-template-rows 280ms cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 220ms ease,
+    transform 280ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.checklistShell.open {
+  grid-template-rows: 1fr;
+  opacity: 1;
+  transform: translateY(0);
+}
+
 .checklist {
+  min-height: 0;
+  overflow: hidden;
+  padding: 0;
+  transition: padding 280ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.checklistShell.open .checklist {
   padding: 6px 0;
 }
 

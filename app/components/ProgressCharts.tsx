@@ -36,12 +36,13 @@ function ChartCard({ title, points, mode }: { title: string; points: ProgressPoi
       </div>
 
       <div className={`evolutionBars ${mode}`} role="list" aria-label={`Evolução ${title.toLowerCase()}`}>
-        {points.map((point) => (
+        {points.map((point, index) => (
           <div
             key={point.date}
             className="evolutionBar"
             role="listitem"
             aria-label={`${point.label}: ${point.pct}% concluído`}
+            style={{ "--bar-index": index } as CSSProperties}
           >
             <div className="evolutionBarTrack">
               <span
