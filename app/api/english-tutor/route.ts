@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { getGeminiUsageLimitMessage, recordGeminiUsage } from "@/lib/gemini-usage";
 
 type TutorMessage = {
   role: "user" | "assistant";
@@ -47,6 +48,15 @@ export async function POST(request: Request) {
 
   const body = (await request.json().catch(() => undefined)) as TutorRequest | undefined;
   const mode = body?.mode === "summary" || body?.mode === "transcribe" ? body.mode : "chat";
+  const usageKind = mode === "summary" ? "summary" : mode === "transcribe" ? "transcribe" : "chat";
+  const usage = await recordGeminiUsage(usageKind);
+
+  if (!usage.allowed) {
+    return NextResponse.json(
+      { message: getGeminiUsageLimitMessage(usageKind, usage.limit) },
+      { status: 429 }
+    );
+  }
 
   if (mode === "transcribe") {
     const audioData = body?.audio?.data;
