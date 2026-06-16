@@ -84,3 +84,12 @@ export type TelegramRoutineReport = {
   generatedAt: string;
   days: RoutineReportDay[];
 };
+
+export type ProgressPoint = {
+  date: string;
+  label: string;
+  shortLabel: string;
+  done: number;
+  total: number;
+  pct: number;
+};

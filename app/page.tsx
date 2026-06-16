@@ -19,11 +19,13 @@ import type {
   RoutineNotificationSection,
   RoutinePrefs,
   RoutineState,
+  ProgressPoint,
   TelegramReportPeriod,
   TelegramRoutineReport
 } from "@/lib/types";
 import AgendaPanel from "./components/AgendaPanel";
 import ManualMeetingsCard from "./components/ManualMeetingsCard";
+import ProgressCharts from "./components/ProgressCharts";
 import RoutineSectionCard from "./components/RoutineSectionCard";
 import TelegramReports from "./components/TelegramReports";
 import { RoutineIcon } from "./components/RoutineIcon";
@@ -195,6 +197,14 @@ export default function HomePage() {
     const done = routineDone;
     return { total, done, pending: total - done, pct: total ? Math.round((done / total) * 100) : 0 };
   }, [routinePrefs, state]);
+
+  const evolution = useMemo(
+    () => ({
+      weekly: getProgressReportDates("weekly").map(buildProgressPoint),
+      monthly: getProgressReportDates("monthly").map(buildProgressPoint)
+    }),
+    [routinePrefs, state]
+  );
 
   const manualEvents = useMemo(() => getManualMeetingEvents(manualMeetings), [manualMeetings]);
   const visibleAgendaEvents = useMemo(
@@ -489,6 +499,30 @@ export default function HomePage() {
     return { period, streak, generatedAt: new Date().toISOString(), days };
   }
 
+  function buildProgressPoint(date: Date): ProgressPoint {
+    const key = dateKey(date);
+    const isToday = key === todayKey();
+    const dayState = isToday ? state : readStorageJson<RoutineState>(`rotina_next_${key}`, {});
+    const totals = routineSections.reduce(
+      (result, section) => {
+        const items = getPersonalizedItems(section, date);
+        const visibleKeys = new Set(items.map((item) => item.key));
+        const done = (dayState[section.key] ?? []).filter((itemKey) => visibleKeys.has(String(itemKey))).length;
+        return { done: result.done + done, total: result.total + items.length };
+      },
+      { done: 0, total: 0 }
+    );
+
+    return {
+      date: key,
+      label: formatShortDate(date),
+      shortLabel: new Intl.DateTimeFormat("pt-BR", { weekday: "short" }).format(date).replace(".", ""),
+      done: totals.done,
+      total: totals.total,
+      pct: totals.total ? Math.round((totals.done / totals.total) * 100) : 0
+    };
+  }
+
   async function sendTelegramReport(period: TelegramReportPeriod, automatic = false) {
     if (todayKey() < progressTrackingStartDate) {
       setTelegramMessage("Os relatórios começam em 15 de junho de 2026.");
@@ -693,6 +727,8 @@ export default function HomePage() {
               <span style={{ width: `${totals.pct}%` }} />
             </div>
           </div>
+
+          <ProgressCharts weekly={evolution.weekly} monthly={evolution.monthly} />
 
           <div className="sections">
             <ManualMeetingsCard

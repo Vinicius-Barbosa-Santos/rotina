@@ -124,6 +124,129 @@
   height: 7px;
 }
 
+.evolutionPanel {
+  display: grid;
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.evolutionHeader {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.evolutionHeader h2 {
+  margin: 3px 0 0;
+  font-size: 22px;
+  letter-spacing: 0;
+}
+
+.evolutionHeader > span {
+  color: var(--muted);
+  font-size: 12px;
+  text-align: right;
+}
+
+.evolutionCharts {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  gap: 14px;
+}
+
+.evolutionChartCard {
+  min-width: 0;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+}
+
+.evolutionChartHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.evolutionChartHeader div {
+  display: grid;
+  gap: 3px;
+}
+
+.evolutionChartHeader strong {
+  font-size: 15px;
+}
+
+.evolutionChartHeader span {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.evolutionChartHeader em {
+  color: var(--green);
+  font-size: 22px;
+  font-style: normal;
+  font-weight: 900;
+}
+
+.evolutionBars {
+  display: grid;
+  align-items: end;
+  gap: 7px;
+  min-height: 136px;
+}
+
+.evolutionBars.week {
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+}
+
+.evolutionBars.month {
+  grid-template-columns: repeat(auto-fit, minmax(8px, 1fr));
+  gap: 4px;
+}
+
+.evolutionBar {
+  display: grid;
+  grid-template-rows: 1fr auto;
+  gap: 7px;
+  min-width: 0;
+  height: 136px;
+}
+
+.evolutionBarTrack {
+  display: flex;
+  align-items: flex-end;
+  min-height: 0;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--panel-2);
+}
+
+.evolutionBarTrack span {
+  display: block;
+  width: 100%;
+  height: var(--pct);
+  min-height: 0;
+  border-radius: 999px;
+  background: linear-gradient(180deg, var(--green), var(--blue));
+}
+
+.evolutionBar small {
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 10px;
+  text-align: center;
+  text-overflow: clip;
+  white-space: nowrap;
+}
+
+.evolutionBars.month .evolutionBar small {
+  font-size: 9px;
+}
+
 .sections {
   display: grid;
   gap: 14px;
