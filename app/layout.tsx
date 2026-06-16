@@ -1,15 +1,26 @@
 import type { Metadata } from "next";
 import type React from "react";
+import { PwaSetup } from "./components/PwaSetup";
 import "./styles.css";
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"),
   title: "Minha rotina",
   description: "Rotina diária com agenda integrada.",
+  applicationName: "Minha Rotina",
+  appleWebApp: {
+    capable: true,
+    title: "Minha Rotina",
+    statusBarStyle: "black-translucent"
+  },
+  formatDetection: {
+    telephone: false
+  },
   icons: {
     icon: "/minha-rotina-logo.png",
     apple: "/minha-rotina-logo.png"
   },
+  manifest: "/manifest.webmanifest",
   openGraph: {
     title: "Minha rotina",
     description: "Rotina diária com agenda integrada.",
@@ -20,7 +31,10 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="pt-BR">
-      <body>{children}</body>
+      <body>
+        <PwaSetup />
+        {children}
+      </body>
     </html>
   );
 }

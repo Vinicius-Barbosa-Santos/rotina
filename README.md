@@ -43,6 +43,7 @@ Em vez de usar vários aplicativos isolados, a aplicação organiza tarefas por 
 - Sincronização da rotina com o Google Calendar.
 - Eventos da rotina com status de conclusão e lembrete antes do início.
 - Avisos do próprio navegador quando um bloco da rotina começa.
+- Instalação como PWA no celular, com ícone na tela inicial e aparência de aplicativo.
 
 ### Inglês com inteligência artificial
 
@@ -213,7 +214,6 @@ Os testes cobrem datas, rotina, calendário, validação de relatórios, reset d
 - Autenticação própria e perfis de usuário.
 - Sincronização entre computador e celular.
 - Relatórios automáticos mesmo com o app fechado.
-- Histórico visual com gráficos semanais e mensais.
 - Interações com tarefas diretamente pelo Telegram.
 
 ## Deploy
