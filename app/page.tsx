@@ -48,11 +48,24 @@ import { RoutineIcon } from "./components/RoutineIcon";
 
 const syncSaveDelay = 900;
 const syncRefreshInterval = 60_000;
+const telegramAutomaticReportHour = 23;
+const telegramAutomaticReportMinute = 50;
 
 function isLastDayOfMonth(date: Date) {
   const tomorrow = new Date(date);
   tomorrow.setDate(tomorrow.getDate() + 1);
   return tomorrow.getMonth() !== date.getMonth();
+}
+
+function getTelegramAutomaticReportDate(date = new Date()) {
+  const reportDate = new Date(date);
+  reportDate.setHours(telegramAutomaticReportHour, telegramAutomaticReportMinute, 0, 0);
+  return reportDate;
+}
+
+function getTelegramAutomaticReportDelay(date = new Date()) {
+  const reportDate = getTelegramAutomaticReportDate(date);
+  return Math.max(reportDate.getTime() - date.getTime(), 1500);
 }
 
 function getSectionStartDate(time: string, date = new Date()) {
@@ -96,7 +109,7 @@ export default function HomePage() {
   const lastRoutineSyncAt = useRef("");
   const applyingRemoteSync = useRef(false);
   const calendarSyncInProgress = useRef(false);
-  const telegramAutoCheckDone = useRef(false);
+  const telegramAutoCheckDone = useRef("");
   const telegramSendingInProgress = useRef(false);
   const [browserNotificationsEnabled, setBrowserNotificationsEnabled] = useState(false);
   const [notificationPermission, setNotificationPermission] = useState<NotificationPermission | "unsupported">("default");
@@ -354,12 +367,13 @@ export default function HomePage() {
   }, [hydrated, syncReady, totals.done, totals.total]);
 
   useEffect(() => {
-    if (!hydrated || !telegramAutomaticEnabled || telegramAutoCheckDone.current) return;
-    telegramAutoCheckDone.current = true;
+    const reportDateKey = todayKey();
+    if (!hydrated || !syncReady || !telegramAutomaticEnabled || telegramAutoCheckDone.current === reportDateKey) return;
+    telegramAutoCheckDone.current = reportDateKey;
 
     const timer = window.setTimeout(async () => {
       const now = new Date();
-      if (todayKey() < progressTrackingStartDate || now.getHours() < 20) return;
+      if (todayKey() < progressTrackingStartDate) return;
 
       const sent = readStorageJson<Record<string, boolean>>(telegramReportSentKey, {});
       const dueReports: TelegramReportPeriod[] = ["daily"];
@@ -375,10 +389,10 @@ export default function HomePage() {
           localStorage.setItem(telegramReportSentKey, JSON.stringify(sent));
         }
       }
-    }, 1500);
+    }, getTelegramAutomaticReportDelay());
 
     return () => window.clearTimeout(timer);
-  }, [hydrated, telegramAutomaticEnabled]);
+  }, [hydrated, syncReady, telegramAutomaticEnabled]);
 
   function toggleItem(sectionKey: string, key: string) {
     setState((current) => {
