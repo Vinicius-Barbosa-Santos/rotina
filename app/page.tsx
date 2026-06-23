@@ -339,6 +339,8 @@ export default function HomePage() {
     }),
     [calendarProgressDays, routinePrefs, state]
   );
+  const stackPreview = profileStacks.length ? profileStacks.slice(0, 4) : ["React", "Java", "System design"];
+  const dayModeLabel = isTodayProgressDay ? "Rotina de programação" : "Fluxo opcional";
 
   const manualEvents = useMemo(() => getManualMeetingEvents(manualMeetings), [manualMeetings]);
   const visibleAgendaEvents = useMemo(
@@ -969,12 +971,20 @@ export default function HomePage() {
 
         <section className="content" aria-label="Checklist da rotina">
           <div className="dayCard">
-            <div>
-              <p className="eyebrow">{formatShortDate(new Date())}</p>
-              <h2>{isTodayProgressDay ? `${totals.done} itens concluídos hoje` : "Fim de semana opcional"}</h2>
+            <div className="dayCardHeader">
+              <div>
+                <p className="eyebrow">{formatShortDate(new Date())}</p>
+                <h2>{isTodayProgressDay ? `${totals.done} itens concluídos hoje` : "Fim de semana opcional"}</h2>
+              </div>
+              <span className={isTodayProgressDay ? "dayMode" : "dayMode optional"}>{dayModeLabel}</span>
             </div>
             <div className="wideProgress">
               <span style={{ width: `${totals.pct}%` }} />
+            </div>
+            <div className="dayStackRow" aria-label="Contexto da rotina">
+              {stackPreview.map((stack) => (
+                <span key={stack}>{stack}</span>
+              ))}
             </div>
           </div>
 
