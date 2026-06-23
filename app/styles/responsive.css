@@ -22,6 +22,10 @@
   .evolutionCharts {
     grid-template-columns: 1fr;
   }
+
+  .weekendFlowGrid {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 560px) {
@@ -63,6 +67,15 @@
   }
 
   .evolutionHeader > span {
+    text-align: left;
+  }
+
+  .weekendFlowHeader {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .weekendFlowHeader > span {
     text-align: left;
   }
 

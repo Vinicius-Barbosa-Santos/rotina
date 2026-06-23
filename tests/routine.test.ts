@@ -33,6 +33,23 @@ test("getSectionScheduleLabel describes weekdays", () => {
   assert.equal(getSectionScheduleLabel(section), "segunda a sexta");
 });
 
+test("weekday routine is centered on programming work", () => {
+  const programming = routineSections.find((item) => item.key === "work");
+
+  assert.ok(programming);
+  assert.equal(programming.label, "Programação");
+  assert.deepEqual(
+    programming.items.map((item) => item.label).slice(0, 5),
+    [
+      "Daily técnica",
+      "Priorizar tasks do sprint",
+      "Implementar feature ou correção",
+      "Revisar pull requests",
+      "Escrever ou ajustar testes",
+    ],
+  );
+});
+
 test("weekend optional focus includes investments, digital marketing and YouTube", () => {
   const optional = routineSections.find((item) => item.key === "saturday");
 
@@ -46,7 +63,7 @@ test("weekend optional focus includes investments, digital marketing and YouTube
       "Estudar marketing digital",
       "Planejar pauta para YouTube",
       "Gravar ou roteirizar um vídeo curto",
-      "Anotar ideias para renda extra",
+      "Anotar ideias para renda extra digital",
     ],
   );
 });

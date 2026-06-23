@@ -27,6 +27,7 @@ import {
 } from "@/lib/routine-dashboard-storage";
 import { resolveInitialSyncSnapshot } from "@/lib/routine-sync-selection";
 import { readStorageJson } from "@/lib/storage";
+import type { CalendarProgressDays } from "@/lib/calendar-progress";
 import type {
   CalendarResponse,
   ManualMeeting,
@@ -45,8 +46,8 @@ import ProfileStacksCard from "./components/ProfileStacksCard";
 import ProgressCharts from "./components/ProgressCharts";
 import RoutineSectionCard from "./components/RoutineSectionCard";
 import TelegramReports from "./components/TelegramReports";
+import WeekendFlowPanel from "./components/WeekendFlowPanel";
 import { RoutineIcon } from "./components/RoutineIcon";
-import type { CalendarProgressDays } from "@/lib/calendar-progress";
 
 const syncSaveDelay = 900;
 const syncRefreshInterval = 60_000;
@@ -976,6 +977,8 @@ export default function HomePage() {
               <span style={{ width: `${totals.pct}%` }} />
             </div>
           </div>
+
+          {!isTodayProgressDay && <WeekendFlowPanel stacks={profileStacks} />}
 
           <ProgressCharts weekly={evolution.weekly} monthly={evolution.monthly} />
 

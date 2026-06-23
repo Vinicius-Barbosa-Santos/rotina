@@ -61,36 +61,39 @@ export const routineSections: RoutineSection[] = [
   {
     key: "work",
     icon: "Job",
-    label: "Trabalho",
-    shortLabel: "Trabalho",
+    label: "Programação",
+    shortLabel: "Código",
     color: "#4f8ef7",
     bg: "rgba(79, 142, 247, 0.12)",
     time: "10:00-18:00",
     days: weekdays,
     items: [
-      { label: "Daily" },
-      { label: "Demandas do dia" },
-      { label: "Revisão de código" },
-      { label: "Atualização Jira" },
-      { label: "Documentação" },
-      { label: "Aprender algo novo no trabalho" },
+      { label: "Daily técnica" },
+      { label: "Priorizar tasks do sprint" },
+      { label: "Implementar feature ou correção" },
+      { label: "Revisar pull requests" },
+      { label: "Escrever ou ajustar testes" },
+      { label: "Atualizar Jira" },
+      { label: "Documentação técnica" },
       { label: "Almoço" },
       { label: "Caminhada após almoço" },
-      { label: "Revisar pendências antes de encerrar" }
+      { label: "Fechar pendências e próximo passo" }
     ]
   },
   {
     key: "career",
     icon: "Rocket",
-    label: "Evolução Profissional",
-    shortLabel: "Carreira",
+    label: "Stack Builder",
+    shortLabel: "Stacks",
     color: "#fb923c",
     bg: "rgba(251, 146, 60, 0.12)",
     time: "18:30-20:00",
     days: weekdays,
+    note: "Aprimorar as stacks principais para oportunidades melhores.",
     items: [
-      { label: "Frontend" },
-      { label: "Backend" }
+      { label: "Frontend com React" },
+      { label: "Backend com Java" },
+      { label: "Arquitetura e system design" }
     ]
   },
   {
@@ -118,7 +121,7 @@ export const routineSections: RoutineSection[] = [
     color: "#b57bee",
     bg: "rgba(181, 123, 238, 0.12)",
     time: "21:00-22:30",
-    note: "Alternar entre os temas da semana.",
+    note: "Construir reputação e carreira como desenvolvedor.",
     days: weekdays,
     items: [
       { label: "Leitura", days: [1] },
@@ -143,7 +146,7 @@ export const routineSections: RoutineSection[] = [
       { label: "Estudar marketing digital" },
       { label: "Planejar pauta para YouTube" },
       { label: "Gravar ou roteirizar um vídeo curto" },
-      { label: "Anotar ideias para renda extra" }
+      { label: "Anotar ideias para renda extra digital" }
     ]
   },
   {

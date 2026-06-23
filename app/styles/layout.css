@@ -151,6 +151,101 @@
   height: 7px;
 }
 
+.weekendFlow {
+  display: grid;
+  gap: 14px;
+  margin-bottom: 18px;
+  border: 1px solid rgba(82, 201, 142, 0.24);
+  border-radius: 8px;
+  padding: 16px;
+  background:
+    linear-gradient(135deg, rgba(82, 201, 142, 0.12), rgba(79, 142, 247, 0.08)),
+    var(--panel);
+  animation: cardRise 320ms ease-out 60ms both;
+}
+
+.weekendFlowHeader {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.weekendFlowHeader h2 {
+  margin: 3px 0 0;
+  font-size: 22px;
+  letter-spacing: 0;
+}
+
+.weekendFlowHeader > span {
+  max-width: 360px;
+  color: var(--muted);
+  font-size: 12px;
+  text-align: right;
+  line-height: 1.4;
+}
+
+.weekendFlowGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.weekendTrack {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 13px;
+  background: rgba(12, 12, 14, 0.52);
+  color: var(--text);
+  text-decoration: none;
+  transition:
+    border-color 180ms ease,
+    transform 180ms ease,
+    background 180ms ease;
+}
+
+.weekendTrack:hover {
+  border-color: var(--line-2);
+  background: rgba(255, 255, 255, 0.045);
+  transform: translateY(-1px);
+}
+
+.weekendTrack > span {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+}
+
+.weekendTrack strong {
+  font-size: 15px;
+}
+
+.weekendTrack small {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.weekendTrack.investment > span {
+  background: rgba(82, 201, 142, 0.14);
+  color: var(--green);
+}
+
+.weekendTrack.youtube > span {
+  background: rgba(251, 146, 60, 0.14);
+  color: #fb923c;
+}
+
+.weekendTrack.marketing > span {
+  background: rgba(181, 123, 238, 0.14);
+  color: #b57bee;
+}
+
 .evolutionPanel {
   display: grid;
   gap: 14px;
