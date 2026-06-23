@@ -46,6 +46,7 @@ import ProgressCharts from "./components/ProgressCharts";
 import RoutineSectionCard from "./components/RoutineSectionCard";
 import TelegramReports from "./components/TelegramReports";
 import { RoutineIcon } from "./components/RoutineIcon";
+import type { CalendarProgressDays } from "@/lib/calendar-progress";
 
 const syncSaveDelay = 900;
 const syncRefreshInterval = 60_000;
@@ -102,6 +103,7 @@ export default function HomePage() {
   const [state, setState] = useState<RoutineState>({});
   const [openSections, setOpenSections] = useState(() => new Set(routineSections.map((item) => item.key)));
   const [calendar, setCalendar] = useState<CalendarResponse | null>(null);
+  const [calendarProgressDays, setCalendarProgressDays] = useState<CalendarProgressDays>({});
   const [calendarLoading, setCalendarLoading] = useState(true);
   const [calendarError, setCalendarError] = useState("");
   const notificationTimers = useRef<number[]>([]);
@@ -279,6 +281,42 @@ export default function HomePage() {
     };
   }, []);
 
+  useEffect(() => {
+    if (!hydrated) return;
+
+    const progressDates = getProgressReportDates("monthly");
+    const firstDate = progressDates[0];
+    const lastDate = progressDates.at(-1);
+    if (!firstDate || !lastDate) return;
+    const start = dateKey(firstDate);
+    const end = dateKey(lastDate);
+
+    let alive = true;
+
+    async function loadCalendarProgress() {
+      try {
+        const response = await fetch(`/api/calendar/progress?start=${start}&end=${end}`, {
+          cache: "no-store"
+        });
+        const payload = (await response.json()) as {
+          configured?: boolean;
+          authRequired?: boolean;
+          days?: CalendarProgressDays;
+        };
+
+        if (!alive || !response.ok || !payload.configured || payload.authRequired || !payload.days) return;
+        setCalendarProgressDays(payload.days);
+      } catch {
+        if (alive) setCalendarProgressDays({});
+      }
+    }
+
+    loadCalendarProgress();
+    return () => {
+      alive = false;
+    };
+  }, [hydrated]);
+
   const totals = useMemo(() => {
     const today = new Date();
     const routineTotal = routineSections.reduce((sum, section) => sum + getProgressItems(section, today).length, 0);
@@ -298,7 +336,7 @@ export default function HomePage() {
       weekly: getProgressReportDates("weekly").map(buildProgressPoint),
       monthly: getProgressReportDates("monthly").map(buildProgressPoint)
     }),
-    [routinePrefs, state]
+    [calendarProgressDays, routinePrefs, state]
   );
 
   const manualEvents = useMemo(() => getManualMeetingEvents(manualMeetings), [manualMeetings]);
@@ -355,7 +393,11 @@ export default function HomePage() {
 
   useEffect(() => {
     if (!hydrated || !syncReady) return;
-    const storedDates = readCompletedDates().filter((date) => date >= progressTrackingStartDate);
+    const calendarCompletedDates = Object.entries(calendarProgressDays)
+      .filter(([date, progress]) => date < todayKey() && progress.total > 0 && progress.done >= progress.total)
+      .map(([date]) => date);
+    const storedDates = [...new Set([...readCompletedDates(), ...calendarCompletedDates])]
+      .filter((date) => date >= progressTrackingStartDate);
     const isComplete = totals.total > 0 && totals.done === totals.total;
     const today = todayKey();
     const nextDates = new Set(storedDates);
@@ -366,7 +408,7 @@ export default function HomePage() {
     const sortedDates = [...nextDates].sort();
     localStorage.setItem("rotina_completed_dates", JSON.stringify(sortedDates));
     setStreak(calculateProgressStreak(sortedDates));
-  }, [hydrated, syncReady, totals.done, totals.total]);
+  }, [calendarProgressDays, hydrated, syncReady, totals.done, totals.total]);
 
   useEffect(() => {
     const reportDateKey = todayKey();
@@ -589,14 +631,18 @@ export default function HomePage() {
       const storageKey = `${routineStatePrefix}${key}`;
       const isToday = key === todayKey();
       const storedState = isToday ? state : readStorageJson<RoutineState | null>(storageKey, null);
-      if (!isToday && storedState === null) return [];
+      const calendarDay = !isToday ? calendarProgressDays[key] : undefined;
+      if (!isToday && storedState === null && !calendarDay) return [];
       const dayState = storedState ?? {};
       const sections = routineSections
         .map((section) => {
           const items = getProgressItems(section, date);
           const visibleKeys = new Set(items.map((item) => item.key));
-          const done = (dayState[section.key] ?? []).filter((itemKey) => visibleKeys.has(String(itemKey))).length;
-          return { label: section.label, done, total: items.length };
+          const localDone = (dayState[section.key] ?? []).filter((itemKey) => visibleKeys.has(String(itemKey))).length;
+          const calendarSection = calendarDay?.sections[section.label];
+          const done = calendarSection && calendarSection.done > localDone ? calendarSection.done : localDone;
+          const total = calendarSection && calendarSection.total > items.length ? calendarSection.total : items.length;
+          return { label: section.label, done, total };
         })
         .filter((section) => section.total > 0);
 
@@ -615,7 +661,7 @@ export default function HomePage() {
     const key = dateKey(date);
     const isToday = key === todayKey();
     const dayState = isToday ? state : readStorageJson<RoutineState>(`${routineStatePrefix}${key}`, {});
-    const totals = routineSections.reduce(
+    const localTotals = routineSections.reduce(
       (result, section) => {
         const items = getProgressItems(section, date);
         const visibleKeys = new Set(items.map((item) => item.key));
@@ -624,6 +670,8 @@ export default function HomePage() {
       },
       { done: 0, total: 0 }
     );
+    const calendarTotals = !isToday ? calendarProgressDays[key] : undefined;
+    const totals = calendarTotals && calendarTotals.done > localTotals.done ? calendarTotals : localTotals;
 
     return {
       date: key,
