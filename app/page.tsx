@@ -8,6 +8,7 @@ import { defaultMeetingForm, getManualMeetingEvents } from "@/lib/manual-meeting
 import {
   calculateProgressStreak,
   getProgressReportDates,
+  isProgressTrackingDate,
   progressTrackingStartDate,
   resetProgressHistory
 } from "@/lib/progress-history";
@@ -280,9 +281,9 @@ export default function HomePage() {
 
   const totals = useMemo(() => {
     const today = new Date();
-    const routineTotal = routineSections.reduce((sum, section) => sum + getPersonalizedItems(section, today).length, 0);
+    const routineTotal = routineSections.reduce((sum, section) => sum + getProgressItems(section, today).length, 0);
     const routineDone = routineSections.reduce((sum, section) => {
-      const visibleKeys = new Set(getPersonalizedItems(section, today).map((item) => item.key));
+      const visibleKeys = new Set(getProgressItems(section, today).map((item) => item.key));
       const doneToday = (state[section.key] ?? []).filter((key) => visibleKeys.has(String(key))).length;
       return sum + doneToday;
     }, 0);
@@ -290,6 +291,7 @@ export default function HomePage() {
     const done = routineDone;
     return { total, done, pending: total - done, pct: total ? Math.round((done / total) * 100) : 0 };
   }, [routinePrefs, state]);
+  const isTodayProgressDay = isProgressTrackingDate(new Date());
 
   const evolution = useMemo(
     () => ({
@@ -373,12 +375,12 @@ export default function HomePage() {
 
     const timer = window.setTimeout(async () => {
       const now = new Date();
-      if (todayKey() < progressTrackingStartDate) return;
 
       const sent = readStorageJson<Record<string, boolean>>(telegramReportSentKey, {});
-      const dueReports: TelegramReportPeriod[] = ["daily"];
+      const dueReports: TelegramReportPeriod[] = isProgressTrackingDate(now) ? ["daily"] : [];
       if (now.getDay() === 0) dueReports.push("weekly");
       if (isLastDayOfMonth(now)) dueReports.push("monthly");
+      if (!dueReports.length) return;
 
       for (const period of dueReports) {
         const key = `${period}-${todayKey()}`;
@@ -485,6 +487,11 @@ export default function HomePage() {
     return [...defaultItems, ...custom];
   }
 
+  function getProgressItems(section: (typeof routineSections)[number], date = new Date()) {
+    if (!isProgressTrackingDate(date)) return [];
+    return getPersonalizedItems(section, date);
+  }
+
   function deleteRoutineItem(sectionKey: string, item: { key: string; defaultIndex?: number; customId?: string }) {
     setRoutinePrefs((current) => {
       const nextSectionLabels = { ...(current.labelOverrides[sectionKey] ?? {}) };
@@ -586,7 +593,7 @@ export default function HomePage() {
       const dayState = storedState ?? {};
       const sections = routineSections
         .map((section) => {
-          const items = getPersonalizedItems(section, date);
+          const items = getProgressItems(section, date);
           const visibleKeys = new Set(items.map((item) => item.key));
           const done = (dayState[section.key] ?? []).filter((itemKey) => visibleKeys.has(String(itemKey))).length;
           return { label: section.label, done, total: items.length };
@@ -610,7 +617,7 @@ export default function HomePage() {
     const dayState = isToday ? state : readStorageJson<RoutineState>(`${routineStatePrefix}${key}`, {});
     const totals = routineSections.reduce(
       (result, section) => {
-        const items = getPersonalizedItems(section, date);
+        const items = getProgressItems(section, date);
         const visibleKeys = new Set(items.map((item) => item.key));
         const done = (dayState[section.key] ?? []).filter((itemKey) => visibleKeys.has(String(itemKey))).length;
         return { done: result.done + done, total: result.total + items.length };
@@ -915,7 +922,7 @@ export default function HomePage() {
           <div className="dayCard">
             <div>
               <p className="eyebrow">{formatShortDate(new Date())}</p>
-              <h2>{totals.done} itens concluídos hoje</h2>
+              <h2>{isTodayProgressDay ? `${totals.done} itens concluídos hoje` : "Fim de semana opcional"}</h2>
             </div>
             <div className="wideProgress">
               <span style={{ width: `${totals.pct}%` }} />

@@ -3,6 +3,7 @@ import test from "node:test";
 import {
   calculateProgressStreak,
   getProgressReportDates,
+  isProgressTrackingDate,
   progressTrackingStartDate,
   resetProgressHistory
 } from "../lib/progress-history.ts";
@@ -36,6 +37,21 @@ test("resets progress history once while preserving preferences", () => {
   assert.equal(storage.getItem("rotina_telegram_reports_sent"), null);
   assert.equal(storage.getItem("rotina_preferences"), '{"customItems":{}}');
   assert.equal(resetProgressHistory(storage), false);
+});
+
+test("weekends are optional and do not count in progress reports or streak", () => {
+  const weeklyDates = getProgressReportDates("weekly", new Date("2026-06-22T12:00:00-03:00")).map(dateKey);
+
+  assert.deepEqual(weeklyDates, ["2026-06-16", "2026-06-17", "2026-06-18", "2026-06-19", "2026-06-22"]);
+  assert.equal(isProgressTrackingDate(new Date("2026-06-20T12:00:00-03:00")), false);
+  assert.equal(isProgressTrackingDate(new Date("2026-06-22T12:00:00-03:00")), true);
+  assert.equal(
+    calculateProgressStreak(
+      ["2026-06-18", "2026-06-19", "2026-06-22"],
+      new Date("2026-06-22T12:00:00-03:00")
+    ),
+    3
+  );
 });
 
 test("reports and streak only count dates from the new start date", () => {

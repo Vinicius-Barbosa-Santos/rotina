@@ -130,20 +130,20 @@ export const routineSections: RoutineSection[] = [
   },
   {
     key: "saturday",
-    icon: "Code",
-    label: "Sábado",
-    shortLabel: "Sábado",
+    icon: "Growth",
+    label: "Foco Opcional",
+    shortLabel: "Opcional",
     color: "#fb923c",
     bg: "rgba(251, 146, 60, 0.12)",
-    time: "flexível",
-    note: "Dia para projeto pessoal, social e organização sem ritmo de trabalho.",
-    days: [6],
+    time: "fim de semana",
+    note: "Sem cobrança de progresso: escolha uma alavanca para crescer com calma.",
+    days: [6, 0],
     items: [
-      { label: "Projeto pessoal" },
-      { label: "Projeto Full Stack" },
-      { label: "Frontend + Backend" },
-      { label: "Organizar a semana" },
-      { label: "Fazer algo fora de casa" }
+      { label: "Revisar carteira de investimentos" },
+      { label: "Estudar marketing digital" },
+      { label: "Planejar pauta para YouTube" },
+      { label: "Gravar ou roteirizar um vídeo curto" },
+      { label: "Anotar ideias para renda extra" }
     ]
   },
   {
@@ -154,7 +154,7 @@ export const routineSections: RoutineSection[] = [
     color: "#52c98e",
     bg: "rgba(82, 201, 142, 0.12)",
     time: "semanal",
-    note: "Aparece segunda, sexta e domingo.",
+    note: "Durante a semana conta como rotina; no domingo vira reflexão opcional.",
     items: [
       { label: "Revisar investimentos", days: [1] },
       { label: "Atualizar patrimônio", days: [5] },
@@ -189,18 +189,15 @@ export const routineSections: RoutineSection[] = [
     color: "#9ba8b5",
     bg: "rgba(155, 168, 181, 0.12)",
     time: "domingo",
-    note: "Responder com calma antes de planejar a próxima semana.",
+    note: "Opcional: use como fechamento leve para voltar forte na segunda.",
     days: [0],
     items: [
       { label: "O que aprendi esta semana?", days: [0] },
       { label: "Quanto investi?", days: [0] },
-      { label: "Quanto treinei?", days: [0] },
-      { label: "Quanto estudei?", days: [0] },
-      { label: "O que evoluí em inglês?", days: [0] },
-      { label: "O que evoluí em Backend?", days: [0] },
-      { label: "O que evoluí em Frontend?", days: [0] },
-      { label: "Estou mais próximo da vaga internacional?", days: [0] },
-      { label: "Qual é a prioridade da próxima semana?", days: [0] }
+      { label: "O que publiquei ou aprendi sobre YouTube?", days: [0] },
+      { label: "Qual ideia de marketing digital vale testar?", days: [0] },
+      { label: "Qual investimento ou hábito financeiro vou acompanhar?", days: [0] },
+      { label: "Qual é a prioridade profissional da próxima semana?", days: [0] }
     ]
   }
 ];

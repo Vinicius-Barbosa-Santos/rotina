@@ -14,6 +14,11 @@ function progressDateKey(date: Date) {
   return `${year}-${month}-${day}`;
 }
 
+export function isProgressTrackingDate(date: Date) {
+  const weekday = date.getDay();
+  return weekday >= 1 && weekday <= 5 && progressDateKey(date) >= progressTrackingStartDate;
+}
+
 type StorageLike = {
   getItem: (key: string) => string | null;
   setItem: (key: string, value: string) => void;
@@ -46,7 +51,7 @@ export function getProgressReportDates(period: TelegramReportPeriod, now = new D
   const dates: Date[] = [];
   const cursor = new Date(start);
   while (cursor <= end) {
-    if (progressDateKey(cursor) >= progressTrackingStartDate) dates.push(new Date(cursor));
+    if (isProgressTrackingDate(cursor)) dates.push(new Date(cursor));
     cursor.setDate(cursor.getDate() + 1);
   }
   return dates;
@@ -57,12 +62,26 @@ export function calculateProgressStreak(dates: string[], now = new Date()) {
   const cursor = new Date(now);
   cursor.setHours(0, 0, 0, 0);
 
+  while (progressDateKey(cursor) >= progressTrackingStartDate && !isProgressTrackingDate(cursor)) {
+    cursor.setDate(cursor.getDate() - 1);
+  }
+
   if (!completed.has(progressDateKey(cursor))) cursor.setDate(cursor.getDate() - 1);
 
+  while (progressDateKey(cursor) >= progressTrackingStartDate && !isProgressTrackingDate(cursor)) {
+    cursor.setDate(cursor.getDate() - 1);
+  }
+
   let count = 0;
-  while (progressDateKey(cursor) >= progressTrackingStartDate && completed.has(progressDateKey(cursor))) {
+  while (progressDateKey(cursor) >= progressTrackingStartDate) {
+    if (!isProgressTrackingDate(cursor)) {
+      cursor.setDate(cursor.getDate() - 1);
+      continue;
+    }
+    if (!completed.has(progressDateKey(cursor))) break;
     count += 1;
     cursor.setDate(cursor.getDate() - 1);
   }
+
   return count;
 }

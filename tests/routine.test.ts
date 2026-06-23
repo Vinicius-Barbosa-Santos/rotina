@@ -3,6 +3,7 @@ import test from "node:test";
 import {
   getSectionScheduleLabel,
   getVisibleItems,
+  routineSections,
   type RoutineSection,
 } from "../lib/routine.ts";
 
@@ -30,4 +31,22 @@ test("getVisibleItems respects section and item weekdays", () => {
 
 test("getSectionScheduleLabel describes weekdays", () => {
   assert.equal(getSectionScheduleLabel(section), "segunda a sexta");
+});
+
+test("weekend optional focus includes investments, digital marketing and YouTube", () => {
+  const optional = routineSections.find((item) => item.key === "saturday");
+
+  assert.ok(optional);
+  assert.equal(optional.label, "Foco Opcional");
+  assert.deepEqual(optional.days, [6, 0]);
+  assert.deepEqual(
+    getVisibleItems(optional, new Date(2026, 5, 20)).map(({ item }) => item.label),
+    [
+      "Revisar carteira de investimentos",
+      "Estudar marketing digital",
+      "Planejar pauta para YouTube",
+      "Gravar ou roteirizar um vídeo curto",
+      "Anotar ideias para renda extra",
+    ],
+  );
 });
