@@ -31,23 +31,33 @@ test("formats an aggregated weekly Telegram report", () => {
     days: [
       {
         date: "2026-06-13",
-        done: 2,
-        total: 2,
-        sections: [{ label: "Saúde", done: 2, total: 2 }],
+        done: 9,
+        total: 10,
+        sections: [
+          { label: "Programação", done: 5, total: 6 },
+          { label: "Inglês", done: 4, total: 4 },
+          { label: "Financeiro", done: 0, total: 0 },
+        ],
       },
       {
         date: "2026-06-14",
-        done: 1,
-        total: 2,
-        sections: [{ label: "Saúde", done: 1, total: 2 }],
+        done: 5,
+        total: 8,
+        sections: [
+          { label: "Programação", done: 3, total: 5 },
+          { label: "Inglês", done: 2, total: 3 },
+          { label: "Foco Opcional", done: 2, total: 3 },
+        ],
       },
     ],
   });
 
   assert.match(message, /Relatório semanal/);
-  assert.match(message, /3 de 4 tarefas concluídas \(75%\)/);
-  assert.match(message, /1 dia com a rotina completa/);
-  assert.match(message, /Saúde: 3\/4 \(75%\)/);
+  assert.match(message, /14 de 18 tarefas concluídas \(78%\)/);
+  assert.match(message, /Leitura inteligente da semana/);
+  assert.match(message, /Foco de programação/);
+  assert.match(message, /Consistência em inglês/);
+  assert.match(message, /Investimentos\/YouTube\/marketing/);
 });
 
 test("rejects malformed Telegram reports", () => {

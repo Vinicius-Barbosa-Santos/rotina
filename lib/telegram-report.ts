@@ -96,6 +96,45 @@ function aggregateSections(days: RoutineReportDay[]) {
     .sort((a, b) => b[1].done - a[1].done);
 }
 
+function findSection(sections: Array<[string, { done: number; total: number }]>, patterns: RegExp[]) {
+  return sections.find(([label]) => patterns.some((pattern) => pattern.test(label)));
+}
+
+function formatSectionScore(entry: [string, { done: number; total: number }] | undefined, fallback: string) {
+  if (!entry) return fallback;
+  const [label, values] = entry;
+  return `${label}: ${values.done}/${values.total} (${percentage(values.done, values.total)}%)`;
+}
+
+function getWeeklyInsights(report: TelegramRoutineReport) {
+  const sections = aggregateSections(report.days);
+  const strongest = sections[0];
+  const weakest = [...sections].sort((a, b) => percentage(a[1].done, a[1].total) - percentage(b[1].done, b[1].total))[0];
+  const programming = findSection(sections, [/programa/i, /c[oó]digo/i, /stack/i, /builder/i]);
+  const english = findSection(sections, [/ingl[eê]s/i]);
+  const optionalGrowth = findSection(sections, [/finance/i, /invest/i, /youtube/i, /marketing/i, /opcional/i]);
+  const totals = totalForDays(report.days);
+  const pct = percentage(totals.done, totals.total);
+
+  const recommendation =
+    pct >= 85
+      ? "Mantenha o mesmo ritmo e escolha uma melhoria pequena para aumentar qualidade, não volume."
+      : pct >= 60
+        ? "Proteja programação e inglês primeiro; deixe o resto como bônus."
+        : "Reduza o escopo da próxima semana e vença com tarefas menores todos os dias úteis.";
+
+  return [
+    "",
+    "🧠 Leitura inteligente da semana",
+    `• Pontos fortes: ${formatSectionScore(strongest, "houve avanço, mas ainda sem seção dominante.")}`,
+    `• Onde caiu: ${formatSectionScore(weakest, "sem queda clara nesta semana.")}`,
+    `• Recomendação: ${recommendation}`,
+    `• Foco de programação: ${formatSectionScore(programming, "priorize uma entrega pequena de código por dia útil.")}`,
+    `• Consistência em inglês: ${formatSectionScore(english, "mantenha pelo menos uma exposição curta diária.")}`,
+    `• Investimentos/YouTube/marketing: ${formatSectionScore(optionalGrowth, "use o fim de semana como opcional, sem afetar o streak.")}`
+  ];
+}
+
 export function formatTelegramReport(report: TelegramRoutineReport) {
   const totals = totalForDays(report.days);
   const pct = percentage(totals.done, totals.total);
@@ -116,6 +155,7 @@ export function formatTelegramReport(report: TelegramRoutineReport) {
     aggregateSections(report.days).forEach(([label, values]) => {
       lines.push(`• ${label}: ${values.done}/${values.total} (${percentage(values.done, values.total)}%)`);
     });
+    if (report.period === "weekly") lines.push(...getWeeklyInsights(report));
   }
 
   lines.push("", motivationalMessage(pct));
