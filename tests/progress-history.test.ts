@@ -40,30 +40,30 @@ test("resets progress history once while preserving preferences", () => {
 });
 
 test("weekends are optional and do not count in progress reports or streak", () => {
-  const weeklyDates = getProgressReportDates("weekly", new Date("2026-06-22T12:00:00-03:00")).map(dateKey);
+  const weeklyDates = getProgressReportDates("weekly", new Date("2026-07-06T12:00:00-03:00")).map(dateKey);
 
-  assert.deepEqual(weeklyDates, ["2026-06-16", "2026-06-17", "2026-06-18", "2026-06-19", "2026-06-22"]);
-  assert.equal(isProgressTrackingDate(new Date("2026-06-20T12:00:00-03:00")), false);
-  assert.equal(isProgressTrackingDate(new Date("2026-06-22T12:00:00-03:00")), true);
+  assert.deepEqual(weeklyDates, ["2026-06-30", "2026-07-01", "2026-07-02", "2026-07-03", "2026-07-06"]);
+  assert.equal(isProgressTrackingDate(new Date("2026-07-04T12:00:00-03:00")), false);
+  assert.equal(isProgressTrackingDate(new Date("2026-07-06T12:00:00-03:00")), true);
   assert.equal(
     calculateProgressStreak(
-      ["2026-06-18", "2026-06-19", "2026-06-22"],
-      new Date("2026-06-22T12:00:00-03:00")
+      ["2026-07-02", "2026-07-03", "2026-07-06"],
+      new Date("2026-07-06T12:00:00-03:00")
     ),
     3
   );
 });
 
 test("reports and streak only count dates from the new start date", () => {
-  const dates = getProgressReportDates("weekly", new Date("2026-06-17T12:00:00-03:00")).map(dateKey);
+  const dates = getProgressReportDates("weekly", new Date("2026-07-01T12:00:00-03:00")).map(dateKey);
 
-  assert.deepEqual(dates, ["2026-06-15", "2026-06-16", "2026-06-17"]);
+  assert.deepEqual(dates, ["2026-06-29", "2026-06-30", "2026-07-01"]);
   assert.equal(
     calculateProgressStreak(
-      ["2026-06-13", "2026-06-14", "2026-06-15", "2026-06-16"],
-      new Date("2026-06-17T12:00:00-03:00")
+      ["2026-06-27", "2026-06-28", "2026-06-29", "2026-06-30"],
+      new Date("2026-07-01T12:00:00-03:00")
     ),
     2
   );
-  assert.equal(progressTrackingStartDate, "2026-06-15");
+  assert.equal(progressTrackingStartDate, "2026-06-29");
 });

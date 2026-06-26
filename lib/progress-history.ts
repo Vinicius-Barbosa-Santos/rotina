@@ -1,6 +1,6 @@
 import type { TelegramReportPeriod } from "@/lib/types";
 
-export const progressTrackingStartDate = "2026-06-15";
+export const progressTrackingStartDate = "2026-06-29";
 
 const progressResetKey = "rotina_progress_reset_version";
 const completedDatesKey = "rotina_completed_dates";

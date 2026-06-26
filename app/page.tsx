@@ -21,6 +21,7 @@ import {
   readCompletedDates,
   readRoutineStatesFromStorage,
   routineStatePrefix,
+  sanitizeRoutineSyncSnapshot,
   telegramAutomaticKey,
   telegramReportSentKey,
   writeSyncSnapshotToStorage
@@ -725,12 +726,13 @@ export default function HomePage() {
 
   async function saveRoutineSyncSnapshot(snapshot: RoutineSyncSnapshot) {
     if (applyingRemoteSync.current) return false;
+    const sanitizedSnapshot = sanitizeRoutineSyncSnapshot(snapshot);
 
     try {
       const response = await fetch("/api/routine-sync", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(snapshot)
+        body: JSON.stringify(sanitizedSnapshot)
       });
       const payload = (await response.json()) as { configured?: boolean; message?: string };
       if (!payload.configured) {
@@ -738,7 +740,7 @@ export default function HomePage() {
         return false;
       }
       if (!response.ok) throw new Error(payload.message ?? "Não consegui sincronizar.");
-      lastRoutineSyncAt.current = snapshot.updatedAt;
+      lastRoutineSyncAt.current = sanitizedSnapshot.updatedAt;
       setSyncMessage("Dados sincronizados entre seus dispositivos.");
       return true;
     } catch {
@@ -773,7 +775,7 @@ export default function HomePage() {
       const initialSync = mergeLocal
         ? resolveInitialSyncSnapshot(buildLocalSyncSnapshot(), remote)
         : { snapshot: remote, shouldSave: false };
-      const nextSnapshot = initialSync.snapshot;
+      const nextSnapshot = sanitizeRoutineSyncSnapshot(initialSync.snapshot);
       applyingRemoteSync.current = !mergeLocal;
       writeSyncSnapshotToStorage(nextSnapshot);
       setState(nextSnapshot.states[todayKey()] ?? {});

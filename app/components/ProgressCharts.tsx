@@ -1,4 +1,5 @@
 import type { CSSProperties } from "react";
+import { progressTrackingStartDate } from "@/lib/progress-history";
 import type { ProgressPoint } from "@/lib/types";
 
 type ProgressChartsProps = {
@@ -58,6 +59,8 @@ function ChartCard({ title, points, mode }: { title: string; points: ProgressPoi
 }
 
 export default function ProgressCharts({ weekly, monthly }: ProgressChartsProps) {
+  const [year, month, day] = progressTrackingStartDate.split("-");
+
   return (
     <section className="evolutionPanel" aria-labelledby="evolution-title">
       <div className="evolutionHeader">
@@ -65,7 +68,9 @@ export default function ProgressCharts({ weekly, monthly }: ProgressChartsProps)
           <p className="eyebrow">evolução</p>
           <h2 id="evolution-title">Seu progresso no tempo</h2>
         </div>
-        <span>Histórico desde 15/06/2026</span>
+        <span>
+          Histórico desde {day}/{month}/{year}
+        </span>
       </div>
 
       <div className="evolutionCharts">

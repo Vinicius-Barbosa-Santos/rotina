@@ -1,6 +1,6 @@
-import { progressTrackingStartDate } from "@/lib/progress-history";
-import { readStorageJson } from "@/lib/storage";
-import type { ManualMeeting, RoutinePrefs, RoutineState, RoutineSyncSnapshot } from "@/lib/types";
+import { progressTrackingStartDate } from "./progress-history";
+import { readStorageJson } from "./storage";
+import type { ManualMeeting, RoutinePrefs, RoutineState, RoutineSyncSnapshot } from "./types";
 
 export const notifiedSectionsKey = "rotina_notified_sections";
 export const notificationPreferenceKey = "rotina_browser_notifications";
@@ -28,54 +28,64 @@ export function readRoutineStatesFromStorage() {
   for (let index = 0; index < localStorage.length; index += 1) {
     const key = localStorage.key(index);
     if (!key?.startsWith(routineStatePrefix)) continue;
-    states[key.replace(routineStatePrefix, "")] = readStorageJson<RoutineState>(key, {});
+    const date = key.replace(routineStatePrefix, "");
+    if (date >= progressTrackingStartDate) states[date] = readStorageJson<RoutineState>(key, {});
   }
 
   return states;
 }
 
 export function buildLocalSyncSnapshot(): RoutineSyncSnapshot {
-  return {
+  return sanitizeRoutineSyncSnapshot({
     version: 1,
     updatedAt: new Date().toISOString(),
     states: readRoutineStatesFromStorage(),
-    completedDates: readCompletedDates().filter((date) => date >= progressTrackingStartDate).sort(),
+    completedDates: readCompletedDates(),
     routinePrefs: normalizeRoutinePrefs(readStorageJson<Partial<RoutinePrefs>>("rotina_preferences", {})),
     manualMeetings: readStorageJson<ManualMeeting[]>("rotina_manual_meetings", []),
     profileStacks: readStorageJson<string[]>(profileStacksKey, []),
     telegramAutomaticEnabled: localStorage.getItem(telegramAutomaticKey) === "true",
     telegramReportsSent: readStorageJson<Record<string, boolean>>(telegramReportSentKey, {})
-  };
+  });
 }
 
 export function mergeSyncSnapshots(local: RoutineSyncSnapshot, remote?: RoutineSyncSnapshot | null): RoutineSyncSnapshot {
   if (!remote) return local;
 
-  return {
+  return sanitizeRoutineSyncSnapshot({
     version: 1,
     updatedAt: new Date().toISOString(),
-    states: mergeRoutineStates(local.states, remote.states),
-    completedDates: [...new Set([...remote.completedDates, ...local.completedDates])]
-      .filter((date) => date >= progressTrackingStartDate)
-      .sort(),
+    states: filterRoutineStatesByTrackingDate(mergeRoutineStates(local.states, remote.states)),
+    completedDates: [...new Set([...remote.completedDates, ...local.completedDates])],
     routinePrefs: hasRoutinePrefsData(local.routinePrefs) ? local.routinePrefs : remote.routinePrefs,
     manualMeetings: local.manualMeetings.length ? local.manualMeetings : remote.manualMeetings,
     profileStacks: local.profileStacks.length ? local.profileStacks : remote.profileStacks,
     telegramAutomaticEnabled: local.telegramAutomaticEnabled || remote.telegramAutomaticEnabled,
-    telegramReportsSent: { ...remote.telegramReportsSent, ...local.telegramReportsSent }
+    telegramReportsSent: filterTelegramReportsByTrackingDate({ ...remote.telegramReportsSent, ...local.telegramReportsSent })
+  });
+}
+
+export function sanitizeRoutineSyncSnapshot(snapshot: RoutineSyncSnapshot): RoutineSyncSnapshot {
+  return {
+    ...snapshot,
+    states: filterRoutineStatesByTrackingDate(snapshot.states),
+    completedDates: snapshot.completedDates.filter((date) => date >= progressTrackingStartDate).sort(),
+    telegramReportsSent: filterTelegramReportsByTrackingDate(snapshot.telegramReportsSent)
   };
 }
 
 export function writeSyncSnapshotToStorage(snapshot: RoutineSyncSnapshot) {
-  Object.entries(snapshot.states).forEach(([date, dayState]) => {
+  const sanitized = sanitizeRoutineSyncSnapshot(snapshot);
+
+  Object.entries(sanitized.states).forEach(([date, dayState]) => {
     localStorage.setItem(`${routineStatePrefix}${date}`, JSON.stringify(dayState));
   });
-  localStorage.setItem("rotina_completed_dates", JSON.stringify(snapshot.completedDates));
-  localStorage.setItem("rotina_preferences", JSON.stringify(snapshot.routinePrefs));
-  localStorage.setItem("rotina_manual_meetings", JSON.stringify(snapshot.manualMeetings));
-  localStorage.setItem(profileStacksKey, JSON.stringify(snapshot.profileStacks));
-  localStorage.setItem(telegramAutomaticKey, String(snapshot.telegramAutomaticEnabled));
-  localStorage.setItem(telegramReportSentKey, JSON.stringify(snapshot.telegramReportsSent));
+  localStorage.setItem("rotina_completed_dates", JSON.stringify(sanitized.completedDates));
+  localStorage.setItem("rotina_preferences", JSON.stringify(sanitized.routinePrefs));
+  localStorage.setItem("rotina_manual_meetings", JSON.stringify(sanitized.manualMeetings));
+  localStorage.setItem(profileStacksKey, JSON.stringify(sanitized.profileStacks));
+  localStorage.setItem(telegramAutomaticKey, String(sanitized.telegramAutomaticEnabled));
+  localStorage.setItem(telegramReportSentKey, JSON.stringify(sanitized.telegramReportsSent));
 }
 
 function mergeRoutineStates(local: Record<string, RoutineState>, remote: Record<string, RoutineState>) {
@@ -101,5 +111,18 @@ function hasRoutinePrefsData(prefs: RoutinePrefs) {
       Object.keys(prefs.customItems).length ||
       Object.keys(prefs.timeOverrides).length ||
       Object.keys(prefs.labelOverrides).length
+  );
+}
+
+function filterRoutineStatesByTrackingDate(states: Record<string, RoutineState>) {
+  return Object.fromEntries(Object.entries(states).filter(([date]) => date >= progressTrackingStartDate));
+}
+
+function filterTelegramReportsByTrackingDate(reports: Record<string, boolean>) {
+  return Object.fromEntries(
+    Object.entries(reports).filter(([key]) => {
+      const date = key.match(/\d{4}-\d{2}-\d{2}/)?.[0];
+      return !date || date >= progressTrackingStartDate;
+    })
   );
 }
