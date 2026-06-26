@@ -50,6 +50,17 @@ test("weekday routine is centered on programming work", () => {
   );
 });
 
+test("weekday routine includes one functional adult skill per day", () => {
+  const functional = routineSections.find((item) => item.key === "functional-life");
+
+  assert.ok(functional);
+  assert.equal(functional.label, "Adulto Funcional");
+  assert.deepEqual(
+    getVisibleItems(functional, new Date(2026, 5, 23)).map(({ item }) => item.label),
+    ["Preparar uma refeição simples e saudável"],
+  );
+});
+
 test("weekend optional focus includes investments, digital marketing and YouTube", () => {
   const optional = routineSections.find((item) => item.key === "saturday");
 

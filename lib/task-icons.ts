@@ -12,6 +12,7 @@ export type TaskIconName =
   | "gitPullRequest"
   | "globe"
   | "heart"
+  | "home"
   | "lightbulb"
   | "megaphone"
   | "message"
@@ -34,18 +35,19 @@ const taskIconRules: Array<{ icon: TaskIconName; keywords: string[] }> = [
   { icon: "water", keywords: ["agua", "beber"] },
   { icon: "sparkles", keywords: ["oracao", "alongamento", "mindfulness"] },
   { icon: "coffee", keywords: ["cafe"] },
+  { icon: "home", keywords: ["casa", "roupa", "documentos"] },
   { icon: "calendar", keywords: ["planejamento", "priorizar", "sprint", "jira", "agenda"] },
-  { icon: "message", keywords: ["daily", "conversacao", "conversar", "networking"] },
+  { icon: "message", keywords: ["daily", "conversacao", "conversar", "comunicacao", "feedback", "respeito", "networking"] },
   { icon: "wallet", keywords: ["investimento", "investimentos", "patrimonio", "aportes", "financeiro"] },
   { icon: "youtube", keywords: ["youtube"] },
   { icon: "play", keywords: ["gravar", "video", "roteiro", "pauta"] },
   { icon: "megaphone", keywords: ["marketing", "conteudo", "distribuicao", "posicionamento"] },
   { icon: "book", keywords: ["leitura", "vocabulario", "listening", "ingles", "estudar", "aprendi"] },
   { icon: "code", keywords: ["programacao", "codigo", "feature", "correcao", "frontend", "backend", "react", "java"] },
-  { icon: "gitPullRequest", keywords: ["pull request", "pull requests", "pr", "revisar codigo", "review"] },
+  { icon: "gitPullRequest", keywords: ["pull request", "pull requests", "revisar codigo", "review"] },
   { icon: "checklist", keywords: ["testes", "teste", "pendencias", "task", "tasks"] },
   { icon: "fileText", keywords: ["documentacao", "documentar"] },
-  { icon: "utensils", keywords: ["almoco", "jantar"] },
+  { icon: "utensils", keywords: ["almoco", "jantar", "refeicao", "cozinhar"] },
   { icon: "dumbbell", keywords: ["academia", "treino", "caminhada"] },
   { icon: "rocket", keywords: ["certificacao", "portfolio", "system design", "arquitetura", "carreira"] },
   { icon: "lightbulb", keywords: ["ideia", "ideias", "renda extra"] },

@@ -114,13 +114,31 @@ export const routineSections: RoutineSection[] = [
     ]
   },
   {
+    key: "functional-life",
+    icon: "Home",
+    label: "Adulto Funcional",
+    shortLabel: "Funcional",
+    color: "#f4b860",
+    bg: "rgba(244, 184, 96, 0.12)",
+    time: "21:00-21:30",
+    note: "Uma habilidade prática por dia para cuidar melhor da própria vida.",
+    days: weekdays,
+    items: [
+      { label: "Revisar dinheiro da semana", days: [1] },
+      { label: "Preparar uma refeição simples e saudável", days: [2] },
+      { label: "Organizar casa, roupa ou documentos", days: [3] },
+      { label: "Praticar comunicação difícil com respeito", days: [4] },
+      { label: "Revisar agenda, segurança digital e próximos compromissos", days: [5] }
+    ]
+  },
+  {
     key: "growth",
     icon: "Growth",
     label: "Crescimento",
     shortLabel: "Crescer",
     color: "#b57bee",
     bg: "rgba(181, 123, 238, 0.12)",
-    time: "21:00-22:30",
+    time: "21:30-22:30",
     note: "Construir reputação e carreira como desenvolvedor.",
     days: weekdays,
     items: [
