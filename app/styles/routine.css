@@ -210,7 +210,7 @@
 .taskCheckButton {
   display: flex;
   align-items: center;
-  gap: 11px;
+  gap: 10px;
   min-width: 0;
   border: 0;
   background: transparent;
@@ -221,6 +221,36 @@
 
 .taskCheckButton span:last-child {
   overflow-wrap: anywhere;
+}
+
+.taskIcon {
+  display: grid;
+  place-items: center;
+  width: 25px;
+  height: 25px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.045);
+  color: var(--muted);
+  flex: 0 0 auto;
+  transition:
+    background 180ms ease,
+    border-color 180ms ease,
+    color 180ms ease,
+    transform 180ms ease;
+}
+
+.checkItem:hover .taskIcon {
+  border-color: var(--line-2);
+  background: rgba(255, 255, 255, 0.075);
+  color: var(--text);
+  transform: translateY(-1px);
+}
+
+.customTask.done .taskIcon {
+  border-color: rgba(82, 201, 142, 0.26);
+  background: rgba(82, 201, 142, 0.1);
+  color: var(--green);
 }
 
 .deleteTaskButton {

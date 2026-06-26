@@ -6,6 +6,7 @@ import { getSectionScheduleLabel, type RoutineSection } from "@/lib/routine";
 import type { PersonalizedRoutineItem } from "@/lib/types";
 import EnglishTutor from "../EnglishTutor";
 import { RoutineIcon } from "./RoutineIcon";
+import TaskIcon from "./TaskIcon";
 
 type RoutineSectionCardProps = {
   section: RoutineSection;
@@ -139,6 +140,7 @@ export default function RoutineSectionCard({
                     <>
                       <button className="taskCheckButton" onClick={() => onToggleItem(item.key)}>
                         <span className="checkCircle">{checked && <Check size={13} aria-hidden />}</span>
+                        <TaskIcon label={item.label} />
                         <span>{item.label}</span>
                       </button>
                       <span className="taskItemActions">
