@@ -233,19 +233,34 @@
   color: #0d1012;
 }
 
-.syncButton {
+.syncButton,
+.clearCalendarButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
   width: fit-content;
   border: 0;
   border-radius: 8px;
   padding: 8px 10px;
-  background: var(--blue);
-  color: #0d1012;
   cursor: pointer;
   font-size: 12px;
   font-weight: 800;
 }
 
-.syncButton:disabled {
+.syncButton {
+  background: var(--blue);
+  color: #0d1012;
+}
+
+.clearCalendarButton {
+  border: 1px solid rgba(255, 113, 113, 0.28);
+  background: rgba(255, 113, 113, 0.09);
+  color: #ff9a9a;
+}
+
+.syncButton:disabled,
+.clearCalendarButton:disabled {
   cursor: wait;
   opacity: 0.65;
 }

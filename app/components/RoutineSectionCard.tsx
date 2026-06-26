@@ -3,10 +3,11 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { Check, CheckIcon, ChevronDown, Pencil, Plus, RotateCcw, Trash2, X } from "lucide-react";
 import { getSectionScheduleLabel, type RoutineSection } from "@/lib/routine";
+import { getTaskIconName, taskIconOptions, type TaskIconName } from "@/lib/task-icons";
 import type { PersonalizedRoutineItem } from "@/lib/types";
 import EnglishTutor from "../EnglishTutor";
 import { RoutineIcon } from "./RoutineIcon";
-import TaskIcon from "./TaskIcon";
+import TaskIcon, { getTaskIconComponent } from "./TaskIcon";
 
 type RoutineSectionCardProps = {
   section: RoutineSection;
@@ -18,7 +19,7 @@ type RoutineSectionCardProps = {
   onToggleSection: () => void;
   onToggleItem: (key: string) => void;
   onDeleteItem: (item: PersonalizedRoutineItem) => void;
-  onEditItem: (item: PersonalizedRoutineItem, label: string) => void;
+  onEditItem: (item: PersonalizedRoutineItem, label: string, icon: TaskIconName) => void;
   onNewItemChange: (value: string) => void;
   onAddItem: () => void;
   onTimeChange: (value: string) => void;
@@ -44,6 +45,7 @@ export default function RoutineSectionCard({
   const pct = items.length ? Math.round((doneItems.size / items.length) * 100) : 0;
   const [editingItemKey, setEditingItemKey] = useState<string | null>(null);
   const [editingLabel, setEditingLabel] = useState("");
+  const [editingIcon, setEditingIcon] = useState<TaskIconName>("notebook");
   const [shouldRenderChecklist, setShouldRenderChecklist] = useState(isOpen);
 
   useEffect(() => {
@@ -64,17 +66,19 @@ export default function RoutineSectionCard({
   function startEditing(item: PersonalizedRoutineItem) {
     setEditingItemKey(item.key);
     setEditingLabel(item.label);
+    setEditingIcon(item.icon ?? getTaskIconName(item.label));
   }
 
   function cancelEditing() {
     setEditingItemKey(null);
     setEditingLabel("");
+    setEditingIcon("notebook");
   }
 
   function saveEditing(item: PersonalizedRoutineItem) {
     const nextLabel = editingLabel.trim();
     if (!nextLabel) return;
-    onEditItem(item, nextLabel);
+    onEditItem(item, nextLabel, editingIcon);
     cancelEditing();
   }
 
@@ -129,6 +133,24 @@ export default function RoutineSectionCard({
                         onChange={(event) => setEditingLabel(event.target.value)}
                         aria-label={`Editar ${item.label}`}
                       />
+                      <div className="taskIconPicker" role="radiogroup" aria-label={`Ícone de ${item.label}`}>
+                        {taskIconOptions.map((option) => {
+                          const Icon = getTaskIconComponent(option.name);
+                          return (
+                            <button
+                              key={option.name}
+                              type="button"
+                              className={editingIcon === option.name ? "selected" : ""}
+                              onClick={() => setEditingIcon(option.name)}
+                              aria-label={option.label}
+                              aria-checked={editingIcon === option.name}
+                              role="radio"
+                            >
+                              <Icon size={15} aria-hidden />
+                            </button>
+                          );
+                        })}
+                      </div>
                       <button type="submit" aria-label={`Salvar ${item.label}`} disabled={!editingLabel.trim()}>
                         <CheckIcon size={15} aria-hidden />
                       </button>
@@ -140,7 +162,7 @@ export default function RoutineSectionCard({
                     <>
                       <button className="taskCheckButton" onClick={() => onToggleItem(item.key)}>
                         <span className="checkCircle">{checked && <Check size={13} aria-hidden />}</span>
-                        <TaskIcon label={item.label} />
+                        <TaskIcon label={item.label} icon={item.icon} />
                         <span>{item.label}</span>
                       </button>
                       <span className="taskItemActions">

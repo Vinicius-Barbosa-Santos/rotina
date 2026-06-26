@@ -63,8 +63,12 @@ const taskIconMap = {
   youtube: Youtube
 } satisfies Record<TaskIconName, typeof AlarmClock>;
 
-export default function TaskIcon({ label }: { label: string }) {
-  const Icon = taskIconMap[getTaskIconName(label)];
+export function getTaskIconComponent(name: TaskIconName) {
+  return taskIconMap[name];
+}
+
+export default function TaskIcon({ label, icon }: { label: string; icon?: TaskIconName }) {
+  const Icon = taskIconMap[icon ?? getTaskIconName(label)];
   return (
     <span className="taskIcon" aria-hidden>
       <Icon size={15} />

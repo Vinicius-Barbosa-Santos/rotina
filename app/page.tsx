@@ -5,6 +5,7 @@ import { Bell, CalendarDays, Flame, Loader2 } from "lucide-react";
 import { getVisibleItems, routineSections } from "@/lib/routine";
 import { dateKey, formatDate, formatShortDate, todayKey } from "@/lib/date";
 import { defaultMeetingForm, getManualMeetingEvents } from "@/lib/manual-meetings";
+import type { TaskIconName } from "@/lib/task-icons";
 import {
   calculateProgressStreak,
   getProgressReportDates,
@@ -126,7 +127,8 @@ export default function HomePage() {
     hiddenItems: {},
     customItems: {},
     timeOverrides: {},
-    labelOverrides: {}
+    labelOverrides: {},
+    iconOverrides: {}
   });
   const [newRoutineItems, setNewRoutineItems] = useState<Record<string, string>>({});
   const [streak, setStreak] = useState(0);
@@ -518,11 +520,13 @@ export default function HomePage() {
       .map(({ item, index }) => ({
         key: String(index),
         label: routinePrefs.labelOverrides[section.key]?.[String(index)] ?? item.label,
+        icon: routinePrefs.iconOverrides[section.key]?.[String(index)],
         defaultIndex: index
       }));
     const custom = (routinePrefs.customItems[section.key] ?? []).map((item) => ({
       key: item.id,
       label: routinePrefs.labelOverrides[section.key]?.[item.id] ?? item.label,
+      icon: routinePrefs.iconOverrides[section.key]?.[item.id],
       customId: item.id
     }));
 
@@ -541,16 +545,23 @@ export default function HomePage() {
   function deleteRoutineItem(sectionKey: string, item: { key: string; defaultIndex?: number; customId?: string }) {
     setRoutinePrefs((current) => {
       const nextSectionLabels = { ...(current.labelOverrides[sectionKey] ?? {}) };
+      const nextSectionIcons = { ...(current.iconOverrides[sectionKey] ?? {}) };
       delete nextSectionLabels[item.key];
+      delete nextSectionIcons[item.key];
       const labelOverrides = {
         ...current.labelOverrides,
         [sectionKey]: nextSectionLabels
+      };
+      const iconOverrides = {
+        ...current.iconOverrides,
+        [sectionKey]: nextSectionIcons
       };
 
       if (typeof item.defaultIndex === "number") {
         return {
           ...current,
           labelOverrides,
+          iconOverrides,
           hiddenItems: {
             ...current.hiddenItems,
             [sectionKey]: [...new Set([...(current.hiddenItems[sectionKey] ?? []), item.defaultIndex])]
@@ -561,6 +572,7 @@ export default function HomePage() {
       return {
         ...current,
         labelOverrides,
+        iconOverrides,
         customItems: {
           ...current.customItems,
           [sectionKey]: (current.customItems[sectionKey] ?? []).filter((customItem) => customItem.id !== item.customId)
@@ -586,7 +598,7 @@ export default function HomePage() {
     setNewRoutineItems((current) => ({ ...current, [sectionKey]: "" }));
   }
 
-  function updateRoutineItemLabel(sectionKey: string, itemKey: string, label: string) {
+  function updateRoutineItem(sectionKey: string, itemKey: string, label: string, icon: TaskIconName) {
     const nextLabel = label.trim();
     if (!nextLabel) return;
 
@@ -597,6 +609,13 @@ export default function HomePage() {
         [sectionKey]: {
           ...(current.labelOverrides[sectionKey] ?? {}),
           [itemKey]: nextLabel
+        }
+      },
+      iconOverrides: {
+        ...current.iconOverrides,
+        [sectionKey]: {
+          ...(current.iconOverrides[sectionKey] ?? {}),
+          [itemKey]: icon
         }
       }
     }));
@@ -1023,7 +1042,7 @@ export default function HomePage() {
                   onToggleSection={() => toggleSection(section.key)}
                   onToggleItem={(key) => toggleItem(section.key, key)}
                   onDeleteItem={(item) => deleteRoutineItem(section.key, item)}
-                  onEditItem={(item, label) => updateRoutineItemLabel(section.key, item.key, label)}
+                  onEditItem={(item, label, icon) => updateRoutineItem(section.key, item.key, label, icon)}
                   onNewItemChange={(value) => setNewRoutineItems((current) => ({ ...current, [section.key]: value }))}
                   onAddItem={() => addRoutineItem(section.key)}
                   onTimeChange={(value) => updateSectionTime(section.key, value)}

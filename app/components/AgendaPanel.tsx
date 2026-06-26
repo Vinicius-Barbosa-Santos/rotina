@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState, type MutableRefObject } from "react";
-import { ArrowUpRight, CalendarDays, Loader2 } from "lucide-react";
+import { ArrowUpRight, CalendarDays, Loader2, Trash2 } from "lucide-react";
 import { formatTime } from "@/lib/date";
 import type { CalendarEvent, CalendarResponse, CalendarSyncSection } from "@/lib/types";
 
@@ -23,6 +23,7 @@ export default function AgendaPanel({
   calendarSyncInProgress
 }: AgendaPanelProps) {
   const [syncing, setSyncing] = useState(false);
+  const [clearing, setClearing] = useState(false);
   const [syncMessage, setSyncMessage] = useState("");
   const events = useMemo(
     () =>
@@ -64,6 +65,31 @@ export default function AgendaPanel({
     }
   }
 
+  async function clearRoutineReminders() {
+    if (clearing) return;
+    const confirmed = window.confirm("Apagar todos os eventos da rotina criados pelo app no Google Calendar?");
+    if (!confirmed) return;
+
+    setClearing(true);
+    setSyncMessage("");
+
+    try {
+      const response = await fetch("/api/calendar/routine-reminders", { method: "DELETE" });
+      const payload = (await response.json()) as { deleted?: number; message?: string };
+
+      if (!response.ok) {
+        setSyncMessage(payload.message ?? "Não consegui limpar a rotina do Calendar.");
+        return;
+      }
+
+      setSyncMessage(`Eventos da rotina apagados: ${payload.deleted ?? 0}.`);
+    } catch {
+      setSyncMessage("Não consegui limpar a rotina do Calendar.");
+    } finally {
+      setClearing(false);
+    }
+  }
+
   if (loading && manualEvents.length === 0) {
     return (
       <div className="agendaState">
@@ -102,6 +128,10 @@ export default function AgendaPanel({
         <div className="calendarActions">
           <button className="syncButton" onClick={syncRoutineReminders} disabled={syncing}>
             {syncing ? "Sincronizando rotina..." : "Sincronizar rotina geral"}
+          </button>
+          <button className="clearCalendarButton" onClick={clearRoutineReminders} disabled={clearing}>
+            {clearing ? <Loader2 className="spin" size={13} aria-hidden /> : <Trash2 size={13} aria-hidden />}
+            {clearing ? "Limpando..." : "Limpar rotina do Calendar"}
           </button>
           <DisconnectCalendarLink />
           {syncMessage && <span>{syncMessage}</span>}

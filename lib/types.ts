@@ -1,4 +1,5 @@
 import type { RoutineSection, Weekday } from "@/lib/routine";
+import type { TaskIconName } from "@/lib/task-icons";
 
 export type CalendarEvent = {
   id: string;
@@ -45,11 +46,13 @@ export type RoutinePrefs = {
   customItems: Record<string, RoutineCustomItem[]>;
   timeOverrides: Record<string, string>;
   labelOverrides: Record<string, Record<string, string>>;
+  iconOverrides: Record<string, Record<string, TaskIconName>>;
 };
 
 export type PersonalizedRoutineItem = {
   key: string;
   label: string;
+  icon?: TaskIconName;
   defaultIndex?: number;
   customId?: string;
 };

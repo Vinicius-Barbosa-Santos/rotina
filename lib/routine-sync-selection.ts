@@ -36,9 +36,10 @@ function getCompletedCount(dayState?: RoutineState) {
 
 function hasRoutinePrefsData(prefs: RoutinePrefs) {
   return Boolean(
-    Object.keys(prefs.hiddenItems).length ||
-      Object.keys(prefs.customItems).length ||
-      Object.keys(prefs.timeOverrides).length ||
-      Object.keys(prefs.labelOverrides).length
+    Object.keys(prefs.hiddenItems ?? {}).length ||
+      Object.keys(prefs.customItems ?? {}).length ||
+      Object.keys(prefs.timeOverrides ?? {}).length ||
+      Object.keys(prefs.labelOverrides ?? {}).length ||
+      Object.keys(prefs.iconOverrides ?? {}).length
   );
 }

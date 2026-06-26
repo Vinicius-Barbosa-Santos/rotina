@@ -81,6 +81,41 @@ export async function POST(request: Request) {
   }
 }
 
+export async function DELETE() {
+  try {
+    const accessToken = await getGoogleAccessToken();
+
+    if (!accessToken) {
+      return NextResponse.json(
+        { message: "Conecte seu Google Calendar antes de limpar a rotina." },
+        { status: 401 }
+      );
+    }
+
+    const calendarId = process.env.GOOGLE_CALENDAR_ID || "primary";
+    const deleted = await deleteAllRoutineEvents({ calendarId, accessToken });
+
+    return NextResponse.json({
+      ok: true,
+      deleted
+    });
+  } catch (error) {
+    if (error instanceof GoogleCalendarAuthError) {
+      const response = NextResponse.json(
+        { message: "Sua sessão do Google expirou. Conecte o Google Calendar novamente." },
+        { status: 401 }
+      );
+      clearGoogleAuthCookies(response);
+      return response;
+    }
+
+    return NextResponse.json(
+      { message: error instanceof Error ? error.message : "Não consegui limpar a rotina do Google Calendar." },
+      { status: 500 }
+    );
+  }
+}
+
 async function upsertRoutineEvent({
   section,
   calendarId,
@@ -151,6 +186,70 @@ async function deleteLegacyRecurringRoutineEvents({
   }
 }
 
+async function deleteAllRoutineEvents({
+  calendarId,
+  accessToken
+}: {
+  calendarId: string;
+  accessToken: string;
+}) {
+  const routineEvents = await listAllRoutineEvents({ calendarId, accessToken });
+  const baseUrl = `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events`;
+  let deleted = 0;
+
+  for (const eventBatch of chunk(routineEvents, 3)) {
+    await Promise.all(
+      eventBatch.map(async (event) => {
+        const response = await googleCalendarFetch(`${baseUrl}/${encodeURIComponent(event.id)}`, {
+          method: "DELETE",
+          headers: { Authorization: `Bearer ${accessToken}` }
+        });
+
+        if (!response.ok && response.status !== 410) {
+          const errorText = await response.text();
+          throwGoogleCalendarError(response.status, errorText, "remover eventos da rotina");
+        }
+
+        deleted += 1;
+      })
+    );
+  }
+
+  return deleted;
+}
+
+async function listAllRoutineEvents({
+  calendarId,
+  accessToken
+}: {
+  calendarId: string;
+  accessToken: string;
+}) {
+  const events = new Map<string, { id: string; summary?: string; recurrence?: string[] }>();
+
+  for (const section of routineSections) {
+    const byProperty = await listRoutineEvents({
+      calendarId,
+      accessToken,
+      privateExtendedProperties: [`rotinaSectionKey=${section.key}`],
+      maxResults: 250
+    });
+    byProperty.forEach((event) => events.set(event.id, event));
+  }
+
+  const byTitle = await listRoutineEvents({
+    calendarId,
+    accessToken,
+    q: "Rotina:",
+    maxResults: 250
+  });
+  byTitle
+    .filter((event) => event.summary?.includes("Rotina:"))
+    .forEach((event) => events.set(event.id, event));
+
+  return [...events.values()];
+}
+
 async function findExistingRoutineEvents({
   section,
   calendarId,
@@ -177,17 +276,19 @@ async function listRoutineEvents({
   calendarId,
   accessToken,
   privateExtendedProperties,
-  q
+  q,
+  maxResults = 10
 }: {
   calendarId: string;
   accessToken: string;
   privateExtendedProperties?: string[];
   q?: string;
+  maxResults?: number;
 }) {
   const url = new URL(`https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events`);
   privateExtendedProperties?.forEach((property) => url.searchParams.append("privateExtendedProperty", property));
   if (q) url.searchParams.set("q", q);
-  url.searchParams.set("maxResults", "10");
+  url.searchParams.set("maxResults", String(maxResults));
   url.searchParams.set("singleEvents", "false");
   url.searchParams.set("fields", "items(id,summary,recurrence)");
 

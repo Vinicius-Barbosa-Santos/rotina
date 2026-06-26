@@ -29,6 +29,38 @@ export type TaskIconName =
   | "water"
   | "youtube";
 
+export const taskIconOptions: Array<{ name: TaskIconName; label: string }> = [
+  { name: "notebook", label: "Geral" },
+  { name: "code", label: "Código" },
+  { name: "gitPullRequest", label: "Review" },
+  { name: "checklist", label: "Checklist" },
+  { name: "book", label: "Estudo" },
+  { name: "message", label: "Comunicação" },
+  { name: "calendar", label: "Agenda" },
+  { name: "briefcase", label: "Trabalho" },
+  { name: "rocket", label: "Carreira" },
+  { name: "target", label: "Meta" },
+  { name: "trendingUp", label: "Evolução" },
+  { name: "wallet", label: "Finanças" },
+  { name: "youtube", label: "YouTube" },
+  { name: "megaphone", label: "Marketing" },
+  { name: "play", label: "Vídeo" },
+  { name: "dumbbell", label: "Treino" },
+  { name: "utensils", label: "Refeição" },
+  { name: "home", label: "Casa" },
+  { name: "heart", label: "Relações" },
+  { name: "alarm", label: "Acordar" },
+  { name: "bed", label: "Sono" },
+  { name: "coffee", label: "Café" },
+  { name: "water", label: "Água" },
+  { name: "sparkles", label: "Cuidado" },
+  { name: "lightbulb", label: "Ideia" },
+  { name: "globe", label: "Global" },
+  { name: "moon", label: "Noite" },
+  { name: "fileText", label: "Documento" },
+  { name: "mic", label: "Voz" }
+];
+
 const taskIconRules: Array<{ icon: TaskIconName; keywords: string[] }> = [
   { icon: "alarm", keywords: ["acordar"] },
   { icon: "bed", keywords: ["arrumar cama", "cama"] },
@@ -63,6 +95,10 @@ export function getTaskIconName(label: string): TaskIconName {
   const normalizedLabel = normalize(label);
   const rule = taskIconRules.find((item) => item.keywords.some((keyword) => normalizedLabel.includes(keyword)));
   return rule?.icon ?? "notebook";
+}
+
+export function isTaskIconName(value: unknown): value is TaskIconName {
+  return typeof value === "string" && taskIconOptions.some((option) => option.name === value);
 }
 
 function normalize(value: string) {

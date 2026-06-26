@@ -202,6 +202,31 @@
   color: var(--text);
 }
 
+.taskEditForm {
+  grid-template-columns: minmax(0, 1fr) 36px 36px;
+  width: 100%;
+}
+
+.taskIconPicker {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding-top: 2px;
+}
+
+.taskIconPicker button {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+}
+
+.taskIconPicker button.selected {
+  border-color: rgba(84, 226, 154, 0.75);
+  background: rgba(84, 226, 154, 0.13);
+  color: var(--green);
+}
+
 .customTask {
   justify-content: space-between;
   cursor: default;
