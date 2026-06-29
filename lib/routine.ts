@@ -405,6 +405,9 @@ export function isReferenceSection(section: RoutineSection) {
   return Boolean(section.references?.length || section.referenceGroups?.length);
 }
 
+export const trackedRoutineSections = routineSections.filter((section) => !isReferenceSection(section));
+export const routineReferenceSections = routineSections.filter(isReferenceSection);
+
 function uniqueDays(days: Weekday[]) {
   return [...new Set(days)].sort();
 }

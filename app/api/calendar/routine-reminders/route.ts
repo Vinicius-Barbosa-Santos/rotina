@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { clearGoogleAuthCookies, getGoogleAccessToken, GoogleCalendarAuthError } from "@/lib/google-auth";
-import { routineSections, type RoutineSection } from "@/lib/routine";
+import { trackedRoutineSections, type RoutineSection } from "@/lib/routine";
 
 export const maxDuration = 60;
 
@@ -32,7 +32,7 @@ export async function POST(request: Request) {
     const body = await request.json().catch(() => undefined) as
       | { sections?: SyncSection[]; rangeDays?: number }
       | undefined;
-    const sourceSections = body?.sections?.length ? body.sections : routineSections;
+    const sourceSections = body?.sections?.length ? body.sections : trackedRoutineSections;
     const rangeDays = Math.min(Math.max(body?.rangeDays ?? 1, 1), 30);
     const dates = getCalendarDates(rangeDays, timeZone);
     const synced: string[] = [];
@@ -229,7 +229,7 @@ async function listAllRoutineEvents({
 }) {
   const events = new Map<string, { id: string; summary?: string; recurrence?: string[] }>();
 
-  for (const sectionBatch of chunk(routineSections, 3)) {
+  for (const sectionBatch of chunk(trackedRoutineSections, 3)) {
     const batchEvents = await Promise.all(
       sectionBatch.map((section) =>
         listRoutineEvents({

@@ -3,7 +3,9 @@ import test from "node:test";
 import {
   getSectionScheduleLabel,
   getVisibleItems,
+  routineReferenceSections,
   routineSections,
+  trackedRoutineSections,
   type RoutineSection,
 } from "../lib/routine.ts";
 
@@ -94,6 +96,8 @@ test("functional adult section is a permanent, categorized reference guide", () 
   assert.ok(functional.referenceGroups?.some((group) => group.title === "Relacionamentos e convivência"));
   assert.ok(functional.referenceGroups?.some((group) => group.title === "Carro, moto e transporte"));
   assert.ok(functional.referenceGroups?.some((group) => group.title === "Cozinha e alimentação"));
+  assert.equal(trackedRoutineSections.some((section) => section.key === functional.key), false);
+  assert.equal(routineReferenceSections.some((section) => section.key === functional.key), true);
 });
 
 test("weekend optional focus includes investments, digital marketing and YouTube", () => {

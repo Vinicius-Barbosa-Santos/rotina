@@ -477,6 +477,24 @@
   gap: 14px;
 }
 
+.referenceArea {
+  display: grid;
+  gap: 14px;
+  margin-top: 30px;
+  padding-top: 24px;
+  border-top: 1px solid var(--line);
+}
+
+.referenceAreaHeader h2 {
+  margin: 4px 0 5px;
+  font-size: 20px;
+}
+
+.referenceAreaHeader > span {
+  color: var(--muted);
+  font-size: 12px;
+}
+
 .routineCard {
   position: relative;
   overflow: hidden;

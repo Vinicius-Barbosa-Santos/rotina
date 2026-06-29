@@ -2,7 +2,13 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Bell, CalendarDays, Flame, Loader2 } from "lucide-react";
-import { getVisibleItems, isReferenceSection, routineSections } from "@/lib/routine";
+import {
+  getVisibleItems,
+  isReferenceSection,
+  routineReferenceSections,
+  routineSections,
+  trackedRoutineSections
+} from "@/lib/routine";
 import { dateKey, formatDate, formatShortDate, todayKey } from "@/lib/date";
 import { defaultMeetingForm, getManualMeetingEvents } from "@/lib/manual-meetings";
 import type { TaskIconName } from "@/lib/task-icons";
@@ -258,10 +264,10 @@ export default function HomePage() {
     );
     const previousState = lastCalendarSyncState.current;
     const changedSectionKeys = previousState
-      ? routineSections
+      ? trackedRoutineSections
           .filter((section) => JSON.stringify(previousState[section.key] ?? []) !== JSON.stringify(state[section.key] ?? []))
           .map((section) => section.key)
-      : routineSections.map((section) => section.key);
+      : trackedRoutineSections.map((section) => section.key);
 
     lastCalendarSyncPrefs.current = calendarPrefs;
     lastCalendarSyncState.current = state;
@@ -374,8 +380,8 @@ export default function HomePage() {
 
   const totals = useMemo(() => {
     const today = new Date();
-    const routineTotal = routineSections.reduce((sum, section) => sum + getProgressItems(section, today).length, 0);
-    const routineDone = routineSections.reduce((sum, section) => {
+    const routineTotal = trackedRoutineSections.reduce((sum, section) => sum + getProgressItems(section, today).length, 0);
+    const routineDone = trackedRoutineSections.reduce((sum, section) => {
       const visibleKeys = new Set(getProgressItems(section, today).map((item) => item.key));
       const doneToday = (state[section.key] ?? []).filter((key) => visibleKeys.has(String(key))).length;
       return sum + doneToday;
@@ -404,7 +410,7 @@ export default function HomePage() {
   const routineNotificationSections = useMemo<RoutineNotificationSection[]>(() => {
     const today = new Date();
 
-    return routineSections
+    return trackedRoutineSections
       .map((section) => {
         const startsAt = getSectionStartDate(getSectionTime(section.key, section.time), today);
         const items = getPersonalizedItems(section, today).map((item) => item.label);
@@ -565,7 +571,6 @@ export default function HomePage() {
   }
 
   function getPersonalizedItems(section: (typeof routineSections)[number], date = new Date()): PersonalizedRoutineItem[] {
-    if (isReferenceSection(section)) return [];
     const hidden = new Set(routinePrefs.hiddenItems[section.key] ?? []);
     const defaultItems = getVisibleItems(section, date)
       .filter(({ index }) => !hidden.has(index))
@@ -590,7 +595,7 @@ export default function HomePage() {
   }
 
   function getProgressItems(section: (typeof routineSections)[number], date = new Date()) {
-    if (!isProgressTrackingDate(date)) return [];
+    if (!isProgressTrackingDate(date) || isReferenceSection(section)) return [];
     return getPersonalizedItems(section, date);
   }
 
@@ -700,7 +705,7 @@ export default function HomePage() {
   }
 
   function buildCalendarSections() {
-    return routineSections.map((section) => ({
+    return trackedRoutineSections.map((section) => ({
       ...section,
       time: getSectionTime(section.key, section.time),
       items: [
@@ -725,7 +730,7 @@ export default function HomePage() {
       const calendarDay = !isToday ? calendarProgressDays[key] : undefined;
       if (!isToday && storedState === null && !calendarDay) return [];
       const dayState = storedState ?? {};
-      const sections = routineSections
+      const sections = trackedRoutineSections
         .map((section) => {
           const items = getProgressItems(section, date);
           const visibleKeys = new Set(items.map((item) => item.key));
@@ -752,7 +757,7 @@ export default function HomePage() {
     const key = dateKey(date);
     const isToday = key === todayKey();
     const dayState = isToday ? state : readStorageJson<RoutineState>(`${routineStatePrefix}${key}`, {});
-    const localTotals = routineSections.reduce(
+    const localTotals = trackedRoutineSections.reduce(
       (result, section) => {
         const items = getProgressItems(section, date);
         const visibleKeys = new Set(items.map((item) => item.key));
@@ -1037,7 +1042,7 @@ export default function HomePage() {
               </i>
               <em>{manualEvents.length}/{manualMeetings.length}</em>
             </a>
-            {routineSections.map((section) => {
+            {trackedRoutineSections.map((section) => {
               const visibleItems = getPersonalizedItems(section);
               const visibleKeys = new Set(visibleItems.map((item) => item.key));
               const done = (state[section.key] ?? []).filter((key) => visibleKeys.has(String(key))).length;
@@ -1051,11 +1056,25 @@ export default function HomePage() {
                   <i>
                     <b style={{ width: `${pct}%`, background: section.color }} />
                   </i>
-                  <em>{total ? `${done}/${total}` : isReferenceSection(section) ? "guia" : "fora"}</em>
+                  <em>{total ? `${done}/${total}` : "fora"}</em>
                 </a>
               );
             })}
           </section>
+
+          {routineReferenceSections.length > 0 && (
+            <section className="sideBlock navList">
+              <p className="sideLabel">referências</p>
+              {routineReferenceSections.map((section) => (
+                <a key={section.key} href={`#${section.key}`} className="navItem">
+                  <RoutineIcon name={section.icon} />
+                  <span>{section.shortLabel}</span>
+                  <i />
+                  <em>guia</em>
+                </a>
+              ))}
+            </section>
+          )}
         </aside>
 
         <section className="content" aria-label="Checklist da rotina">
@@ -1092,7 +1111,7 @@ export default function HomePage() {
               onDelete={deleteManualMeeting}
             />
 
-            {routineSections.map((section) => {
+            {trackedRoutineSections.map((section) => {
               const visibleItems = getPersonalizedItems(section);
               const visibleKeys = new Set(visibleItems.map((item) => item.key));
               const doneItems = new Set((state[section.key] ?? []).filter((key) => visibleKeys.has(String(key))).map(String));
@@ -1121,6 +1140,39 @@ export default function HomePage() {
               );
             })}
           </div>
+
+          {routineReferenceSections.length > 0 && (
+            <section className="referenceArea" aria-labelledby="reference-area-title">
+              <div className="referenceAreaHeader">
+                <p className="eyebrow">referências</p>
+                <h2 id="reference-area-title">Guias para consultar</h2>
+                <span>Não entram na sua rotina, progresso, streak ou relatórios.</span>
+              </div>
+              <div className="sections">
+                {routineReferenceSections.map((section) => (
+                  <RoutineSectionCard
+                    key={section.key}
+                    section={section}
+                    items={[]}
+                    doneItems={new Set()}
+                    guideDoneItems={new Set(routinePrefs.guideChecks[section.key] ?? [])}
+                    isOpen={openSections.has(section.key)}
+                    time={section.time}
+                    newItem=""
+                    onToggleSection={() => toggleSection(section.key)}
+                    onToggleItem={() => undefined}
+                    onToggleGuideItem={(key) => toggleGuideItem(section.key, key)}
+                    onDeleteItem={() => undefined}
+                    onEditItem={() => undefined}
+                    onNewItemChange={() => undefined}
+                    onAddItem={() => undefined}
+                    onTimeChange={() => undefined}
+                    onClear={() => undefined}
+                  />
+                ))}
+              </div>
+            </section>
+          )}
         </section>
       </div>
     </main>
