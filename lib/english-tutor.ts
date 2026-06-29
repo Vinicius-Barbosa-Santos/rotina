@@ -4,11 +4,41 @@ export type TutorMessage = {
   content: string;
 };
 
+export type TutorReportSection = {
+  title: string;
+  content: string;
+};
+
 export const welcomeTutorMessage: TutorMessage = {
   id: "welcome",
   role: "assistant",
   content: "Hi! Let's practice a developer daily. What did you work on yesterday, and what will you work on today?"
 };
+
+export function parseTutorReport(report: string): TutorReportSection[] {
+  const sections: TutorReportSection[] = [];
+  let title = "Análise geral";
+  let lines: string[] = [];
+
+  function saveSection() {
+    const content = lines.join("\n").trim();
+    if (content) sections.push({ title, content });
+    lines = [];
+  }
+
+  report.split(/\r?\n/).forEach((line) => {
+    const heading = line.match(/^##\s+(.+)$/);
+    if (heading) {
+      saveSection();
+      title = heading[1].trim();
+      return;
+    }
+    lines.push(line);
+  });
+  saveSection();
+
+  return sections;
+}
 
 export async function requestTutor(
   mode: "chat" | "summary",

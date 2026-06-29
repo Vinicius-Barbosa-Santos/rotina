@@ -111,6 +111,10 @@ export default function HomePage() {
   const [calendarError, setCalendarError] = useState("");
   const notificationTimers = useRef<number[]>([]);
   const calendarSyncTimer = useRef<number | undefined>(undefined);
+  const lastCalendarSyncState = useRef<RoutineState | null>(null);
+  const lastCalendarSyncPrefs = useRef<Pick<RoutinePrefs, "hiddenItems" | "customItems" | "timeOverrides" | "labelOverrides"> | null>(null);
+  const pendingCalendarSectionKeys = useRef(new Set<string>());
+  const pendingFullCalendarSync = useRef(false);
   const routineSyncTimer = useRef<number | undefined>(undefined);
   const lastRoutineSyncAt = useRef("");
   const applyingRemoteSync = useRef(false);
@@ -242,23 +246,69 @@ export default function HomePage() {
   useEffect(() => {
     if (!hydrated || calendar?.source !== "oauth") return;
 
-    window.clearTimeout(calendarSyncTimer.current);
-    calendarSyncTimer.current = window.setTimeout(() => {
-      if (calendarSyncInProgress.current) return;
+    const calendarPrefs = {
+      hiddenItems: routinePrefs.hiddenItems,
+      customItems: routinePrefs.customItems,
+      timeOverrides: routinePrefs.timeOverrides,
+      labelOverrides: routinePrefs.labelOverrides
+    };
+    const previousPrefs = lastCalendarSyncPrefs.current;
+    const preferencesChanged = !previousPrefs || Object.keys(calendarPrefs).some(
+      (key) => calendarPrefs[key as keyof typeof calendarPrefs] !== previousPrefs[key as keyof typeof previousPrefs]
+    );
+    const previousState = lastCalendarSyncState.current;
+    const changedSectionKeys = previousState
+      ? routineSections
+          .filter((section) => JSON.stringify(previousState[section.key] ?? []) !== JSON.stringify(state[section.key] ?? []))
+          .map((section) => section.key)
+      : routineSections.map((section) => section.key);
+
+    lastCalendarSyncPrefs.current = calendarPrefs;
+    lastCalendarSyncState.current = state;
+
+    if (preferencesChanged) pendingFullCalendarSync.current = true;
+    else changedSectionKeys.forEach((key) => pendingCalendarSectionKeys.current.add(key));
+
+    if (!pendingFullCalendarSync.current && pendingCalendarSectionKeys.current.size === 0) return;
+
+    function syncChangedCalendarSections() {
+      if (calendarSyncInProgress.current) {
+        calendarSyncTimer.current = window.setTimeout(syncChangedCalendarSections, 800);
+        return;
+      }
+
+      const syncAllSections = pendingFullCalendarSync.current;
+      const sectionKeys = new Set(pendingCalendarSectionKeys.current);
+      const sections = buildCalendarSections().filter(
+        (section) => syncAllSections || sectionKeys.has(section.key)
+      );
+      pendingFullCalendarSync.current = false;
+      pendingCalendarSectionKeys.current.clear();
       calendarSyncInProgress.current = true;
       fetch("/api/calendar/routine-reminders", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ sections: buildCalendarSections() })
+        body: JSON.stringify({ sections })
       })
         .catch(() => undefined)
         .finally(() => {
           calendarSyncInProgress.current = false;
         });
-    }, 800);
+    }
+
+    window.clearTimeout(calendarSyncTimer.current);
+    calendarSyncTimer.current = window.setTimeout(syncChangedCalendarSections, 800);
 
     return () => window.clearTimeout(calendarSyncTimer.current);
-  }, [calendar?.source, hydrated, routinePrefs, state]);
+  }, [
+    calendar?.source,
+    hydrated,
+    routinePrefs.customItems,
+    routinePrefs.hiddenItems,
+    routinePrefs.labelOverrides,
+    routinePrefs.timeOverrides,
+    state
+  ]);
 
   useEffect(() => {
     let alive = true;
@@ -383,7 +433,7 @@ export default function HomePage() {
         const firstItems = section.items.slice(0, 3).join(", ");
         new Notification(`Começa agora: ${section.label}`, {
           body: firstItems ? `Próximos itens: ${firstItems}` : "Hora de começar este bloco da rotina.",
-          icon: "/minha-rotina-logo.png",
+          icon: "/minha-rotina-logo-192.png",
           tag: `rotina-${todayKey()}-${section.key}`
         });
         saveNotifiedSectionKey(section.key);
@@ -862,7 +912,7 @@ export default function HomePage() {
   if (!hydrated) {
     return (
       <main className="appLoading">
-        <img src="/minha-rotina-logo.png" alt="Minha Rotina" />
+        <img src="/minha-rotina-logo-192.png" alt="Minha Rotina" width={58} height={58} />
         <Loader2 className="spin" size={20} aria-hidden />
         <span>Carregando sua rotina</span>
       </main>
@@ -873,7 +923,7 @@ export default function HomePage() {
     <main className="shell">
       <header className="topbar">
         <div className="brandHeader">
-          <img src="/minha-rotina-logo.png" alt="Minha Rotina" />
+          <img src="/minha-rotina-logo-192.png" alt="Minha Rotina" width={54} height={54} />
           <div>
             <p className="eyebrow">minha rotina</p>
             <h1>{formatDate(new Date())}</h1>

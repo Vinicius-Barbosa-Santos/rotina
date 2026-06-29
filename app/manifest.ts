@@ -14,7 +14,7 @@ export default function manifest(): MetadataRoute.Manifest {
     categories: ["productivity", "lifestyle"],
     icons: [
       {
-        src: "/minha-rotina-logo.png",
+        src: "/minha-rotina-logo-192.png",
         sizes: "192x192",
         type: "image/png",
         purpose: "any"

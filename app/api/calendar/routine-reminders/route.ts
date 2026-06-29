@@ -38,8 +38,10 @@ export async function POST(request: Request) {
     const synced: string[] = [];
 
     if (rangeDays > 1) {
-      for (const section of sourceSections) {
-        await deleteLegacyRecurringRoutineEvents({ section, calendarId, accessToken });
+      for (const sectionBatch of chunk(sourceSections, 3)) {
+        await Promise.all(
+          sectionBatch.map((section) => deleteLegacyRecurringRoutineEvents({ section, calendarId, accessToken }))
+        );
       }
     }
 
@@ -227,14 +229,18 @@ async function listAllRoutineEvents({
 }) {
   const events = new Map<string, { id: string; summary?: string; recurrence?: string[] }>();
 
-  for (const section of routineSections) {
-    const byProperty = await listRoutineEvents({
-      calendarId,
-      accessToken,
-      privateExtendedProperties: [`rotinaSectionKey=${section.key}`],
-      maxResults: 250
-    });
-    byProperty.forEach((event) => events.set(event.id, event));
+  for (const sectionBatch of chunk(routineSections, 3)) {
+    const batchEvents = await Promise.all(
+      sectionBatch.map((section) =>
+        listRoutineEvents({
+          calendarId,
+          accessToken,
+          privateExtendedProperties: [`rotinaSectionKey=${section.key}`],
+          maxResults: 250
+        })
+      )
+    );
+    batchEvents.flat().forEach((event) => events.set(event.id, event));
   }
 
   const byTitle = await listRoutineEvents({

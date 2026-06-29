@@ -230,7 +230,31 @@
   color: var(--green);
 }
 
-.englishSummary p {
+.englishSummarySections {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 9px;
+}
+
+.englishSummarySections section {
+  min-width: 0;
+  padding: 11px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.englishSummarySections section.wide {
+  grid-column: 1 / -1;
+}
+
+.englishSummarySections h4 {
+  margin: 0 0 7px;
+  color: var(--green);
+  font-size: 12px;
+}
+
+.englishSummarySections p {
   margin: 0;
   white-space: pre-wrap;
   font-size: 12px;

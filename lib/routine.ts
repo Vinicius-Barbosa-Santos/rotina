@@ -101,20 +101,45 @@ export const routineSections: RoutineSection[] = [
     ]
   },
   {
+    key: "house-cleaning",
+    icon: "Home",
+    label: "Limpeza da Casa",
+    shortLabel: "Limpeza",
+    color: "#6dd3b2",
+    bg: "rgba(109, 211, 178, 0.12)",
+    time: "20:00-20:30",
+    days: weekdays,
+    note: "Pouco por dia para a casa não acumular. Proteja coluna e joelhos: evite torcer o tronco, ajoelhar e carregar peso excessivo.",
+    items: [
+      { label: "Manutenção diária: guardar o que está fora do lugar (10 min)" },
+      { label: "Manutenção diária: lavar louça e limpar pia e bancada" },
+      { label: "Segunda — Cozinha: fogão, mesa, geladeira por fora e lixo", days: [1] },
+      { label: "Terça — Banheiro: vaso, pia, espelho, box e trocar toalhas", days: [2] },
+      { label: "Quarta — Quarto e roupas: tirar pó, organizar e lavar roupa", days: [3] },
+      { label: "Quinta — Sala e escritório: tirar pó, organizar e aspirar", days: [4] },
+      { label: "Sexta — Pisos, roupa de cama e revisão geral da casa", days: [5] }
+    ]
+  },
+  {
     key: "health",
     icon: "Fit",
     label: "Saúde",
     shortLabel: "Saúde",
     color: "#8ec3f7",
     bg: "rgba(142, 195, 247, 0.12)",
-    time: "20:00-21:00",
+    time: "20:30-21:15",
     days: weekdays,
+    note: "Plano inicial de baixo impacto. Faça somente movimentos liberados para a sua coluna e o seu joelho; pare se a dor aumentar e procure fisioterapeuta ou ortopedista.",
     items: [
-      { label: "Academia" },
-      { label: "Alongamento" },
-      { label: "Jantar" },
-      { label: "Água" },
-      { label: "Caminhada leve (opcional)" }
+      { label: "Água ao longo do dia" },
+      { label: "Pausa ativa e mobilidade suave (5-10 min)" },
+      { label: "Jantar equilibrado com proteína, vegetais e carboidrato" },
+      { label: "Preparar o sono para 7-9 horas" },
+      { label: "Segunda — Força A orientada: core, glúteos, costas e joelho (20-30 min)", days: [1] },
+      { label: "Terça — Cardio de baixo impacto: caminhada plana ou bicicleta (20-30 min)", days: [2] },
+      { label: "Quarta — Recuperação ativa: caminhada leve e mobilidade confortável (20 min)", days: [3] },
+      { label: "Quinta — Força B orientada: membros superiores, quadril e estabilidade (20-30 min)", days: [4] },
+      { label: "Sexta — Cardio de baixo impacto em ritmo confortável (25-30 min)", days: [5] }
     ]
   },
   {

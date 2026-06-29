@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Download, Loader2, Mic, Send, Sparkles, Trash2, Volume2, VolumeX } from "lucide-react";
 import {
+  parseTutorReport,
   requestAudioTranscription,
   requestTutor,
   welcomeTutorMessage,
@@ -30,6 +31,7 @@ export default function EnglishTutor() {
   const recorderRef = useRef<MediaRecorder | null>(null);
   const recordingStreamRef = useRef<MediaStream | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
+  const summarySections = useMemo(() => parseTutorReport(summary), [summary]);
 
   useEffect(() => {
     const savedSummary = localStorage.getItem(summaryKey);
@@ -196,7 +198,7 @@ export default function EnglishTutor() {
       setInput(result.text);
       if (result.pronunciationFeedback) {
         setPronunciationNotes((current) => {
-          const next = [...current, result.pronunciationFeedback].slice(-12);
+          const next = [...current, result.pronunciationFeedback].slice(-30);
           localStorage.setItem(pronunciationNotesKey, JSON.stringify(next));
           return next;
         });
@@ -295,7 +297,7 @@ export default function EnglishTutor() {
       <div className="englishTutorActions">
         <button type="button" onClick={createSummary} disabled={summarizing || !messages.some((message) => message.role === "user")}>
           {summarizing ? <Loader2 className="spin" size={15} aria-hidden /> : <Sparkles size={15} aria-hidden />}
-          {summarizing ? "Analisando..." : "Gerar relatório da prática"}
+          {summarizing ? "Analisando tudo..." : "Gerar análise completa"}
         </button>
         <span>
           {speechSupported
@@ -312,13 +314,20 @@ export default function EnglishTutor() {
       {summary && (
         <div className="englishSummary">
           <div className="englishSummaryHeader">
-            <strong>Relatório da sessão</strong>
+            <strong>Análise completa da sessão</strong>
             <button type="button" onClick={downloadSummary}>
               <Download size={15} aria-hidden />
               Baixar arquivo
             </button>
           </div>
-          <p>{summary}</p>
+          <div className="englishSummarySections">
+            {summarySections.map((section) => (
+              <section className={section.title.includes("Correções") ? "wide" : ""} key={section.title}>
+                <h4>{section.title}</h4>
+                <p>{section.content}</p>
+              </section>
+            ))}
+          </div>
         </div>
       )}
     </section>

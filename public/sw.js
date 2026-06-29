@@ -1,5 +1,5 @@
-const CACHE_NAME = "minha-rotina-shell-v1";
-const SHELL_ASSETS = ["/", "/minha-rotina-logo.png", "/minha-rotina-preview.jpg"];
+const CACHE_NAME = "minha-rotina-shell-v2";
+const SHELL_ASSETS = ["/", "/minha-rotina-logo-192.png", "/minha-rotina-preview.jpg"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(

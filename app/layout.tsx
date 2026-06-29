@@ -17,8 +17,8 @@ export const metadata: Metadata = {
     telephone: false
   },
   icons: {
-    icon: "/minha-rotina-logo.png",
-    apple: "/minha-rotina-logo.png"
+    icon: "/minha-rotina-logo-192.png",
+    apple: "/minha-rotina-logo-192.png"
   },
   manifest: "/manifest.webmanifest",
   openGraph: {

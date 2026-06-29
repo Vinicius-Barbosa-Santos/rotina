@@ -25,8 +25,10 @@ type GeminiResponse = {
   }>;
 };
 
-const maxMessages = 30;
-const maxConversationCharacters = 12_000;
+const chatMaxMessages = 30;
+const chatMaxCharacters = 12_000;
+const summaryMaxMessages = 80;
+const summaryMaxCharacters = 30_000;
 const maxRequestsPerHour = 30;
 const requestWindows = new Map<string, { count: number; resetsAt: number }>();
 
@@ -62,7 +64,7 @@ export async function POST(request: Request) {
     return transcribeAudio({ apiKey, audioData, mimeType });
   }
 
-  const messages = sanitizeMessages(body?.messages ?? []);
+  const messages = sanitizeMessages(body?.messages ?? [], mode);
   const pronunciationNotes = sanitizePronunciationNotes(body?.pronunciationNotes ?? []);
 
   if (!messages.length) {
@@ -95,7 +97,7 @@ export async function POST(request: Request) {
         parts: [{ text: message.content }]
       })),
       generationConfig: {
-        maxOutputTokens: mode === "summary" ? 1_200 : 600,
+        maxOutputTokens: mode === "summary" ? 3_000 : 600,
         thinkingConfig: { thinkingBudget: 0 }
       }
     }
@@ -246,6 +248,11 @@ function allowRequest(request: Request) {
   const forwardedFor = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim();
   const visitor = forwardedFor || request.headers.get("x-real-ip") || "local";
   const now = Date.now();
+  if (requestWindows.size > 1_000) {
+    requestWindows.forEach((window, key) => {
+      if (window.resetsAt <= now) requestWindows.delete(key);
+    });
+  }
   const current = requestWindows.get(visitor);
 
   if (!current || current.resetsAt <= now) {
@@ -258,7 +265,9 @@ function allowRequest(request: Request) {
   return true;
 }
 
-function sanitizeMessages(messages: TutorMessage[]) {
+function sanitizeMessages(messages: TutorMessage[], mode: "chat" | "summary") {
+  const maxMessages = mode === "summary" ? summaryMaxMessages : chatMaxMessages;
+  const maxCharacters = mode === "summary" ? summaryMaxCharacters : chatMaxCharacters;
   const sanitized = messages
     .filter((message) => message?.role === "user" || message?.role === "assistant")
     .map((message) => ({
@@ -273,7 +282,7 @@ function sanitizeMessages(messages: TutorMessage[]) {
     .reverse()
     .filter((message) => {
       characters += message.content.length;
-      return characters <= maxConversationCharacters;
+      return characters <= maxCharacters;
     })
     .reverse();
 }
@@ -283,7 +292,7 @@ function sanitizePronunciationNotes(notes: unknown) {
     .filter((note) => typeof note === "string")
     .map((note) => note.trim().slice(0, 500))
     .filter(Boolean)
-    .slice(-12);
+    .slice(-30);
 }
 
 function extractOutputText(payload?: GeminiResponse) {
@@ -334,19 +343,32 @@ Ignore tiny stylistic issues when the sentence is clear. Be encouraging without 
 const summaryInstructions = `
 Analyze the English workplace communication practice of a Brazilian software developer.
 Write the report in Brazilian Portuguese, while keeping English examples in English.
-Use exactly these short sections:
+Review every learner message in the conversation. The report must be comprehensive, not a brief summary.
+Do not omit a correction merely because the original sentence was understandable.
+Deduplicate repeated mistakes, but list every distinct opportunity to improve grammar, spelling, punctuation, word choice, sentence structure, clarity, tone, fluency, and naturalness.
+Clearly distinguish evidence from written messages from evidence collected through audio pronunciation observations.
+
+Use exactly these sections:
 
 ## Cenário praticado
 ## O que você comunicou bem
-## Pontos gramaticais para melhorar
-## Pronúncia
-## Clareza e confiança ao falar
-## Vocabulário técnico aprendido
-## Frases úteis para o trabalho
-## Plano para a próxima prática
+## Correções completas da escrita
+## Como soar mais natural
+## Fala, fluência e clareza
+## Pronúncia observada nos áudios
+## Padrões que mais se repetem
+## Vocabulário e frases melhores
+## Plano de estudo personalizado
 
-Evaluate clarity, confidence, grammar, and ability to explain technical work.
-For pronunciation, use only the pronunciation observations supplied below. Never infer pronunciation from written text. If there are no reliable observations, say so clearly.
-Be specific and quote only short fragments from the learner's messages.
-Explain grammatical corrections clearly, include corrected examples, and give 3 practical example sentences the learner can reuse at work.
+In "Correções completas da escrita", enumerate every distinct issue using this exact structure:
+1. Original: "short learner fragment"
+   Correção: "correct English"
+   Mais natural: "natural workplace English"
+   Explicação: concise explanation in Brazilian Portuguese
+
+If a sentence is grammatically correct but unnatural, include it under "Como soar mais natural".
+Evaluate confidence and fluency only when the conversation or audio observations provide evidence; never pretend to hear written text.
+For pronunciation, use only the supplied audio observations. Never infer pronunciation from spelling or grammar. If there are no reliable observations, say so clearly.
+Identify recurring patterns and rank them by impact. Finish with specific exercises and at least 5 reusable workplace sentences tailored to the learner's actual mistakes.
+Be direct, constructive, and detailed. Quote only short fragments from the learner's messages.
 `.trim();
