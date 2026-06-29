@@ -40,6 +40,7 @@ function hasRoutinePrefsData(prefs: RoutinePrefs) {
       Object.keys(prefs.customItems ?? {}).length ||
       Object.keys(prefs.timeOverrides ?? {}).length ||
       Object.keys(prefs.labelOverrides ?? {}).length ||
-      Object.keys(prefs.iconOverrides ?? {}).length
+      Object.keys(prefs.iconOverrides ?? {}).length ||
+      Object.keys(prefs.guideChecks ?? {}).length
   );
 }

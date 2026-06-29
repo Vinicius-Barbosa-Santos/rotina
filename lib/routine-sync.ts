@@ -27,7 +27,8 @@ export function getDefaultRoutineSyncData(): RoutineSyncData {
       customItems: {},
       timeOverrides: {},
       labelOverrides: {},
-      iconOverrides: {}
+      iconOverrides: {},
+      guideChecks: {}
     },
     manualMeetings: [],
     profileStacks: [],
@@ -113,7 +114,8 @@ function normalizeRoutineSyncData(data: Partial<RoutineSyncData>): RoutineSyncDa
       customItems: isObject(data.routinePrefs?.customItems) ? data.routinePrefs.customItems : {},
       timeOverrides: isObject(data.routinePrefs?.timeOverrides) ? data.routinePrefs.timeOverrides : {},
       labelOverrides: isObject(data.routinePrefs?.labelOverrides) ? data.routinePrefs.labelOverrides : {},
-      iconOverrides: isObject(data.routinePrefs?.iconOverrides) ? data.routinePrefs.iconOverrides : {}
+      iconOverrides: isObject(data.routinePrefs?.iconOverrides) ? data.routinePrefs.iconOverrides : {},
+      guideChecks: isObject(data.routinePrefs?.guideChecks) ? data.routinePrefs.guideChecks as Record<string, string[]> : {}
     },
     manualMeetings: Array.isArray(data.manualMeetings) ? data.manualMeetings : [],
     profileStacks: Array.isArray(data.profileStacks)

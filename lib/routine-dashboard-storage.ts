@@ -19,7 +19,8 @@ export function normalizeRoutinePrefs(savedPrefs: Partial<RoutinePrefs>): Routin
     customItems: savedPrefs.customItems ?? {},
     timeOverrides: savedPrefs.timeOverrides ?? {},
     labelOverrides: savedPrefs.labelOverrides ?? {},
-    iconOverrides: savedPrefs.iconOverrides ?? {}
+    iconOverrides: savedPrefs.iconOverrides ?? {},
+    guideChecks: savedPrefs.guideChecks ?? {}
   };
 }
 
@@ -112,7 +113,8 @@ function hasRoutinePrefsData(prefs: RoutinePrefs) {
       Object.keys(prefs.customItems).length ||
       Object.keys(prefs.timeOverrides).length ||
       Object.keys(prefs.labelOverrides).length ||
-      Object.keys(prefs.iconOverrides).length
+      Object.keys(prefs.iconOverrides).length ||
+      Object.keys(prefs.guideChecks).length
   );
 }
 

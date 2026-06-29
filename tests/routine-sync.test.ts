@@ -17,6 +17,8 @@ function snapshot(overrides: Partial<RoutineSyncSnapshot> = {}): RoutineSyncSnap
       customItems: {},
       timeOverrides: {},
       labelOverrides: {},
+      iconOverrides: {},
+      guideChecks: {},
     },
     manualMeetings: [],
     profileStacks: [],

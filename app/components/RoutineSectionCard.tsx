@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, type FormEvent } from "react";
-import { Check, CheckIcon, ChevronDown, Pencil, Plus, RotateCcw, Trash2, X } from "lucide-react";
+import { Check, CheckIcon, ChevronDown, ChevronLeft, ChevronRight, Pencil, Plus, RotateCcw, Trash2, X } from "lucide-react";
 import { getSectionScheduleLabel, isReferenceSection, type RoutineSection } from "@/lib/routine";
 import { getTaskIconName, taskIconOptions, type TaskIconName } from "@/lib/task-icons";
 import type { PersonalizedRoutineItem } from "@/lib/types";
@@ -13,11 +13,13 @@ type RoutineSectionCardProps = {
   section: RoutineSection;
   items: PersonalizedRoutineItem[];
   doneItems: Set<string>;
+  guideDoneItems: Set<string>;
   isOpen: boolean;
   time: string;
   newItem: string;
   onToggleSection: () => void;
   onToggleItem: (key: string) => void;
+  onToggleGuideItem: (key: string) => void;
   onDeleteItem: (item: PersonalizedRoutineItem) => void;
   onEditItem: (item: PersonalizedRoutineItem, label: string, icon: TaskIconName) => void;
   onNewItemChange: (value: string) => void;
@@ -30,11 +32,13 @@ export default function RoutineSectionCard({
   section,
   items,
   doneItems,
+  guideDoneItems,
   isOpen,
   time,
   newItem,
   onToggleSection,
   onToggleItem,
+  onToggleGuideItem,
   onDeleteItem,
   onEditItem,
   onNewItemChange,
@@ -42,12 +46,18 @@ export default function RoutineSectionCard({
   onTimeChange,
   onClear
 }: RoutineSectionCardProps) {
-  const pct = items.length ? Math.round((doneItems.size / items.length) * 100) : 0;
   const referenceSection = isReferenceSection(section);
+  const referenceGroups = section.referenceGroups ?? [];
+  const referenceTotal = referenceGroups.reduce((sum, group) => sum + group.items.length, 0);
+  const referenceDone = guideDoneItems.size;
+  const pct = referenceSection
+    ? referenceTotal ? Math.round((referenceDone / referenceTotal) * 100) : 0
+    : items.length ? Math.round((doneItems.size / items.length) * 100) : 0;
   const [editingItemKey, setEditingItemKey] = useState<string | null>(null);
   const [editingLabel, setEditingLabel] = useState("");
   const [editingIcon, setEditingIcon] = useState<TaskIconName>("notebook");
   const [shouldRenderChecklist, setShouldRenderChecklist] = useState(isOpen);
+  const [activeReferenceGroup, setActiveReferenceGroup] = useState(0);
 
   useEffect(() => {
     if (isOpen) {
@@ -96,7 +106,7 @@ export default function RoutineSectionCard({
         </span>
         <span className="sectionActions">
           <span className="countBadge" style={{ color: section.color, background: section.bg }}>
-            {referenceSection ? "guia" : items.length ? `${doneItems.size}/${items.length}` : "0/0"}
+            {referenceSection ? `${referenceDone}/${referenceTotal}` : items.length ? `${doneItems.size}/${items.length}` : "0/0"}
           </span>
           <ChevronDown className={isOpen ? "chevron open" : "chevron"} size={18} aria-hidden />
         </span>
@@ -196,16 +206,72 @@ export default function RoutineSectionCard({
                 {section.references.map((reference) => <li key={reference}>{reference}</li>)}
               </ol>
             ) : null}
-            {section.referenceGroups?.length ? (
-              <div className="referenceGroups">
-                {section.referenceGroups.map((group) => (
-                  <section className="referenceGroup" key={group.title}>
-                    <h3>{group.title}</h3>
-                    <ul>
-                      {group.items.map((reference) => <li key={reference}>{reference}</li>)}
-                    </ul>
+            {referenceGroups.length ? (
+              <div className="referenceSlider">
+                <div className="referenceSliderSummary">
+                  <span>{referenceDone} de {referenceTotal} competências</span>
+                  <strong>{referenceTotal ? Math.round((referenceDone / referenceTotal) * 100) : 0}%</strong>
+                </div>
+                <div className="referenceSliderProgress" aria-hidden>
+                  <span style={{ width: `${referenceTotal ? (referenceDone / referenceTotal) * 100 : 0}%`, background: section.color }} />
+                </div>
+                <div className="referenceSliderNav">
+                  <button
+                    type="button"
+                    onClick={() => setActiveReferenceGroup((current) => (current - 1 + referenceGroups.length) % referenceGroups.length)}
+                    aria-label="Tópico anterior"
+                  >
+                    <ChevronLeft size={17} aria-hidden />
+                  </button>
+                  <span>{activeReferenceGroup + 1} / {referenceGroups.length}</span>
+                  <button
+                    type="button"
+                    onClick={() => setActiveReferenceGroup((current) => (current + 1) % referenceGroups.length)}
+                    aria-label="Próximo tópico"
+                  >
+                    <ChevronRight size={17} aria-hidden />
+                  </button>
+                </div>
+                {referenceGroups.map((group, groupIndex) => groupIndex === activeReferenceGroup ? (
+                  <section className="referenceSlide" key={group.title}>
+                    <div className="referenceSlideHeader">
+                      <div>
+                        <small>Tópico {groupIndex + 1}</small>
+                        <h3>{group.title}</h3>
+                      </div>
+                      <span>{group.items.filter((_, itemIndex) => guideDoneItems.has(`${groupIndex}:${itemIndex}`)).length}/{group.items.length}</span>
+                    </div>
+                    <div className="referenceChecklist">
+                      {group.items.map((reference, itemIndex) => {
+                        const itemKey = `${groupIndex}:${itemIndex}`;
+                        const checked = guideDoneItems.has(itemKey);
+                        return (
+                          <label className={checked ? "referenceCheck done" : "referenceCheck"} key={reference}>
+                            <input
+                              type="checkbox"
+                              checked={checked}
+                              onChange={() => onToggleGuideItem(itemKey)}
+                            />
+                            <span className="referenceCheckbox">{checked && <Check size={13} aria-hidden />}</span>
+                            <span>{reference}</span>
+                          </label>
+                        );
+                      })}
+                    </div>
                   </section>
-                ))}
+                ) : null)}
+                <div className="referenceDots" aria-label="Escolher tópico">
+                  {referenceGroups.map((group, index) => (
+                    <button
+                      type="button"
+                      className={index === activeReferenceGroup ? "active" : ""}
+                      key={group.title}
+                      onClick={() => setActiveReferenceGroup(index)}
+                      aria-label={group.title}
+                      aria-current={index === activeReferenceGroup ? "step" : undefined}
+                    />
+                  ))}
+                </div>
               </div>
             ) : null}
             {doneItems.size > 0 && (

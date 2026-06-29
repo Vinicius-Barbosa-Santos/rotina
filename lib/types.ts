@@ -47,6 +47,7 @@ export type RoutinePrefs = {
   timeOverrides: Record<string, string>;
   labelOverrides: Record<string, Record<string, string>>;
   iconOverrides: Record<string, Record<string, TaskIconName>>;
+  guideChecks: Record<string, string[]>;
 };
 
 export type PersonalizedRoutineItem = {

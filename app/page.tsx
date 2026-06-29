@@ -128,7 +128,8 @@ export default function HomePage() {
     customItems: {},
     timeOverrides: {},
     labelOverrides: {},
-    iconOverrides: {}
+    iconOverrides: {},
+    guideChecks: {}
   });
   const [newRoutineItems, setNewRoutineItems] = useState<Record<string, string>>({});
   const [streak, setStreak] = useState(0);
@@ -632,6 +633,22 @@ export default function HomePage() {
     }));
   }
 
+  function toggleGuideItem(sectionKey: string, itemKey: string) {
+    setRoutinePrefs((current) => {
+      const checked = new Set(current.guideChecks[sectionKey] ?? []);
+      if (checked.has(itemKey)) checked.delete(itemKey);
+      else checked.add(itemKey);
+
+      return {
+        ...current,
+        guideChecks: {
+          ...current.guideChecks,
+          [sectionKey]: [...checked]
+        }
+      };
+    });
+  }
+
   function buildCalendarSections() {
     return routineSections.map((section) => ({
       ...section,
@@ -1037,11 +1054,13 @@ export default function HomePage() {
                   section={section}
                   items={visibleItems}
                   doneItems={doneItems}
+                  guideDoneItems={new Set(routinePrefs.guideChecks[section.key] ?? [])}
                   isOpen={isOpen}
                   time={getSectionTime(section.key, section.time)}
                   newItem={newRoutineItems[section.key] ?? ""}
                   onToggleSection={() => toggleSection(section.key)}
                   onToggleItem={(key) => toggleItem(section.key, key)}
+                  onToggleGuideItem={(key) => toggleGuideItem(section.key, key)}
                   onDeleteItem={(item) => deleteRoutineItem(section.key, item)}
                   onEditItem={(item, label, icon) => updateRoutineItem(section.key, item.key, label, icon)}
                   onNewItemChange={(value) => setNewRoutineItems((current) => ({ ...current, [section.key]: value }))}
