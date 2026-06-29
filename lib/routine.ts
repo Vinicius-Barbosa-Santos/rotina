@@ -17,6 +17,10 @@ export type RoutineSection = {
   days?: Weekday[];
   items: RoutineItem[];
   references?: string[];
+  referenceGroups?: Array<{
+    title: string;
+    items: string[];
+  }>;
 };
 
 const weekdays: Weekday[] = [1, 2, 3, 4, 5];
@@ -120,15 +124,144 @@ export const routineSections: RoutineSection[] = [
     shortLabel: "Funcional",
     color: "#f4b860",
     bg: "rgba(244, 184, 96, 0.12)",
-    time: "21:00-21:30",
-    note: "Uma habilidade prática por dia para cuidar melhor da própria vida.",
-    days: weekdays,
-    items: [
-      { label: "Revisar dinheiro da semana", days: [1] },
-      { label: "Preparar uma refeição simples e saudável", days: [2] },
-      { label: "Organizar casa, roupa ou documentos", days: [3] },
-      { label: "Praticar comunicação difícil com respeito", days: [4] },
-      { label: "Revisar agenda, segurança digital e próximos compromissos", days: [5] }
+    time: "guia permanente",
+    note: "Um mapa do que vale saber para cuidar da própria vida. Consulte quando precisar; nada aqui é uma cobrança semanal.",
+    items: [],
+    referenceGroups: [
+      {
+        title: "Autonomia e organização pessoal",
+        items: [
+          "Manter agenda, prazos, contatos importantes e uma rotina básica sustentável",
+          "Definir prioridades, dividir problemas em próximos passos e cumprir combinados",
+          "Organizar documentos físicos e digitais e saber onde encontrar cada um",
+          "Pedir ajuda, pesquisar com senso crítico e reconhecer quando chamar um profissional"
+        ]
+      },
+      {
+        title: "Cozinha e alimentação",
+        items: [
+          "Planejar refeições e compras sem desperdício e dentro do orçamento",
+          "Preparar arroz, feijão, massas, ovos, carnes, legumes, saladas, sopas e molhos básicos",
+          "Usar faca, fogão, forno, air fryer e panela de pressão com segurança",
+          "Armazenar, congelar, descongelar e reaproveitar alimentos com higiene",
+          "Ler validade e rótulos e montar refeições equilibradas para o dia a dia",
+          "Limpar a cozinha e evitar contaminação cruzada"
+        ]
+      },
+      {
+        title: "Casa, limpeza e manutenção",
+        items: [
+          "Limpar banheiro, cozinha, quartos, pisos, vidros e eletrodomésticos",
+          "Lavar, secar, passar e guardar roupas entendendo etiquetas e tipos de tecido",
+          "Criar rotinas de lixo, compras, despensa, geladeira e prevenção de pragas",
+          "Trocar lâmpada, resistência do chuveiro e pilhas e fazer pequenos reparos com segurança",
+          "Saber fechar registros de água e gás e desligar disjuntores em uma emergência",
+          "Identificar vazamento, mofo, curto, infiltração e quando chamar assistência",
+          "Ter ferramentas básicas, contatos de confiança e noção dos custos da casa"
+        ]
+      },
+      {
+        title: "Dinheiro e patrimônio",
+        items: [
+          "Montar orçamento, acompanhar gastos e gastar menos do que ganha",
+          "Pagar contas em dia, entender juros, crédito, empréstimos e parcelamentos",
+          "Criar reserva de emergência e proteção para imprevistos",
+          "Entender conta bancária, cartão, Pix, golpes e segurança financeira",
+          "Declarar imposto de renda e guardar comprovantes e contratos",
+          "Conhecer o básico de inflação, investimentos, seguros e aposentadoria",
+          "Comparar preços, negociar e decidir compras grandes pelo custo total"
+        ]
+      },
+      {
+        title: "Documentos, direitos e vida civil",
+        items: [
+          "Manter RG, CPF, CNH, título, passaporte, cartões e certidões válidos e seguros",
+          "Ler contratos antes de assinar e guardar cópias e comprovantes",
+          "Conhecer direitos básicos de consumidor, trabalho, moradia e privacidade",
+          "Resolver serviços públicos, banco, cartório, correios e atendimentos oficiais",
+          "Entender aluguel, condomínio, garantias, multas e cancelamentos",
+          "Reconhecer quando buscar Procon, Defensoria, advogado ou outro especialista"
+        ]
+      },
+      {
+        title: "Saúde, autocuidado e emergências",
+        items: [
+          "Manter higiene, sono, alimentação, exercício e saúde bucal",
+          "Agendar consultas e exames preventivos e organizar receitas e histórico médico",
+          "Usar medicamentos apenas com orientação e entender dose, horário e validade",
+          "Montar kit de primeiros socorros e saber agir em cortes, queimaduras e engasgos",
+          "Reconhecer sinais de urgência e saber acionar SAMU, Bombeiros e contatos de emergência",
+          "Cuidar da saúde mental, perceber limites e procurar apoio profissional",
+          "Conhecer prevenção de ISTs, contracepção, consentimento e cuidados sexuais"
+        ]
+      },
+      {
+        title: "Relacionamentos e convivência",
+        items: [
+          "Comunicar necessidades e sentimentos com clareza, respeito e escuta",
+          "Estabelecer limites, aceitar um não e respeitar consentimento",
+          "Conversar sobre dinheiro, tarefas, expectativas, sexo e futuro numa parceria",
+          "Resolver conflitos sem humilhar, ameaçar, manipular ou fugir do problema",
+          "Reconhecer relações abusivas e saber buscar uma rede de apoio",
+          "Cultivar família, amizades, comunidade e tempo de qualidade",
+          "Pedir desculpas, reparar erros e encerrar relações com maturidade"
+        ]
+      },
+      {
+        title: "Carro, moto e transporte",
+        items: [
+          "Conhecer documentos, licenciamento, seguro, multas e responsabilidades do veículo",
+          "Verificar combustível, óleo, água, pneus, luzes, bateria e painel",
+          "Calibrar pneus, trocar pneu com segurança e saber quando chamar assistência",
+          "Seguir o plano de revisão e entender manutenção preventiva e sinais de defeito",
+          "Agir em pane ou acidente, sinalizar o local e registrar as informações necessárias",
+          "Planejar rota, estacionamento, pedágios e custo real do transporte",
+          "Usar transporte público, aplicativos, bicicleta e caminhada com segurança"
+        ]
+      },
+      {
+        title: "Trabalho e vida profissional",
+        items: [
+          "Criar currículo e portfólio, procurar vagas e se preparar para entrevistas",
+          "Comunicar andamento, riscos, dúvidas e resultados no trabalho",
+          "Organizar tarefas, prazos, arquivos, reuniões e aprendizado contínuo",
+          "Entender salário, benefícios, férias, impostos e direitos trabalhistas",
+          "Negociar remuneração e limites e construir uma rede profissional",
+          "Manter postura ética, documentar acordos e planejar mudanças de carreira"
+        ]
+      },
+      {
+        title: "Tecnologia e segurança digital",
+        items: [
+          "Usar senhas únicas, gerenciador de senhas e autenticação em dois fatores",
+          "Fazer backup e organizar fotos, arquivos, e-mails e contas importantes",
+          "Reconhecer phishing, golpes, links suspeitos e engenharia social",
+          "Configurar privacidade, atualizações e bloqueio dos dispositivos",
+          "Usar editor de texto, planilhas, videoconferência e serviços digitais essenciais",
+          "Planejar o que acontece com contas e dados digitais numa emergência"
+        ]
+      },
+      {
+        title: "Segurança e imprevistos",
+        items: [
+          "Ter contatos de emergência, cópias de documentos, lanterna e itens essenciais",
+          "Saber o que fazer em incêndio, enchente, falta de energia, vazamento de gás e invasão",
+          "Conhecer rotas de saída e números de emergência do lugar onde vive",
+          "Evitar riscos domésticos e avaliar situações antes de tentar resolver sozinho",
+          "Ter um plano para perda ou roubo de celular, carteira, cartões e documentos"
+        ]
+      },
+      {
+        title: "Viagens, lazer e vida em sociedade",
+        items: [
+          "Planejar viagem, orçamento, documentos, hospedagem, deslocamento e seguro",
+          "Fazer mala adequada e cuidar da segurança em lugares desconhecidos",
+          "Receber visitas, ser um bom hóspede e praticar etiqueta básica à mesa e em público",
+          "Acompanhar notícias por fontes confiáveis e entender deveres cívicos básicos",
+          "Construir hobbies, descanso e lazer sem comprometer saúde ou finanças",
+          "Cuidar do meio ambiente próximo: consumo, descarte, reciclagem e uso consciente"
+        ]
+      }
     ]
   },
   {
@@ -236,11 +369,15 @@ export function hasScheduledItems(section: RoutineSection, date = new Date()) {
 }
 
 export function getSectionScheduleLabel(section: RoutineSection) {
-  if (section.references?.length) return "referência";
+  if (isReferenceSection(section)) return "referência";
   const days = section.days ?? uniqueDays(section.items.flatMap((item) => item.days ?? []));
   if (!days.length) return "todos os dias";
   if (isSameDays(days, weekdays)) return "segunda a sexta";
   return days.map((day) => ["domingo", "segunda", "terça", "quarta", "quinta", "sexta", "sábado"][day]).join(", ");
+}
+
+export function isReferenceSection(section: RoutineSection) {
+  return Boolean(section.references?.length || section.referenceGroups?.length);
 }
 
 function uniqueDays(days: Weekday[]) {

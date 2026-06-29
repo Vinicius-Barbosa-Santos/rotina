@@ -2,7 +2,7 @@
 
 import { useEffect, useState, type FormEvent } from "react";
 import { Check, CheckIcon, ChevronDown, Pencil, Plus, RotateCcw, Trash2, X } from "lucide-react";
-import { getSectionScheduleLabel, type RoutineSection } from "@/lib/routine";
+import { getSectionScheduleLabel, isReferenceSection, type RoutineSection } from "@/lib/routine";
 import { getTaskIconName, taskIconOptions, type TaskIconName } from "@/lib/task-icons";
 import type { PersonalizedRoutineItem } from "@/lib/types";
 import EnglishTutor from "../EnglishTutor";
@@ -43,6 +43,7 @@ export default function RoutineSectionCard({
   onClear
 }: RoutineSectionCardProps) {
   const pct = items.length ? Math.round((doneItems.size / items.length) * 100) : 0;
+  const referenceSection = isReferenceSection(section);
   const [editingItemKey, setEditingItemKey] = useState<string | null>(null);
   const [editingLabel, setEditingLabel] = useState("");
   const [editingIcon, setEditingIcon] = useState<TaskIconName>("notebook");
@@ -95,7 +96,7 @@ export default function RoutineSectionCard({
         </span>
         <span className="sectionActions">
           <span className="countBadge" style={{ color: section.color, background: section.bg }}>
-            {items.length ? `${doneItems.size}/${items.length}` : "ref"}
+            {referenceSection ? "guia" : items.length ? `${doneItems.size}/${items.length}` : "0/0"}
           </span>
           <ChevronDown className={isOpen ? "chevron open" : "chevron"} size={18} aria-hidden />
         </span>
@@ -106,7 +107,7 @@ export default function RoutineSectionCard({
           <div className="checklist">
             {section.note && <p className="sectionNote">{section.note}</p>}
             {section.key === "english" && <EnglishTutor />}
-            {!section.references?.length && (
+            {!referenceSection && (
               <div className="sectionEditor">
                 <label>
                   Horário
@@ -179,7 +180,7 @@ export default function RoutineSectionCard({
                 </div>
               );
             })}
-            {!section.references?.length && (
+            {!referenceSection && (
               <form className="taskForm sectionTaskForm" onSubmit={handleAddItem}>
                 <input value={newItem} onChange={(event) => onNewItemChange(event.target.value)} placeholder={`Adicionar tarefa em ${section.label}`} />
                 <button type="submit" aria-label="Adicionar tarefa">
@@ -187,13 +188,25 @@ export default function RoutineSectionCard({
                 </button>
               </form>
             )}
-            {items.length === 0 && !section.references?.length && (
+            {items.length === 0 && !referenceSection && (
               <div className="emptySection">Nada programado para hoje. Esta seção aparece em {getSectionScheduleLabel(section)}.</div>
             )}
             {section.references?.length ? (
               <ol className="referenceList">
                 {section.references.map((reference) => <li key={reference}>{reference}</li>)}
               </ol>
+            ) : null}
+            {section.referenceGroups?.length ? (
+              <div className="referenceGroups">
+                {section.referenceGroups.map((group) => (
+                  <section className="referenceGroup" key={group.title}>
+                    <h3>{group.title}</h3>
+                    <ul>
+                      {group.items.map((reference) => <li key={reference}>{reference}</li>)}
+                    </ul>
+                  </section>
+                ))}
+              </div>
             ) : null}
             {doneItems.size > 0 && (
               <button className="resetButton" onClick={onClear}>

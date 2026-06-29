@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Bell, CalendarDays, Flame, Loader2 } from "lucide-react";
-import { getVisibleItems, routineSections } from "@/lib/routine";
+import { getVisibleItems, isReferenceSection, routineSections } from "@/lib/routine";
 import { dateKey, formatDate, formatShortDate, todayKey } from "@/lib/date";
 import { defaultMeetingForm, getManualMeetingEvents } from "@/lib/manual-meetings";
 import type { TaskIconName } from "@/lib/task-icons";
@@ -514,6 +514,7 @@ export default function HomePage() {
   }
 
   function getPersonalizedItems(section: (typeof routineSections)[number], date = new Date()): PersonalizedRoutineItem[] {
+    if (isReferenceSection(section)) return [];
     const hidden = new Set(routinePrefs.hiddenItems[section.key] ?? []);
     const defaultItems = getVisibleItems(section, date)
       .filter(({ index }) => !hidden.has(index))
@@ -983,7 +984,7 @@ export default function HomePage() {
                   <i>
                     <b style={{ width: `${pct}%`, background: section.color }} />
                   </i>
-                  <em>{total ? `${done}/${total}` : section.references?.length ? "ref" : "fora"}</em>
+                  <em>{total ? `${done}/${total}` : isReferenceSection(section) ? "guia" : "fora"}</em>
                 </a>
               );
             })}
