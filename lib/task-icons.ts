@@ -91,10 +91,18 @@ const taskIconRules: Array<{ icon: TaskIconName; keywords: string[] }> = [
   { icon: "globe", keywords: ["internacional"] }
 ];
 
+const taskIconCache = new Map<string, TaskIconName>();
+
 export function getTaskIconName(label: string): TaskIconName {
+  const cached = taskIconCache.get(label);
+  if (cached) return cached;
+
   const normalizedLabel = normalize(label);
   const rule = taskIconRules.find((item) => item.keywords.some((keyword) => normalizedLabel.includes(keyword)));
-  return rule?.icon ?? "notebook";
+  const icon = rule?.icon ?? "notebook";
+  if (taskIconCache.size >= 500) taskIconCache.clear();
+  taskIconCache.set(label, icon);
+  return icon;
 }
 
 export function isTaskIconName(value: unknown): value is TaskIconName {

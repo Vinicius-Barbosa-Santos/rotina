@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Bell, CalendarDays, Flame, Loader2 } from "lucide-react";
 import {
   getVisibleItems,
@@ -61,6 +61,7 @@ const syncSaveDelay = 900;
 const syncRefreshInterval = 60_000;
 const telegramAutomaticReportHour = 23;
 const telegramAutomaticReportMinute = 50;
+const emptyItemKeys = new Set<string>();
 
 function isLastDayOfMonth(date: Date) {
   const tomorrow = new Date(date);
@@ -103,6 +104,12 @@ function saveNotifiedSectionKey(sectionKey: string) {
   const nextKeys = new Set(stored[today] ?? []);
   nextKeys.add(sectionKey);
   localStorage.setItem(notifiedSectionsKey, JSON.stringify({ ...stored, [today]: Array.from(nextKeys) }));
+}
+
+function haveSameDoneKeys(previous: RoutineState[string] = [], current: RoutineState[string] = []) {
+  if (previous.length !== current.length) return false;
+  const previousKeys = new Set(previous.map(String));
+  return current.every((key) => previousKeys.has(String(key)));
 }
 
 export default function HomePage() {
@@ -265,7 +272,7 @@ export default function HomePage() {
     const previousState = lastCalendarSyncState.current;
     const changedSectionKeys = previousState
       ? trackedRoutineSections
-          .filter((section) => JSON.stringify(previousState[section.key] ?? []) !== JSON.stringify(state[section.key] ?? []))
+          .filter((section) => !haveSameDoneKeys(previousState[section.key], state[section.key]))
           .map((section) => section.key)
       : trackedRoutineSections.map((section) => section.key);
 
@@ -378,19 +385,33 @@ export default function HomePage() {
     };
   }, [hydrated]);
 
-  const totals = useMemo(() => {
+  const isTodayProgressDay = isProgressTrackingDate(new Date());
+  const todaySectionViews = useMemo(() => {
     const today = new Date();
-    const routineTotal = trackedRoutineSections.reduce((sum, section) => sum + getProgressItems(section, today).length, 0);
-    const routineDone = trackedRoutineSections.reduce((sum, section) => {
-      const visibleKeys = new Set(getProgressItems(section, today).map((item) => item.key));
-      const doneToday = (state[section.key] ?? []).filter((key) => visibleKeys.has(String(key))).length;
-      return sum + doneToday;
-    }, 0);
+    return trackedRoutineSections.map((section) => {
+      const items = getPersonalizedItems(section, today);
+      const visibleKeys = new Set(items.map((item) => item.key));
+      const doneItems = new Set(
+        (state[section.key] ?? []).filter((key) => visibleKeys.has(String(key))).map(String)
+      );
+      return { section, items, doneItems };
+    });
+  }, [
+    routinePrefs.customItems,
+    routinePrefs.hiddenItems,
+    routinePrefs.iconOverrides,
+    routinePrefs.labelOverrides,
+    state
+  ]);
+
+  const totals = useMemo(() => {
+    if (!isTodayProgressDay) return { total: 0, done: 0, pending: 0, pct: 0 };
+    const routineTotal = todaySectionViews.reduce((sum, view) => sum + view.items.length, 0);
+    const routineDone = todaySectionViews.reduce((sum, view) => sum + view.doneItems.size, 0);
     const total = routineTotal;
     const done = routineDone;
     return { total, done, pending: total - done, pct: total ? Math.round((done / total) * 100) : 0 };
-  }, [routinePrefs, state]);
-  const isTodayProgressDay = isProgressTrackingDate(new Date());
+  }, [isTodayProgressDay, todaySectionViews]);
 
   const evolution = useMemo(
     () => ({
@@ -410,15 +431,15 @@ export default function HomePage() {
   const routineNotificationSections = useMemo<RoutineNotificationSection[]>(() => {
     const today = new Date();
 
-    return trackedRoutineSections
-      .map((section) => {
+    return todaySectionViews
+      .map(({ section, items: personalizedItems }) => {
         const startsAt = getSectionStartDate(getSectionTime(section.key, section.time), today);
-        const items = getPersonalizedItems(section, today).map((item) => item.label);
+        const items = personalizedItems.map((item) => item.label);
         if (!startsAt || items.length === 0) return null;
         return { key: section.key, label: section.label, startsAt, items };
       })
       .filter((section): section is RoutineNotificationSection => Boolean(section));
-  }, [routinePrefs]);
+  }, [routinePrefs.timeOverrides, todaySectionViews]);
 
   useEffect(() => {
     notificationTimers.current.forEach((timer) => window.clearTimeout(timer));
@@ -705,20 +726,23 @@ export default function HomePage() {
   }
 
   function buildCalendarSections() {
-    return trackedRoutineSections.map((section) => ({
-      ...section,
-      time: getSectionTime(section.key, section.time),
-      items: [
-        ...section.items
-          .map((item, index) => ({ ...item, key: String(index), index }))
-          .filter((item) => !(routinePrefs.hiddenItems[section.key] ?? []).includes(item.index)),
-        ...(routinePrefs.customItems[section.key] ?? []).map((item) => ({ ...item, key: item.id }))
-      ].map((item) => ({
-        label: routinePrefs.labelOverrides[section.key]?.[item.key] ?? item.label,
-        days: "days" in item ? item.days : undefined,
-        completed: (state[section.key] ?? []).map(String).includes(item.key)
-      }))
-    }));
+    return trackedRoutineSections.map((section) => {
+      const completedKeys = new Set((state[section.key] ?? []).map(String));
+      return {
+        ...section,
+        time: getSectionTime(section.key, section.time),
+        items: [
+          ...section.items
+            .map((item, index) => ({ ...item, key: String(index), index }))
+            .filter((item) => !(routinePrefs.hiddenItems[section.key] ?? []).includes(item.index)),
+          ...(routinePrefs.customItems[section.key] ?? []).map((item) => ({ ...item, key: item.id }))
+        ].map((item) => ({
+          label: routinePrefs.labelOverrides[section.key]?.[item.key] ?? item.label,
+          days: "days" in item ? item.days : undefined,
+          completed: completedKeys.has(item.key)
+        }))
+      };
+    });
   }
 
   function buildTelegramReport(period: TelegramReportPeriod): TelegramRoutineReport {
@@ -1042,11 +1066,9 @@ export default function HomePage() {
               </i>
               <em>{manualEvents.length}/{manualMeetings.length}</em>
             </a>
-            {trackedRoutineSections.map((section) => {
-              const visibleItems = getPersonalizedItems(section);
-              const visibleKeys = new Set(visibleItems.map((item) => item.key));
-              const done = (state[section.key] ?? []).filter((key) => visibleKeys.has(String(key))).length;
-              const total = visibleItems.length;
+            {todaySectionViews.map(({ section, items, doneItems }) => {
+              const done = doneItems.size;
+              const total = items.length;
               const pct = total ? Math.round((done / total) * 100) : 0;
 
               return (
@@ -1111,19 +1133,16 @@ export default function HomePage() {
               onDelete={deleteManualMeeting}
             />
 
-            {trackedRoutineSections.map((section) => {
-              const visibleItems = getPersonalizedItems(section);
-              const visibleKeys = new Set(visibleItems.map((item) => item.key));
-              const doneItems = new Set((state[section.key] ?? []).filter((key) => visibleKeys.has(String(key))).map(String));
+            {todaySectionViews.map(({ section, items, doneItems }) => {
               const isOpen = openSections.has(section.key);
 
               return (
                 <RoutineSectionCard
                   key={section.key}
                   section={section}
-                  items={visibleItems}
+                  items={items}
                   doneItems={doneItems}
-                  guideDoneItems={new Set(routinePrefs.guideChecks[section.key] ?? [])}
+                  guideDoneItems={emptyItemKeys}
                   isOpen={isOpen}
                   time={getSectionTime(section.key, section.time)}
                   newItem={newRoutineItems[section.key] ?? ""}
@@ -1154,7 +1173,7 @@ export default function HomePage() {
                     key={section.key}
                     section={section}
                     items={[]}
-                    doneItems={new Set()}
+                    doneItems={emptyItemKeys}
                     guideDoneItems={new Set(routinePrefs.guideChecks[section.key] ?? [])}
                     isOpen={openSections.has(section.key)}
                     time={section.time}

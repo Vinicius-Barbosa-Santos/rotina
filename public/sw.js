@@ -1,5 +1,11 @@
 const CACHE_NAME = "minha-rotina-shell-v2";
 const SHELL_ASSETS = ["/", "/minha-rotina-logo-192.png", "/minha-rotina-preview.jpg"];
+const MAX_CACHE_ENTRIES = 80;
+
+async function trimCache(cache) {
+  const keys = await cache.keys();
+  await Promise.all(keys.slice(0, Math.max(keys.length - MAX_CACHE_ENTRIES, 0)).map((key) => cache.delete(key)));
+}
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
@@ -28,13 +34,20 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
+  const networkRequest = fetch(request).then((response) => ({ response, copy: response.clone() }));
+
   event.respondWith(
-    fetch(request)
-      .then((response) => {
-        const copy = response.clone();
-        caches.open(CACHE_NAME).then((cache) => cache.put(request, copy)).catch(() => undefined);
-        return response;
-      })
+    networkRequest
+      .then(({ response }) => response)
       .catch(() => caches.match(request).then((cached) => cached || caches.match("/")))
+  );
+  event.waitUntil(
+    networkRequest
+      .then(async ({ copy }) => {
+        const cache = await caches.open(CACHE_NAME);
+        await cache.put(request, copy);
+        await trimCache(cache);
+      })
+      .catch(() => undefined)
   );
 });
