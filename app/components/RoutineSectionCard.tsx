@@ -48,7 +48,7 @@ export default function RoutineSectionCard({
 }: RoutineSectionCardProps) {
   const referenceSection = isReferenceSection(section);
   const referenceGroups = section.referenceGroups ?? [];
-  const groupedContentLabel = referenceSection ? "itens marcados como dominados" : "tópicos estudados";
+  const groupedContentLabel = "itens marcados como dominados";
   const referenceTotal = referenceGroups.reduce((sum, group) => sum + group.items.length, 0);
   const referenceDone = guideDoneItems.size;
   const pct = referenceSection

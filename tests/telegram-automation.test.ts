@@ -50,7 +50,7 @@ test("server report includes every weekday even when no task was checked", () =>
     "2026-07-03"
   ]);
   assert.equal(report.days[0]?.sections.find((section) => section.label === "Programação")?.done, 1);
-  assert.equal(report.days[0]?.sections.some((section) => section.label === "Guia de Inglês"), false);
+  assert.equal(report.days[0]?.sections.find((section) => section.label === "Inglês")?.total, 5);
   assert.equal(report.days[0]?.sections.some((section) => section.label === "Guia do Desenvolvedor"), false);
   assert.ok(report.days.every((day) => day.total > 0));
 });

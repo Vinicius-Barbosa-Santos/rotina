@@ -52,17 +52,20 @@ test("weekday routine is centered on programming work", () => {
   );
 });
 
-test("English is a permanent knowledge guide and does not count toward routine progress", () => {
+test("English habits count toward progress while the complete guide remains below", () => {
   const english = routineSections.find((item) => item.key === "english");
 
   assert.ok(english);
-  assert.equal(english.label, "Guia de Inglês");
-  assert.equal(getSectionScheduleLabel(english), "referência");
-  assert.deepEqual(getVisibleItems(english, new Date(2026, 5, 22)), []);
+  assert.equal(english.label, "Inglês");
+  assert.equal(getSectionScheduleLabel(english), "segunda a sexta");
+  assert.deepEqual(
+    getVisibleItems(english, new Date(2026, 5, 22)).map(({ item }) => item.label),
+    ["Duolingo", "Leitura em inglês", "Vocabulário", "Conversação", "Listening"],
+  );
   assert.ok(english.referenceGroups?.some((group) => group.title === "Present Simple e Present Continuous"));
   assert.ok(english.referenceGroups?.some((group) => group.title === "Inglês para desenvolvimento de software"));
-  assert.equal(trackedRoutineSections.some((section) => section.key === english.key), false);
-  assert.equal(routineReferenceSections.some((section) => section.key === english.key), true);
+  assert.equal(trackedRoutineSections.some((section) => section.key === english.key), true);
+  assert.equal(routineReferenceSections.some((section) => section.key === english.key), false);
 });
 
 test("developer curriculum is a permanent guide and does not count toward routine progress", () => {
@@ -102,15 +105,17 @@ test("house cleaning is distributed from Monday to Friday", () => {
   );
 });
 
-test("health routine alternates low-impact strength, cardio and recovery", () => {
+test("gym routine alternates muscle groups, cardio and recovery", () => {
   const health = routineSections.find((item) => item.key === "health");
 
   assert.ok(health);
+  assert.equal(health.label, "Academia");
   assert.match(health.note ?? "", /baixo impacto/i);
-  assert.ok(getVisibleItems(health, new Date(2026, 5, 22)).some(({ item }) => item.label.includes("Força A")));
-  assert.ok(getVisibleItems(health, new Date(2026, 5, 23)).some(({ item }) => item.label.includes("Cardio de baixo impacto")));
-  assert.ok(getVisibleItems(health, new Date(2026, 5, 24)).some(({ item }) => item.label.includes("Recuperação ativa")));
-  assert.ok(getVisibleItems(health, new Date(2026, 5, 25)).some(({ item }) => item.label.includes("Força B")));
+  assert.ok(getVisibleItems(health, new Date(2026, 5, 22)).some(({ item }) => item.label.includes("Peito")));
+  assert.ok(getVisibleItems(health, new Date(2026, 5, 23)).some(({ item }) => item.label.includes("Costas")));
+  assert.ok(getVisibleItems(health, new Date(2026, 5, 24)).some(({ item }) => item.label.includes("Cardio de baixo impacto")));
+  assert.ok(getVisibleItems(health, new Date(2026, 5, 25)).some(({ item }) => item.label.includes("Glúteos")));
+  assert.ok(getVisibleItems(health, new Date(2026, 5, 26)).some(({ item }) => item.label.includes("Ombros")));
 });
 
 test("functional adult section is a permanent, categorized reference guide", () => {

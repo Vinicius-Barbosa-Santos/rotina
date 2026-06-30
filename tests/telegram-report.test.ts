@@ -56,7 +56,7 @@ test("formats an aggregated weekly Telegram report", () => {
   assert.match(message, /14 de 18 tarefas concluídas \(78%\)/);
   assert.match(message, /Leitura inteligente da semana/);
   assert.match(message, /Foco de programação/);
-  assert.doesNotMatch(message, /Consistência em inglês/);
+  assert.match(message, /Consistência em inglês/);
   assert.match(message, /Investimentos\/YouTube\/marketing/);
 });
 
