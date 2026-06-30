@@ -53,13 +53,66 @@ export const routineSections: RoutineSection[] = [
     color: "#34d399",
     bg: "rgba(52, 211, 153, 0.12)",
     time: "09:00-10:00",
-    note: "Objetivo: exposição diária ao idioma.",
+    note: "Objetivo: usar o inglês nas situações reais de um desenvolvedor. Escolha o tópico do dia e pratique com exemplos do seu trabalho.",
     days: weekdays,
     items: [
-      { label: "Conversação" },
-      { label: "Leitura" },
-      { label: "Vocabulário" },
-      { label: "Listening" }
+      { label: "Segunda — Speaking: daily, andamento e bloqueios", days: [1] },
+      { label: "Terça — Leitura: documentação, tickets e pull requests", days: [2] },
+      { label: "Quarta — Escrita: Slack, Jira, commits e code review", days: [3] },
+      { label: "Quinta — Listening: reuniões, demos e conteúdo técnico", days: [4] },
+      { label: "Sexta — Revisão: vocabulário e simulação de conversa", days: [5] }
+    ],
+    referenceGroups: [
+      {
+        title: "Daily e comunicação com o time",
+        items: [
+          "Explicar o que fiz, o que farei e quais são os bloqueios",
+          "Pedir esclarecimentos e confirmar se entendeu corretamente",
+          "Falar sobre prazo, prioridade, dependências e riscos",
+          "Concordar, discordar e dar sugestões com educação",
+          "Dar e receber feedback técnico"
+        ]
+      },
+      {
+        title: "Leitura técnica",
+        items: [
+          "Ler documentação de APIs, bibliotecas e frameworks",
+          "Interpretar tickets, critérios de aceite e requisitos",
+          "Entender pull requests, comentários de review e discussões técnicas",
+          "Ler mensagens de erro, logs e incidentes",
+          "Acompanhar changelogs, release notes e artigos técnicos"
+        ]
+      },
+      {
+        title: "Escrita profissional",
+        items: [
+          "Escrever mensagens claras no Slack e por e-mail",
+          "Descrever contexto, problema e solução em tickets",
+          "Escrever commits e descrições de pull request",
+          "Comentar código e documentação sem traduzir palavra por palavra",
+          "Registrar bugs, passos para reprodução e resultados esperados"
+        ]
+      },
+      {
+        title: "Reuniões e apresentações",
+        items: [
+          "Participar de planning, refinement, retrospectiva e one-on-one",
+          "Apresentar uma demo e explicar decisões técnicas",
+          "Fazer perguntas durante uma discussão de arquitetura",
+          "Explicar um problema para pessoas não técnicas",
+          "Conduzir uma conversa curta sobre carreira e entrevistas"
+        ]
+      },
+      {
+        title: "Vocabulário essencial de software",
+        items: [
+          "Verbos de trabalho: deploy, merge, rollback, debug, refactor e ship",
+          "Status e prioridade: pending, blocked, overdue, scope e trade-off",
+          "Qualidade: edge case, flaky test, regression, bottleneck e root cause",
+          "Arquitetura: scalability, reliability, latency, throughput e dependency",
+          "Pronúncia dos termos mais usados na sua stack"
+        ]
+      }
     ]
   },
   {
@@ -93,11 +146,75 @@ export const routineSections: RoutineSection[] = [
     bg: "rgba(251, 146, 60, 0.12)",
     time: "18:30-20:00",
     days: weekdays,
-    note: "Aprimorar as stacks principais para oportunidades melhores.",
+    note: "Aprimorar as stacks principais com um mapa de tópicos. Avance em um assunto por vez e transforme cada bloco em código ou anotação.",
     items: [
-      { label: "Frontend com React" },
-      { label: "Backend com Java" },
-      { label: "Arquitetura e system design" }
+      { label: "Segunda — Frontend: React e TypeScript", days: [1] },
+      { label: "Terça — Backend: Java e Spring", days: [2] },
+      { label: "Quarta — APIs, banco de dados e integração", days: [3] },
+      { label: "Quinta — Arquitetura e system design", days: [4] },
+      { label: "Sexta — Testes, cloud e revisão da semana", days: [5] }
+    ],
+    referenceGroups: [
+      {
+        title: "Frontend — React e TypeScript",
+        items: [
+          "JavaScript moderno, TypeScript, tipos e generics",
+          "Componentes, props, estado, hooks e composição no React",
+          "Formulários, rotas, consumo de APIs e tratamento de erros",
+          "Acessibilidade, HTML semântico e CSS responsivo",
+          "Performance, testes de interface e boas práticas de estado"
+        ]
+      },
+      {
+        title: "Backend — Java e Spring",
+        items: [
+          "Java moderno, orientação a objetos, collections, streams e exceptions",
+          "Spring Boot, injeção de dependência e configuração",
+          "Controllers, services, repositories e validação",
+          "JPA, Hibernate, transações e tratamento de erros",
+          "Autenticação, autorização e documentação da API"
+        ]
+      },
+      {
+        title: "APIs e dados",
+        items: [
+          "HTTP, REST, status codes, headers e versionamento",
+          "Modelagem relacional, SQL, índices e consultas",
+          "Paginação, filtros, cache e idempotência",
+          "Integrações assíncronas, filas e eventos",
+          "Contratos, compatibilidade e tratamento de falhas externas"
+        ]
+      },
+      {
+        title: "Testes e qualidade",
+        items: [
+          "Testes unitários, de integração e ponta a ponta",
+          "Mocks, fixtures, pirâmide de testes e cobertura útil",
+          "Clean Code, SOLID e refatoração segura",
+          "Code review, análise estática e automação no CI",
+          "Debugging, logs e investigação de causa raiz"
+        ]
+      },
+      {
+        title: "Arquitetura e system design",
+        items: [
+          "Separação de responsabilidades e arquitetura em camadas",
+          "Monólitos, microsserviços e critérios para escolher",
+          "Escalabilidade, disponibilidade, consistência e tolerância a falhas",
+          "Cache, filas, balanceamento e banco de dados em escala",
+          "Documentar decisões e explicar trade-offs"
+        ]
+      },
+      {
+        title: "Cloud e entrega",
+        items: [
+          "Git, estratégias de branch e fluxo de pull request",
+          "Docker, imagens, containers e configuração por ambiente",
+          "CI/CD, deploy, rollback e feature flags",
+          "Fundamentos de AWS: IAM, EC2, S3, RDS, Lambda e CloudWatch",
+          "Observabilidade, métricas, alertas e segurança de segredos"
+        ]
+      }
     ]
   },
   {
@@ -402,7 +519,7 @@ export function getSectionScheduleLabel(section: RoutineSection) {
 }
 
 export function isReferenceSection(section: RoutineSection) {
-  return Boolean(section.references?.length || section.referenceGroups?.length);
+  return section.items.length === 0 && Boolean(section.references?.length || section.referenceGroups?.length);
 }
 
 const routineSectionEmoji: Record<string, string> = {

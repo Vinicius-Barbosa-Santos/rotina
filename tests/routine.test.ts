@@ -52,6 +52,33 @@ test("weekday routine is centered on programming work", () => {
   );
 });
 
+test("technical English is organized by weekday and workplace topics", () => {
+  const english = routineSections.find((item) => item.key === "english");
+
+  assert.ok(english);
+  assert.deepEqual(
+    getVisibleItems(english, new Date(2026, 5, 22)).map(({ item }) => item.label),
+    ["Segunda — Speaking: daily, andamento e bloqueios"],
+  );
+  assert.ok(english.referenceGroups?.some((group) => group.title === "Daily e comunicação com o time"));
+  assert.ok(english.referenceGroups?.some((group) => group.title === "Leitura técnica"));
+  assert.equal(trackedRoutineSections.some((section) => section.key === english.key), true);
+});
+
+test("programming study is organized into a weekly rotation and learning tracks", () => {
+  const career = routineSections.find((item) => item.key === "career");
+
+  assert.ok(career);
+  assert.deepEqual(
+    getVisibleItems(career, new Date(2026, 5, 25)).map(({ item }) => item.label),
+    ["Quinta — Arquitetura e system design"],
+  );
+  assert.ok(career.referenceGroups?.some((group) => group.title === "Frontend — React e TypeScript"));
+  assert.ok(career.referenceGroups?.some((group) => group.title === "Backend — Java e Spring"));
+  assert.ok(career.referenceGroups?.some((group) => group.title === "Cloud e entrega"));
+  assert.equal(trackedRoutineSections.some((section) => section.key === career.key), true);
+});
+
 test("house cleaning is distributed from Monday to Friday", () => {
   const cleaning = routineSections.find((item) => item.key === "house-cleaning");
 

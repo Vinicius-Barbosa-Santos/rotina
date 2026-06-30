@@ -48,6 +48,7 @@ export default function RoutineSectionCard({
 }: RoutineSectionCardProps) {
   const referenceSection = isReferenceSection(section);
   const referenceGroups = section.referenceGroups ?? [];
+  const groupedContentLabel = referenceSection ? "competências" : "tópicos estudados";
   const referenceTotal = referenceGroups.reduce((sum, group) => sum + group.items.length, 0);
   const referenceDone = guideDoneItems.size;
   const pct = referenceSection
@@ -209,7 +210,7 @@ export default function RoutineSectionCard({
             {referenceGroups.length ? (
               <div className="referenceSlider">
                 <div className="referenceSliderSummary">
-                  <span>{referenceDone} de {referenceTotal} competências</span>
+                  <span>{referenceDone} de {referenceTotal} {groupedContentLabel}</span>
                   <strong>{referenceTotal ? Math.round((referenceDone / referenceTotal) * 100) : 0}%</strong>
                 </div>
                 <div className="referenceSliderProgress" aria-hidden>
