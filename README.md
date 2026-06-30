@@ -26,7 +26,7 @@ Em vez de usar vários aplicativos isolados, a aplicação organiza tarefas por 
 ### Organização da rotina
 
 - Rotinas diferentes para dias úteis, sábado e domingo.
-- Blocos por horário para vida pessoal, inglês, trabalho, carreira, saúde, crescimento e finanças.
+- Blocos por horário para a rotina e guias permanentes de inglês, desenvolvimento e vida funcional.
 - Checklist diário com progresso geral e progresso por seção.
 - Streak para acompanhar dias completamente concluídos.
 - Edição de nomes, horários e tarefas.
@@ -60,8 +60,8 @@ Em vez de usar vários aplicativos isolados, a aplicação organiza tarefas por 
 - Progresso geral e detalhamento por seção.
 - Streak atual e mensagem motivacional.
 - Envios manuais pelos botões do app.
-- Envios automáticos ao abrir o app depois das 20h.
-- Proteção do endpoint por sessão do Google Calendar.
+- Envios automáticos pelo servidor às 23h (horário de São Paulo), mesmo com o app fechado.
+- Proteção dos envios manuais pela sessão do Google e dos automáticos por `CRON_SECRET`.
 
 ## Como funciona
 
@@ -150,6 +150,7 @@ GEMINI_DAILY_TRANSCRIPTION_LIMIT=30
 
 TELEGRAM_BOT_TOKEN=
 TELEGRAM_CHAT_ID=
+CRON_SECRET=
 
 SUPABASE_URL=
 SUPABASE_SERVICE_ROLE_KEY=
@@ -190,7 +191,7 @@ A chave fica somente no servidor. Evite enviar informações confidenciais duran
 2. Abra o novo bot, clique em **Start** e envie uma mensagem.
 3. Consulte `https://api.telegram.org/botSEU_TOKEN/getUpdates`.
 4. Copie `message.chat.id` para `TELEGRAM_CHAT_ID`.
-5. Configure o token e o Chat ID na Vercel.
+5. Configure o token, o Chat ID e uma chave longa em `CRON_SECRET` na Vercel.
 
 O token do bot é secreto e nunca deve ser publicado.
 
@@ -216,7 +217,7 @@ A chave `service_role` deve ficar somente no servidor, dentro da Vercel ou do `.
 
 ## Persistência e relatórios
 
-O histórico atual começa em **15 de junho de 2026**. O reset preserva tarefas personalizadas, horários, reuniões e integrações.
+O histórico atual começa em **29 de junho de 2026**. O reset preserva tarefas personalizadas, horários, reuniões e integrações.
 
 Chaves principais utilizadas no navegador:
 
@@ -226,7 +227,7 @@ Chaves principais utilizadas no navegador:
 - `rotina_next_YYYY-MM-DD`
 - `rotina_telegram_reports_sent`
 
-Com o Supabase configurado, o mesmo histórico passa a aparecer no computador, celular e PWA. Os relatórios automáticos ainda são enviados quando o app é aberto depois das 20h; para enviar com o app totalmente fechado, o próximo passo é criar uma rotina agendada no servidor.
+Com o Supabase e o cron da Vercel configurados, os relatórios automáticos são enviados às 23h mesmo com o aplicativo fechado. Em dias úteis sai o relatório diário; aos domingos, o semanal; e no último dia do mês, o mensal.
 
 ## Qualidade
 

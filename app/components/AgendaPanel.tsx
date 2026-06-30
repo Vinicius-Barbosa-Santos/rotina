@@ -2,6 +2,7 @@
 
 import { useMemo, useState, type MutableRefObject } from "react";
 import { ArrowUpRight, CalendarDays, Loader2, Trash2 } from "lucide-react";
+import { calendarRoutineSyncDays } from "@/lib/calendar-routine-sync";
 import { formatTime } from "@/lib/date";
 import type { CalendarEvent, CalendarResponse, CalendarSyncSection } from "@/lib/types";
 
@@ -47,7 +48,7 @@ export default function AgendaPanel({
       const response = await fetch("/api/calendar/routine-reminders", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ sections: getReminderSections(), rangeDays: 30 })
+        body: JSON.stringify({ sections: getReminderSections(), rangeDays: calendarRoutineSyncDays })
       });
       const payload = (await response.json()) as { count?: number; message?: string };
 
@@ -56,7 +57,7 @@ export default function AgendaPanel({
         return;
       }
 
-      setSyncMessage(`Rotina geral sincronizada: ${payload.count ?? 0} blocos nos próximos 30 dias.`);
+      setSyncMessage(`Rotina geral sincronizada: ${payload.count ?? 0} blocos nos próximos ${calendarRoutineSyncDays} dias.`);
     } catch {
       setSyncMessage("Não consegui criar as notificações.");
     } finally {

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { clearGoogleAuthCookies, getGoogleAccessToken, GoogleCalendarAuthError } from "@/lib/google-auth";
+import { clampCalendarRoutineSyncDays } from "@/lib/calendar-routine-sync";
 import { getRoutineSectionEmoji, routineReferenceSections, trackedRoutineSections, type RoutineSection } from "@/lib/routine";
 import { getTaskEmoji, type TaskIconName } from "@/lib/task-icons";
 
@@ -34,7 +35,7 @@ export async function POST(request: Request) {
       | { sections?: SyncSection[]; rangeDays?: number }
       | undefined;
     const sourceSections = body?.sections?.length ? body.sections : trackedRoutineSections;
-    const rangeDays = Math.min(Math.max(body?.rangeDays ?? 1, 1), 30);
+    const rangeDays = clampCalendarRoutineSyncDays(body?.rangeDays);
     const dates = getCalendarDates(rangeDays, timeZone);
     const synced: string[] = [];
 

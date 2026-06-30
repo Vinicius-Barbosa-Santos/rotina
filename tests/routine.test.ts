@@ -52,31 +52,31 @@ test("weekday routine is centered on programming work", () => {
   );
 });
 
-test("technical English is organized by weekday and workplace topics", () => {
+test("English is a permanent knowledge guide and does not count toward routine progress", () => {
   const english = routineSections.find((item) => item.key === "english");
 
   assert.ok(english);
-  assert.deepEqual(
-    getVisibleItems(english, new Date(2026, 5, 22)).map(({ item }) => item.label),
-    ["Segunda — Speaking: daily, andamento e bloqueios"],
-  );
-  assert.ok(english.referenceGroups?.some((group) => group.title === "Daily e comunicação com o time"));
-  assert.ok(english.referenceGroups?.some((group) => group.title === "Leitura técnica"));
-  assert.equal(trackedRoutineSections.some((section) => section.key === english.key), true);
+  assert.equal(english.label, "Guia de Inglês");
+  assert.equal(getSectionScheduleLabel(english), "referência");
+  assert.deepEqual(getVisibleItems(english, new Date(2026, 5, 22)), []);
+  assert.ok(english.referenceGroups?.some((group) => group.title === "Present Simple e Present Continuous"));
+  assert.ok(english.referenceGroups?.some((group) => group.title === "Inglês para desenvolvimento de software"));
+  assert.equal(trackedRoutineSections.some((section) => section.key === english.key), false);
+  assert.equal(routineReferenceSections.some((section) => section.key === english.key), true);
 });
 
-test("programming study is organized into a weekly rotation and learning tracks", () => {
+test("developer curriculum is a permanent guide and does not count toward routine progress", () => {
   const career = routineSections.find((item) => item.key === "career");
 
   assert.ok(career);
-  assert.deepEqual(
-    getVisibleItems(career, new Date(2026, 5, 25)).map(({ item }) => item.label),
-    ["Quinta — Arquitetura e system design"],
-  );
-  assert.ok(career.referenceGroups?.some((group) => group.title === "Frontend — React e TypeScript"));
-  assert.ok(career.referenceGroups?.some((group) => group.title === "Backend — Java e Spring"));
-  assert.ok(career.referenceGroups?.some((group) => group.title === "Cloud e entrega"));
-  assert.equal(trackedRoutineSections.some((section) => section.key === career.key), true);
+  assert.equal(career.label, "Guia do Desenvolvedor");
+  assert.equal(getSectionScheduleLabel(career), "referência");
+  assert.deepEqual(getVisibleItems(career, new Date(2026, 5, 25)), []);
+  assert.ok(career.referenceGroups?.some((group) => group.title === "Frontend com React"));
+  assert.ok(career.referenceGroups?.some((group) => group.title === "Backend com Spring"));
+  assert.ok(career.referenceGroups?.some((group) => group.title === "System design e sistemas distribuídos"));
+  assert.equal(trackedRoutineSections.some((section) => section.key === career.key), false);
+  assert.equal(routineReferenceSections.some((section) => section.key === career.key), true);
 });
 
 test("house cleaning is distributed from Monday to Friday", () => {

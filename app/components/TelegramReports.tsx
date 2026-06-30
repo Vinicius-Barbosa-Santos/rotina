@@ -42,9 +42,9 @@ export default function TelegramReports({
         type="button"
         onClick={onToggleAutomatic}
       >
-        Envios automáticos {automaticEnabled ? "ativados" : "desativados"}
+        Envios às 23h {automaticEnabled ? "ativados" : "desativados"}
       </button>
-      <span>{message || "Envie sua evolução e uma mensagem para continuar firme."}</span>
+      <span>{message || "Diário nos dias úteis, semanal no domingo e mensal no último dia do mês."}</span>
     </div>
   );
 }

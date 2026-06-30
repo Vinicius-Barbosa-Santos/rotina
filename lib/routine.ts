@@ -48,69 +48,216 @@ export const routineSections: RoutineSection[] = [
   {
     key: "english",
     icon: "EN",
-    label: "Inglês",
+    label: "Guia de Inglês",
     shortLabel: "Inglês",
     color: "#34d399",
     bg: "rgba(52, 211, 153, 0.12)",
-    time: "09:00-10:00",
-    note: "Objetivo: usar o inglês nas situações reais de um desenvolvedor. Escolha o tópico do dia e pratique com exemplos do seu trabalho.",
-    days: weekdays,
-    items: [
-      { label: "Segunda — Speaking: daily, andamento e bloqueios", days: [1] },
-      { label: "Terça — Leitura: documentação, tickets e pull requests", days: [2] },
-      { label: "Quarta — Escrita: Slack, Jira, commits e code review", days: [3] },
-      { label: "Quinta — Listening: reuniões, demos e conteúdo técnico", days: [4] },
-      { label: "Sexta — Revisão: vocabulário e simulação de conversa", days: [5] }
-    ],
+    time: "guia permanente",
+    note: "Mapa completo do idioma. Marque apenas o que você já domina; os itens pendentes mostram o que estudar depois. Este guia não entra no progresso diário, semanal ou mensal.",
+    items: [],
     referenceGroups: [
       {
-        title: "Daily e comunicação com o time",
+        title: "Fundamentos do idioma",
         items: [
-          "Explicar o que fiz, o que farei e quais são os bloqueios",
-          "Pedir esclarecimentos e confirmar se entendeu corretamente",
-          "Falar sobre prazo, prioridade, dependências e riscos",
-          "Concordar, discordar e dar sugestões com educação",
-          "Dar e receber feedback técnico"
+          "Alfabeto, soletração, números, datas, horas e valores",
+          "Pronomes pessoais, possessivos, demonstrativos e objetos",
+          "Verbo to be no presente e no passado",
+          "There is, there are, have e have got",
+          "Artigos a, an e the e quando não usar artigo",
+          "Plural, substantivos contáveis e incontáveis",
+          "Some, any, much, many, few, little e a lot of"
         ]
       },
       {
-        title: "Leitura técnica",
+        title: "Present Simple e Present Continuous",
         items: [
-          "Ler documentação de APIs, bibliotecas e frameworks",
-          "Interpretar tickets, critérios de aceite e requisitos",
-          "Entender pull requests, comentários de review e discussões técnicas",
-          "Ler mensagens de erro, logs e incidentes",
-          "Acompanhar changelogs, release notes e artigos técnicos"
+          "Present Simple para rotina, fatos e hábitos",
+          "Do, does, negativas e perguntas no Present Simple",
+          "Advérbios de frequência: always, usually, often, sometimes e never",
+          "Present Continuous para ações acontecendo agora",
+          "Am, is, are + verbo com -ing em frases, negativas e perguntas",
+          "Regras de escrita do -ing: working, making, running e lying",
+          "Diferença entre Present Simple e Present Continuous",
+          "Stative verbs: know, want, need, believe, understand e prefer"
         ]
       },
       {
-        title: "Escrita profissional",
+        title: "Passado e narrativas",
         items: [
-          "Escrever mensagens claras no Slack e por e-mail",
-          "Descrever contexto, problema e solução em tickets",
-          "Escrever commits e descrições de pull request",
-          "Comentar código e documentação sem traduzir palavra por palavra",
-          "Registrar bugs, passos para reprodução e resultados esperados"
+          "Past Simple com verbos regulares e irregulares",
+          "Did, negativas e perguntas no passado",
+          "Past Continuous para ações em andamento no passado",
+          "Diferença entre Past Simple e Past Continuous",
+          "Used to para hábitos e situações antigas",
+          "Marcadores de tempo: ago, last, yesterday, when e while",
+          "Contar uma sequência de acontecimentos com clareza"
         ]
       },
       {
-        title: "Reuniões e apresentações",
+        title: "Present Perfect e tempos perfeitos",
         items: [
-          "Participar de planning, refinement, retrospectiva e one-on-one",
-          "Apresentar uma demo e explicar decisões técnicas",
-          "Fazer perguntas durante uma discussão de arquitetura",
-          "Explicar um problema para pessoas não técnicas",
-          "Conduzir uma conversa curta sobre carreira e entrevistas"
+          "Present Perfect com have ou has + particípio",
+          "Experiências com ever, never, already, yet e just",
+          "Ações com duração usando since e for",
+          "Diferença entre Present Perfect e Past Simple",
+          "Present Perfect Continuous para duração e atividade recente",
+          "Past Perfect para ordenar acontecimentos no passado",
+          "Particípios dos verbos irregulares mais frequentes"
         ]
       },
       {
-        title: "Vocabulário essencial de software",
+        title: "Futuro",
         items: [
-          "Verbos de trabalho: deploy, merge, rollback, debug, refactor e ship",
-          "Status e prioridade: pending, blocked, overdue, scope e trade-off",
-          "Qualidade: edge case, flaky test, regression, bottleneck e root cause",
-          "Arquitetura: scalability, reliability, latency, throughput e dependency",
-          "Pronúncia dos termos mais usados na sua stack"
+          "Will para decisões, previsões, promessas e ofertas",
+          "Going to para planos e previsões com evidência",
+          "Present Continuous para compromissos futuros",
+          "Present Simple para horários e programações",
+          "Future Continuous e Future Perfect",
+          "Orações de tempo futuro com when, as soon as, before e after",
+          "Diferenças práticas entre will, going to e formas do presente"
+        ]
+      },
+      {
+        title: "Modais, condições e hipóteses",
+        items: [
+          "Can, could, may e might para capacidade e possibilidade",
+          "Must, have to, should e ought to para obrigação e conselho",
+          "Would para pedidos, preferências e situações hipotéticas",
+          "Zero e First Conditional para fatos e possibilidades reais",
+          "Second Conditional para hipóteses presentes",
+          "Third Conditional para hipóteses passadas",
+          "Mixed Conditionals",
+          "Wish, if only e would rather"
+        ]
+      },
+      {
+        title: "Estruturas gramaticais avançadas",
+        items: [
+          "Voz passiva nos principais tempos verbais",
+          "Reported Speech e mudanças de tempo, pronome e referência",
+          "Relative clauses com who, which, that, whose e where",
+          "Gerunds e infinitives: doing, to do e bare infinitive",
+          "Comparativos, superlativos e estruturas com as...as",
+          "Question tags e perguntas indiretas",
+          "Inversão e estruturas de ênfase",
+          "Phrasal verbs, collocations e padrões verbo + preposição"
+        ]
+      },
+      {
+        title: "Construção de frases",
+        items: [
+          "Ordem de palavras em afirmações, negativas e perguntas",
+          "Adjetivos, advérbios e posição na frase",
+          "Preposições de tempo, lugar, movimento e combinação fixa",
+          "Conectores de adição, contraste, causa, efeito e conclusão",
+          "Orações simples, compostas e complexas",
+          "Pontuação, contrações e uso de maiúsculas",
+          "Coesão: referência, substituição e evitar repetição",
+          "Paráfrase e escolha de registro formal ou informal"
+        ]
+      },
+      {
+        title: "Vocabulário geral",
+        items: [
+          "Apresentações, família, casa, alimentação e rotina",
+          "Cidade, transporte, viagens e direções",
+          "Saúde, corpo, emoções e bem-estar",
+          "Compras, dinheiro, serviços e atendimento",
+          "Educação, notícias, cultura e entretenimento",
+          "Trabalho, carreira, reuniões e produtividade",
+          "Sinônimos, antônimos, word families e formação de palavras",
+          "Expressões idiomáticas e phrasal verbs de alta frequência"
+        ]
+      },
+      {
+        title: "Pronúncia",
+        items: [
+          "Sons vocálicos curtos, longos e ditongos",
+          "Consoantes difíceis para falantes de português: th, r, h, w e final sounds",
+          "Pronúncia das terminações -ed e -s",
+          "Word stress e sílaba tônica",
+          "Sentence stress, ritmo e redução de palavras funcionais",
+          "Connected speech: linking, assimilation e contractions",
+          "Entonação em afirmações, perguntas, contraste e emoção",
+          "Alfabeto fonético e uso de dicionário com áudio"
+        ]
+      },
+      {
+        title: "Listening",
+        items: [
+          "Identificar ideia principal antes de buscar detalhes",
+          "Reconhecer números, nomes, datas e palavras-chave",
+          "Entender diferentes sotaques e velocidades de fala",
+          "Acompanhar conversas, entrevistas, vídeos e podcasts",
+          "Entender instruções, explicações e opiniões",
+          "Inferir significado pelo contexto",
+          "Praticar shadowing, transcrição e repetição espaçada",
+          "Assistir sem legenda, com legenda em inglês e revisar trechos difíceis"
+        ]
+      },
+      {
+        title: "Speaking",
+        items: [
+          "Apresentar-se e sustentar uma conversa cotidiana",
+          "Descrever pessoas, lugares, processos e experiências",
+          "Narrar acontecimentos no presente, passado e futuro",
+          "Expressar opinião, concordar, discordar e justificar",
+          "Pedir repetição, esclarecimento e tempo para pensar",
+          "Falar com fluidez sem traduzir cada frase mentalmente",
+          "Reformular quando não souber uma palavra",
+          "Gravar a própria fala e corrigir clareza, gramática e pronúncia"
+        ]
+      },
+      {
+        title: "Reading",
+        items: [
+          "Skimming para identificar assunto e estrutura",
+          "Scanning para localizar informações específicas",
+          "Distinguir fato, opinião, argumento e exemplo",
+          "Inferir palavras desconhecidas pelo contexto",
+          "Reconhecer referência de pronomes e conectores",
+          "Ler notícias, artigos, mensagens e textos longos",
+          "Resumir ideias principais com as próprias palavras",
+          "Usar dicionário monolíngue sem interromper toda a leitura"
+        ]
+      },
+      {
+        title: "Writing",
+        items: [
+          "Escrever frases corretas e parágrafos com uma ideia central",
+          "Organizar introdução, desenvolvimento e conclusão",
+          "Usar conectores e evitar repetição",
+          "Escrever mensagens, e-mails e solicitações claras",
+          "Descrever fatos, processos, problemas e soluções",
+          "Resumir e parafrasear sem copiar o texto original",
+          "Revisar gramática, vocabulário, tom e pontuação",
+          "Escrever textos formais e informais adequados ao público"
+        ]
+      },
+      {
+        title: "Inglês profissional",
+        items: [
+          "Apresentar trajetória, responsabilidades e resultados",
+          "Participar de reuniões, one-on-ones e apresentações",
+          "Negociar prazo, prioridade, escopo e expectativas",
+          "Dar e receber feedback com clareza e educação",
+          "Escrever mensagens de Slack e e-mails profissionais",
+          "Fazer networking e manter small talk",
+          "Preparar currículo, LinkedIn e entrevistas em inglês",
+          "Explicar um assunto complexo para pessoas não técnicas"
+        ]
+      },
+      {
+        title: "Inglês para desenvolvimento de software",
+        items: [
+          "Explicar andamento, próximos passos e bloqueios na daily",
+          "Ler documentação, RFCs, tickets e critérios de aceite",
+          "Escrever commits, pull requests e comentários de code review",
+          "Descrever bugs, passos para reprodução e resultados esperados",
+          "Explicar código, arquitetura, decisões e trade-offs",
+          "Discutir testes, deploy, incidentes e causa raiz",
+          "Vocabulário de frontend, backend, dados, cloud e segurança",
+          "Acompanhar demos, talks, cursos e entrevistas técnicas"
         ]
       }
     ]
@@ -140,79 +287,243 @@ export const routineSections: RoutineSection[] = [
   {
     key: "career",
     icon: "Rocket",
-    label: "Stack Builder",
-    shortLabel: "Stacks",
+    label: "Guia do Desenvolvedor",
+    shortLabel: "Guia Dev",
     color: "#fb923c",
     bg: "rgba(251, 146, 60, 0.12)",
-    time: "18:30-20:00",
-    days: weekdays,
-    note: "Aprimorar as stacks principais com um mapa de tópicos. Avance em um assunto por vez e transforme cada bloco em código ou anotação.",
-    items: [
-      { label: "Segunda — Frontend: React e TypeScript", days: [1] },
-      { label: "Terça — Backend: Java e Spring", days: [2] },
-      { label: "Quarta — APIs, banco de dados e integração", days: [3] },
-      { label: "Quinta — Arquitetura e system design", days: [4] },
-      { label: "Sexta — Testes, cloud e revisão da semana", days: [5] }
-    ],
+    time: "guia permanente",
+    note: "Mapa de competências para sua formação como desenvolvedor. Marque o que já domina e use os itens pendentes para decidir os próximos estudos. Este guia não entra no progresso da rotina.",
+    items: [],
     referenceGroups: [
       {
-        title: "Frontend — React e TypeScript",
+        title: "Lógica, algoritmos e estruturas de dados",
         items: [
-          "JavaScript moderno, TypeScript, tipos e generics",
-          "Componentes, props, estado, hooks e composição no React",
-          "Formulários, rotas, consumo de APIs e tratamento de erros",
-          "Acessibilidade, HTML semântico e CSS responsivo",
-          "Performance, testes de interface e boas práticas de estado"
+          "Variáveis, tipos, operadores, condições e laços",
+          "Funções, escopo, recursão e tratamento de erros",
+          "Arrays, listas, pilhas, filas, conjuntos, mapas, árvores e grafos",
+          "Busca, ordenação e técnicas de resolução de problemas",
+          "Complexidade de tempo e espaço com notação Big O",
+          "Decompor problemas, escrever pseudocódigo e validar casos extremos",
+          "Imutabilidade, efeitos colaterais e programação funcional básica",
+          "Resolver exercícios e explicar a solução em voz alta"
         ]
       },
       {
-        title: "Backend — Java e Spring",
+        title: "Fundamentos de computação",
         items: [
-          "Java moderno, orientação a objetos, collections, streams e exceptions",
-          "Spring Boot, injeção de dependência e configuração",
-          "Controllers, services, repositories e validação",
-          "JPA, Hibernate, transações e tratamento de erros",
-          "Autenticação, autorização e documentação da API"
+          "Como CPU, memória, disco e processos executam um programa",
+          "Sistemas operacionais, threads, concorrência e paralelismo",
+          "Bits, bytes, codificação de texto e representação de dados",
+          "Internet, DNS, TCP, UDP, TLS e modelo cliente-servidor",
+          "Terminal, sistema de arquivos, permissões e variáveis de ambiente",
+          "Compilação, interpretação, runtime e gerenciamento de memória",
+          "Virtualização, containers e diferenças para máquinas virtuais"
         ]
       },
       {
-        title: "APIs e dados",
+        title: "Git e colaboração",
         items: [
-          "HTTP, REST, status codes, headers e versionamento",
-          "Modelagem relacional, SQL, índices e consultas",
-          "Paginação, filtros, cache e idempotência",
-          "Integrações assíncronas, filas e eventos",
-          "Contratos, compatibilidade e tratamento de falhas externas"
+          "Criar repositório, commits, branches, merges e tags",
+          "Entender working tree, staging area e histórico",
+          "Resolver conflitos, rebase, cherry-pick e revert com segurança",
+          "Escrever commits pequenos e mensagens claras",
+          "Trabalhar com pull requests, code review e proteção de branches",
+          "Usar .gitignore e evitar segredos no histórico",
+          "Definir estratégias de branch e fluxo de entrega em equipe"
         ]
       },
       {
-        title: "Testes e qualidade",
+        title: "Web — HTML, CSS e navegador",
         items: [
-          "Testes unitários, de integração e ponta a ponta",
-          "Mocks, fixtures, pirâmide de testes e cobertura útil",
-          "Clean Code, SOLID e refatoração segura",
-          "Code review, análise estática e automação no CI",
-          "Debugging, logs e investigação de causa raiz"
+          "HTML semântico, formulários, tabelas, mídia e metadados",
+          "CSS: cascata, especificidade, box model e posicionamento",
+          "Flexbox, Grid, responsividade e mobile first",
+          "Acessibilidade: teclado, foco, contraste, labels e ARIA",
+          "DOM, eventos, armazenamento, cookies e ciclo de renderização",
+          "DevTools, network, console, performance e depuração no navegador",
+          "SEO técnico e fundamentos de compatibilidade entre navegadores"
         ]
       },
       {
-        title: "Arquitetura e system design",
+        title: "JavaScript e TypeScript",
+        items: [
+          "Tipos, coerção, igualdade, escopo, closures e hoisting",
+          "Objetos, arrays, destructuring, spread e módulos",
+          "Promises, async/await, event loop e tratamento de erros",
+          "Funções de alta ordem, map, filter, reduce e composição",
+          "TypeScript: tipos, interfaces, unions, narrowing e generics",
+          "Configuração, lint, formatação, bundling e gerenciamento de pacotes",
+          "Boas práticas para código assíncrono e segurança de tipos"
+        ]
+      },
+      {
+        title: "Frontend com React",
+        items: [
+          "Componentes, JSX, props, estado e eventos",
+          "Hooks, efeitos, refs, contexto e hooks personalizados",
+          "Composição, separação de responsabilidades e design de componentes",
+          "Formulários, validação, rotas e consumo de APIs",
+          "Estado local, estado do servidor e gerenciamento global",
+          "Loading, erro, estados vazios e atualizações otimistas",
+          "Testes de componentes e acessibilidade",
+          "Performance, memoização, code splitting e Server Components",
+          "Next.js: renderização, rotas, cache, metadados e deploy"
+        ]
+      },
+      {
+        title: "Java e orientação a objetos",
+        items: [
+          "Sintaxe, tipos, operadores, controle de fluxo e métodos",
+          "Classes, objetos, encapsulamento, herança e polimorfismo",
+          "Interfaces, classes abstratas, records, enums e generics",
+          "Collections, streams, lambdas e Optional",
+          "Exceptions, recursos, datas e entrada e saída",
+          "Imutabilidade, equals, hashCode e contratos de objetos",
+          "Concorrência, threads, executors e CompletableFuture",
+          "JVM, garbage collection, build com Maven ou Gradle e testes"
+        ]
+      },
+      {
+        title: "Backend com Spring",
+        items: [
+          "Spring Boot, configuração e injeção de dependência",
+          "Controllers, services, repositories e separação em camadas",
+          "DTOs, validação, mapeamento e tratamento global de erros",
+          "Spring Data JPA, Hibernate, transações e paginação",
+          "Spring Security, autenticação, autorização e CORS",
+          "Configuração por ambiente, secrets e profiles",
+          "Testes unitários, integração e Testcontainers",
+          "Documentação OpenAPI e observabilidade da aplicação"
+        ]
+      },
+      {
+        title: "APIs e integrações",
+        items: [
+          "HTTP, métodos, status codes, headers, cookies e cache",
+          "REST, recursos, contratos, versionamento e compatibilidade",
+          "Validação, paginação, filtros, ordenação e idempotência",
+          "OpenAPI, documentação e testes de contrato",
+          "Autenticação com sessão, JWT e OAuth 2.0",
+          "Webhooks, retries, timeout, circuit breaker e rate limiting",
+          "Mensageria, filas, eventos e processamento assíncrono",
+          "GraphQL, WebSocket e quando usar cada alternativa"
+        ]
+      },
+      {
+        title: "Bancos de dados e dados",
+        items: [
+          "Modelagem relacional, normalização e relacionamentos",
+          "SQL: SELECT, JOIN, agregações, subqueries e window functions",
+          "Índices, planos de execução e otimização de consultas",
+          "Transações, isolamento, locks e consistência",
+          "Migrations, backup, restauração e segurança de dados",
+          "NoSQL: documento, chave-valor, coluna e grafo",
+          "Cache com Redis, invalidação e estratégias de expiração",
+          "Escolher armazenamento conforme acesso, volume e consistência"
+        ]
+      },
+      {
+        title: "Testes e qualidade de software",
+        items: [
+          "Testes unitários, integração, contrato e ponta a ponta",
+          "Pirâmide de testes, cobertura útil e testes baseados em comportamento",
+          "Mocks, stubs, fakes, fixtures e test data builders",
+          "Testar casos felizes, falhas, limites e concorrência",
+          "Clean Code, SOLID, coesão, acoplamento e refatoração",
+          "Lint, análise estática, qualidade no CI e dívida técnica",
+          "Code review respeitoso, objetivo e orientado a risco",
+          "Depuração sistemática e investigação de causa raiz"
+        ]
+      },
+      {
+        title: "Arquitetura e design de software",
         items: [
           "Separação de responsabilidades e arquitetura em camadas",
-          "Monólitos, microsserviços e critérios para escolher",
-          "Escalabilidade, disponibilidade, consistência e tolerância a falhas",
-          "Cache, filas, balanceamento e banco de dados em escala",
-          "Documentar decisões e explicar trade-offs"
+          "Design patterns e critérios para não superutilizá-los",
+          "Domain-Driven Design: entidades, value objects e bounded contexts",
+          "Arquitetura hexagonal, Clean Architecture e ports and adapters",
+          "Monólito modular, microsserviços e trade-offs",
+          "Acoplamento síncrono e assíncrono entre módulos e serviços",
+          "ADRs, diagramas C4 e documentação de decisões",
+          "Evoluir arquitetura de forma incremental conforme a necessidade"
         ]
       },
       {
-        title: "Cloud e entrega",
+        title: "System design e sistemas distribuídos",
         items: [
-          "Git, estratégias de branch e fluxo de pull request",
-          "Docker, imagens, containers e configuração por ambiente",
-          "CI/CD, deploy, rollback e feature flags",
-          "Fundamentos de AWS: IAM, EC2, S3, RDS, Lambda e CloudWatch",
-          "Observabilidade, métricas, alertas e segurança de segredos"
+          "Levantar requisitos funcionais, não funcionais e estimativas",
+          "Escalabilidade horizontal e vertical, balanceamento e CDN",
+          "Disponibilidade, confiabilidade, latência e throughput",
+          "Consistência, particionamento, replicação e teorema CAP",
+          "Cache, filas, streaming, backpressure e processamento em lote",
+          "Idempotência, deduplicação e consistência eventual",
+          "Tolerância a falhas, retries, timeouts e circuit breakers",
+          "Desenhar APIs, dados, componentes, gargalos e trade-offs"
+        ]
+      },
+      {
+        title: "Cloud, Docker e entrega",
+        items: [
+          "Linux, processos, rede, logs e automação por scripts",
+          "Dockerfiles, imagens, containers, volumes e redes",
+          "Docker Compose e configuração local reproduzível",
+          "CI/CD, pipelines, artefatos, ambientes e aprovações",
+          "Deploy, rollback, blue-green, canary e feature flags",
+          "AWS: IAM, VPC, EC2, S3, RDS, Lambda e CloudWatch",
+          "Infraestrutura como código e fundamentos de Terraform",
+          "Kubernetes: pods, deployments, services e configuração básica"
+        ]
+      },
+      {
+        title: "Segurança de aplicações",
+        items: [
+          "Princípios de menor privilégio, defesa em profundidade e threat modeling",
+          "OWASP Top 10: injection, XSS, CSRF, SSRF e falhas de acesso",
+          "Hash de senhas, sessões, tokens e armazenamento seguro",
+          "Autenticação, autorização, RBAC e auditoria",
+          "TLS, CORS, CSP, headers e cookies seguros",
+          "Validação de entrada, encoding de saída e queries parametrizadas",
+          "Gestão de secrets, dependências e supply chain",
+          "Privacidade, proteção de dados, backups e resposta a incidentes"
+        ]
+      },
+      {
+        title: "Observabilidade e performance",
+        items: [
+          "Logs estruturados, correlação e níveis adequados",
+          "Métricas, traces, dashboards e alertas acionáveis",
+          "SLI, SLO, SLA e error budgets",
+          "Profiling de CPU e memória e análise de gargalos",
+          "Performance de frontend, Core Web Vitals e tamanho de bundle",
+          "Performance de APIs, consultas, cache e pool de conexões",
+          "Health checks, graceful shutdown e readiness",
+          "Conduzir incidentes, post-mortems e ações preventivas"
+        ]
+      },
+      {
+        title: "Produto e trabalho em equipe",
+        items: [
+          "Entender problema, usuário, regra de negócio e resultado esperado",
+          "Refinar requisitos, critérios de aceite e casos extremos",
+          "Dividir entregas grandes em incrementos pequenos",
+          "Estimar com incerteza e comunicar risco, bloqueio e dependência",
+          "Scrum, Kanban, planning, daily, review e retrospectiva",
+          "Documentar decisões, APIs, runbooks e onboarding",
+          "Colaborar com produto, design, QA, dados e operações",
+          "Equilibrar velocidade, qualidade, manutenção e valor para o usuário"
+        ]
+      },
+      {
+        title: "Carreira e evolução profissional",
+        items: [
+          "Construir projetos completos e explicar suas decisões",
+          "Manter GitHub, portfólio, currículo e LinkedIn claros",
+          "Preparar entrevistas de código, backend, frontend e system design",
+          "Comunicar impacto, contexto, ações e resultados",
+          "Pedir feedback, criar plano de desenvolvimento e acompanhar evolução",
+          "Aprender por documentação, experimentos e projetos, não só por cursos",
+          "Contribuir com revisões, mentoria, documentação e comunidade",
+          "Desenvolver autonomia sem deixar de pedir ajuda cedo"
         ]
       }
     ]

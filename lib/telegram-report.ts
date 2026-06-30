@@ -111,7 +111,6 @@ function getWeeklyInsights(report: TelegramRoutineReport) {
   const strongest = sections[0];
   const weakest = [...sections].sort((a, b) => percentage(a[1].done, a[1].total) - percentage(b[1].done, b[1].total))[0];
   const programming = findSection(sections, [/programa/i, /c[oó]digo/i, /stack/i, /builder/i]);
-  const english = findSection(sections, [/ingl[eê]s/i]);
   const optionalGrowth = findSection(sections, [/finance/i, /invest/i, /youtube/i, /marketing/i, /opcional/i]);
   const totals = totalForDays(report.days);
   const pct = percentage(totals.done, totals.total);
@@ -130,7 +129,6 @@ function getWeeklyInsights(report: TelegramRoutineReport) {
     `• Onde caiu: ${formatSectionScore(weakest, "sem queda clara nesta semana.")}`,
     `• Recomendação: ${recommendation}`,
     `• Foco de programação: ${formatSectionScore(programming, "priorize uma entrega pequena de código por dia útil.")}`,
-    `• Consistência em inglês: ${formatSectionScore(english, "mantenha pelo menos uma exposição curta diária.")}`,
     `• Investimentos/YouTube/marketing: ${formatSectionScore(optionalGrowth, "use o fim de semana como opcional, sem afetar o streak.")}`
   ];
 }
