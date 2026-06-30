@@ -263,7 +263,8 @@ export default function HomePage() {
       hiddenItems: routinePrefs.hiddenItems,
       customItems: routinePrefs.customItems,
       timeOverrides: routinePrefs.timeOverrides,
-      labelOverrides: routinePrefs.labelOverrides
+      labelOverrides: routinePrefs.labelOverrides,
+      iconOverrides: routinePrefs.iconOverrides
     };
     const previousPrefs = lastCalendarSyncPrefs.current;
     const preferencesChanged = !previousPrefs || Object.keys(calendarPrefs).some(
@@ -318,6 +319,7 @@ export default function HomePage() {
     hydrated,
     routinePrefs.customItems,
     routinePrefs.hiddenItems,
+    routinePrefs.iconOverrides,
     routinePrefs.labelOverrides,
     routinePrefs.timeOverrides,
     state
@@ -738,6 +740,7 @@ export default function HomePage() {
           ...(routinePrefs.customItems[section.key] ?? []).map((item) => ({ ...item, key: item.id }))
         ].map((item) => ({
           label: routinePrefs.labelOverrides[section.key]?.[item.key] ?? item.label,
+          icon: routinePrefs.iconOverrides[section.key]?.[item.key],
           days: "days" in item ? item.days : undefined,
           completed: completedKeys.has(item.key)
         }))

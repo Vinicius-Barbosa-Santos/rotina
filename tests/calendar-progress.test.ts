@@ -29,3 +29,18 @@ test("extracts routine completion progress from Google Calendar event titles", (
     },
   });
 });
+
+test("extracts hidden routine progress without exposing it in the event title", () => {
+  const calendarEvent = {
+    ...event("🇬🇧 Rotina: Inglês"),
+    routineProgress: { section: "Inglês", done: 3, total: 4 },
+  };
+
+  assert.deepEqual(extractCalendarProgress([calendarEvent])["2026-06-17"], {
+    done: 3,
+    total: 4,
+    sections: {
+      Inglês: { done: 3, total: 4 },
+    },
+  });
+});

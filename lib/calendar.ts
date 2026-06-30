@@ -32,6 +32,9 @@ export type GoogleCalendarApiEvent = {
       uri?: string;
     }>;
   };
+  extendedProperties?: {
+    private?: Record<string, string>;
+  };
 };
 
 type RawEvent = {
@@ -89,6 +92,13 @@ export function mapGoogleCalendarEvents(
       const allDay = Boolean(event.start?.date);
       const meetingUrl = findGoogleMeetingUrl(event);
       const provider = meetingUrl ? identifyProvider(meetingUrl) : undefined;
+      const privateProperties = event.extendedProperties?.private;
+      const routineDone = Number(privateProperties?.rotinaCompleted);
+      const routineTotal = Number(privateProperties?.rotinaTotal);
+      const routineSection = privateProperties?.rotinaSectionLabel;
+      const routineProgress = routineSection && Number.isFinite(routineDone) && Number.isFinite(routineTotal)
+        ? { section: routineSection, done: routineDone, total: routineTotal }
+        : undefined;
 
       return {
         id: [options.calendarId, event.iCalUID ?? event.id ?? `${event.summary}-${startsAt}`]
@@ -101,7 +111,8 @@ export function mapGoogleCalendarEvents(
         location: event.location || undefined,
         meetingUrl,
         provider,
-        calendarId: options.calendarId
+        calendarId: options.calendarId,
+        routineProgress
       };
     })
     .filter((event): event is CalendarEvent => Boolean(event));

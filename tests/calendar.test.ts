@@ -24,6 +24,26 @@ test("mapGoogleCalendarEvents only exposes recognized meeting links", () => {
   assert.equal(events[1].meetingUrl, "https://meet.google.com/abc-defg-hij");
 });
 
+test("mapGoogleCalendarEvents reads routine progress from private metadata", () => {
+  const [event] = mapGoogleCalendarEvents([
+    {
+      id: "routine",
+      summary: "💻 Rotina: Programação",
+      start: { dateTime: "2026-06-12T10:00:00-03:00" },
+      end: { dateTime: "2026-06-12T18:00:00-03:00" },
+      extendedProperties: {
+        private: {
+          rotinaSectionLabel: "Programação",
+          rotinaCompleted: "7",
+          rotinaTotal: "10",
+        },
+      },
+    },
+  ]);
+
+  assert.deepEqual(event.routineProgress, { section: "Programação", done: 7, total: 10 });
+});
+
 test("parseCalendarEvents expands weekly events for the requested day", () => {
   const ics = [
     "BEGIN:VCALENDAR",

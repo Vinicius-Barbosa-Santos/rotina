@@ -405,6 +405,25 @@ export function isReferenceSection(section: RoutineSection) {
   return Boolean(section.references?.length || section.referenceGroups?.length);
 }
 
+const routineSectionEmoji: Record<string, string> = {
+  personal: "🌅",
+  english: "🇬🇧",
+  work: "💻",
+  career: "🚀",
+  "house-cleaning": "🧹",
+  health: "💪",
+  "functional-life": "🏠",
+  growth: "📈",
+  saturday: "🎯",
+  finance: "💰",
+  relationships: "❤️",
+  "sunday-review": "🗓️"
+};
+
+export function getRoutineSectionEmoji(section: Pick<RoutineSection, "key">) {
+  return routineSectionEmoji[section.key] ?? "📌";
+}
+
 export const trackedRoutineSections = routineSections.filter((section) => !isReferenceSection(section));
 export const routineReferenceSections = routineSections.filter(isReferenceSection);
 

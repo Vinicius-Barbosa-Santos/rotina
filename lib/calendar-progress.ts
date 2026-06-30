@@ -14,16 +14,20 @@ const routineTitlePattern = /Rotina:\s*(.+?)\s+\((\d+)\/(\d+)\)/i;
 type ProgressCalendarEvent = {
   title: string;
   startsAt: string;
+  routineProgress?: {
+    section: string;
+    done: number;
+    total: number;
+  };
 };
 
 export function extractCalendarProgress(events: ProgressCalendarEvent[]): CalendarProgressDays {
   return events.reduce<CalendarProgressDays>((progress, event) => {
     const match = event.title.match(routineTitlePattern);
-    if (!match) return progress;
-
-    const [, sectionLabel, doneText, totalText] = match;
-    const done = Number(doneText);
-    const total = Number(totalText);
+    const sectionLabel = event.routineProgress?.section ?? match?.[1];
+    const done = event.routineProgress?.done ?? Number(match?.[2]);
+    const total = event.routineProgress?.total ?? Number(match?.[3]);
+    if (!sectionLabel) return progress;
     if (!Number.isFinite(done) || !Number.isFinite(total) || total <= 0) return progress;
 
     const key = eventDateKey(event.startsAt);

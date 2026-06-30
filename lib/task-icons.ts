@@ -61,6 +61,38 @@ export const taskIconOptions: Array<{ name: TaskIconName; label: string }> = [
   { name: "mic", label: "Voz" }
 ];
 
+const taskEmojiMap: Record<TaskIconName, string> = {
+  alarm: "⏰",
+  bed: "🛏️",
+  book: "📚",
+  briefcase: "💼",
+  calendar: "🗓️",
+  checklist: "✅",
+  code: "💻",
+  coffee: "☕",
+  dumbbell: "💪",
+  fileText: "📄",
+  gitPullRequest: "🔀",
+  globe: "🌍",
+  heart: "❤️",
+  home: "🏠",
+  lightbulb: "💡",
+  megaphone: "📣",
+  message: "💬",
+  mic: "🎙️",
+  moon: "🌙",
+  notebook: "📝",
+  play: "▶️",
+  rocket: "🚀",
+  sparkles: "✨",
+  target: "🎯",
+  trendingUp: "📈",
+  utensils: "🍽️",
+  wallet: "💰",
+  water: "💧",
+  youtube: "📺"
+};
+
 const taskIconRules: Array<{ icon: TaskIconName; keywords: string[] }> = [
   { icon: "alarm", keywords: ["acordar"] },
   { icon: "bed", keywords: ["arrumar cama", "cama"] },
@@ -103,6 +135,10 @@ export function getTaskIconName(label: string): TaskIconName {
   if (taskIconCache.size >= 500) taskIconCache.clear();
   taskIconCache.set(label, icon);
   return icon;
+}
+
+export function getTaskEmoji(label: string, icon?: TaskIconName) {
+  return taskEmojiMap[icon ?? getTaskIconName(label)];
 }
 
 export function isTaskIconName(value: unknown): value is TaskIconName {

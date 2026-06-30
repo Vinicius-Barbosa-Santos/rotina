@@ -147,7 +147,7 @@ function getCalendarEventsUrl({
   url.searchParams.set("q", "Rotina:");
   url.searchParams.set(
     "fields",
-    "items(id,iCalUID,summary,start,end)"
+    "items(id,iCalUID,summary,start,end,extendedProperties)"
   );
   return url;
 }

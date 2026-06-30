@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { clearGoogleAuthCookies, getGoogleAccessToken, GoogleCalendarAuthError } from "@/lib/google-auth";
-import { trackedRoutineSections, type RoutineSection } from "@/lib/routine";
+import { getRoutineSectionEmoji, routineReferenceSections, trackedRoutineSections, type RoutineSection } from "@/lib/routine";
+import { getTaskEmoji, type TaskIconName } from "@/lib/task-icons";
 
 export const maxDuration = 60;
 
@@ -9,7 +10,7 @@ type GoogleEventListResponse = {
 };
 
 type SyncSection = Omit<RoutineSection, "items"> & {
-  items: Array<{ label: string; completed?: boolean; days?: Array<0 | 1 | 2 | 3 | 4 | 5 | 6> }>;
+  items: Array<{ label: string; icon?: TaskIconName; completed?: boolean; days?: Array<0 | 1 | 2 | 3 | 4 | 5 | 6> }>;
 };
 
 const reminderMinutes = 10;
@@ -36,6 +37,12 @@ export async function POST(request: Request) {
     const rangeDays = Math.min(Math.max(body?.rangeDays ?? 1, 1), 30);
     const dates = getCalendarDates(rangeDays, timeZone);
     const synced: string[] = [];
+
+    await deleteObsoleteRoutineEvents({
+      sectionKeys: routineReferenceSections.map((section) => section.key),
+      calendarId,
+      accessToken
+    });
 
     if (rangeDays > 1) {
       for (const sectionBatch of chunk(sourceSections, 3)) {
@@ -220,6 +227,41 @@ async function deleteAllRoutineEvents({
   return deleted;
 }
 
+async function deleteObsoleteRoutineEvents({
+  sectionKeys,
+  calendarId,
+  accessToken
+}: {
+  sectionKeys: string[];
+  calendarId: string;
+  accessToken: string;
+}) {
+  const baseUrl = `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events`;
+
+  for (const sectionKey of sectionKeys) {
+    const events = await listRoutineEvents({
+      calendarId,
+      accessToken,
+      privateExtendedProperties: [`rotinaSectionKey=${sectionKey}`],
+      maxResults: 250
+    });
+
+    for (const eventBatch of chunk(events, 3)) {
+      await Promise.all(eventBatch.map(async (event) => {
+        const response = await googleCalendarFetch(`${baseUrl}/${encodeURIComponent(event.id)}`, {
+          method: "DELETE",
+          headers: { Authorization: `Bearer ${accessToken}` }
+        });
+
+        if (!response.ok && response.status !== 410) {
+          const errorText = await response.text();
+          throwGoogleCalendarError(response.status, errorText, "remover blocos antigos da rotina");
+        }
+      }));
+    }
+  }
+}
+
 async function listAllRoutineEvents({
   calendarId,
   accessToken
@@ -319,14 +361,13 @@ function buildRoutineEvent(section: SyncSection, timeZone: string, date: Date) {
   const items = section.items.filter((item) => !item.days?.length || item.days.includes(date.getUTCDay() as 0 | 1 | 2 | 3 | 4 | 5 | 6));
   const isToday = startDate === formatDateInTimeZone(new Date(), timeZone);
   const completedCount = isToday ? items.filter((item) => item.completed).length : 0;
-  const allCompleted = items.length > 0 && completedCount === items.length;
 
   return {
-    summary: `${allCompleted ? "✅" : "⬜"} Rotina: ${section.label} (${completedCount}/${items.length})`,
+    summary: `${getRoutineSectionEmoji(section)} Rotina: ${section.label}`,
     description: [
       section.note,
       items.length
-        ? items.map((item) => `${isToday && item.completed ? "✅" : "⬜"} ${item.label}`).join("\n")
+        ? items.map((item) => `${getTaskEmoji(item.label, item.icon)} ${item.label}`).join("\n")
         : undefined
     ]
       .filter(Boolean)
@@ -346,7 +387,10 @@ function buildRoutineEvent(section: SyncSection, timeZone: string, date: Date) {
     extendedProperties: {
       private: {
         rotinaSectionKey: section.key,
-        rotinaDate: startDate
+        rotinaDate: startDate,
+        rotinaSectionLabel: section.label,
+        rotinaCompleted: String(completedCount),
+        rotinaTotal: String(items.length)
       }
     }
   };

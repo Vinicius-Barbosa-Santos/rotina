@@ -11,6 +11,11 @@ export type CalendarEvent = {
   meetingUrl?: string;
   provider?: string;
   calendarId?: string;
+  routineProgress?: {
+    section: string;
+    done: number;
+    total: number;
+  };
 };
 
 export type CalendarResponse = {
@@ -66,7 +71,7 @@ export type RoutineNotificationSection = {
 };
 
 export type CalendarSyncSection = Omit<RoutineSection, "items"> & {
-  items: Array<{ label: string; completed?: boolean; days?: Weekday[] }>;
+  items: Array<{ label: string; icon?: TaskIconName; completed?: boolean; days?: Weekday[] }>;
 };
 
 export type TelegramReportPeriod = "daily" | "weekly" | "monthly";
