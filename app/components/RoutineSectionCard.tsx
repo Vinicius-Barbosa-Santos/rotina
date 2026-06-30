@@ -209,6 +209,12 @@ export default function RoutineSectionCard({
             ) : null}
             {referenceGroups.length ? (
               <div className="referenceSlider">
+                {section.guideLabel && (
+                  <div className="referenceGuideTitle">
+                    <small>guia permanente</small>
+                    <h2>{section.guideLabel}</h2>
+                  </div>
+                )}
                 <div className="referenceSliderSummary">
                   <span>{referenceDone} de {referenceTotal} {groupedContentLabel}</span>
                   <strong>{referenceTotal ? Math.round((referenceDone / referenceTotal) * 100) : 0}%</strong>

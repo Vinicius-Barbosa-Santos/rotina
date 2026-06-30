@@ -57,6 +57,7 @@ test("English habits count toward progress while the complete guide remains belo
 
   assert.ok(english);
   assert.equal(english.label, "Inglês");
+  assert.equal(english.guideLabel, "Guia de Inglês");
   assert.equal(getSectionScheduleLabel(english), "segunda a sexta");
   assert.deepEqual(
     getVisibleItems(english, new Date(2026, 5, 22)).map(({ item }) => item.label),

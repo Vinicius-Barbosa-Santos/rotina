@@ -14,6 +14,7 @@ export type RoutineSection = {
   bg: string;
   time: string;
   note?: string;
+  guideLabel?: string;
   days?: Weekday[];
   items: RoutineItem[];
   references?: string[];
@@ -54,6 +55,7 @@ export const routineSections: RoutineSection[] = [
     bg: "rgba(52, 211, 153, 0.12)",
     time: "09:00-10:00",
     days: weekdays,
+    guideLabel: "Guia de Inglês",
     note: "Os cinco hábitos acima entram no progresso da rotina. O guia abaixo é apenas um mapa de conhecimento: marque o que já domina e use os itens pendentes para escolher os próximos estudos.",
     items: [
       { label: "Duolingo" },
