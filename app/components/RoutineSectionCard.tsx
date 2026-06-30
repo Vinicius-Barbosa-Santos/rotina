@@ -14,6 +14,7 @@ type RoutineSectionCardProps = {
   items: PersonalizedRoutineItem[];
   doneItems: Set<string>;
   guideDoneItems: Set<string>;
+  showGuide?: boolean;
   isOpen: boolean;
   time: string;
   newItem: string;
@@ -33,6 +34,7 @@ export default function RoutineSectionCard({
   items,
   doneItems,
   guideDoneItems,
+  showGuide = true,
   isOpen,
   time,
   newItem,
@@ -207,14 +209,8 @@ export default function RoutineSectionCard({
                 {section.references.map((reference) => <li key={reference}>{reference}</li>)}
               </ol>
             ) : null}
-            {referenceGroups.length ? (
+            {showGuide && referenceGroups.length ? (
               <div className="referenceSlider">
-                {section.guideLabel && (
-                  <div className="referenceGuideTitle">
-                    <small>guia permanente</small>
-                    <h2>{section.guideLabel}</h2>
-                  </div>
-                )}
                 <div className="referenceSliderSummary">
                   <span>{referenceDone} de {referenceTotal} {groupedContentLabel}</span>
                   <strong>{referenceTotal ? Math.round((referenceDone / referenceTotal) * 100) : 0}%</strong>

@@ -97,7 +97,9 @@ export default function HomePage() {
   const [syncReady, setSyncReady] = useState(false);
   const [syncMessage, setSyncMessage] = useState("");
   const [state, setState] = useState<RoutineState>({});
-  const [openSections, setOpenSections] = useState(() => new Set(routineSections.map((item) => item.key)));
+  const [openSections, setOpenSections] = useState(() => new Set(
+    [...routineSections, ...routineReferenceSections].map((item) => item.key)
+  ));
   const [calendar, setCalendar] = useState<CalendarResponse | null>(null);
   const [calendarProgressDays, setCalendarProgressDays] = useState<CalendarProgressDays>({});
   const [calendarLoading, setCalendarLoading] = useState(true);
@@ -1097,6 +1099,7 @@ export default function HomePage() {
                   items={items}
                   doneItems={doneItems}
                   guideDoneItems={emptyItemKeys}
+                  showGuide={false}
                   isOpen={isOpen}
                   time={getSectionTime(section.key, section.time)}
                   newItem={newRoutineItems[section.key] ?? ""}

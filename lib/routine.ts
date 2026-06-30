@@ -56,7 +56,7 @@ export const routineSections: RoutineSection[] = [
     time: "09:00-10:00",
     days: weekdays,
     guideLabel: "Guia de Inglês",
-    note: "Os cinco hábitos acima entram no progresso da rotina. O guia abaixo é apenas um mapa de conhecimento: marque o que já domina e use os itens pendentes para escolher os próximos estudos.",
+    note: "Estes cinco hábitos entram no progresso da rotina. O mapa completo de conhecimento fica no Guia de Inglês, junto aos outros guias para consultar.",
     items: [
       { label: "Duolingo" },
       { label: "Leitura em inglês" },
@@ -860,6 +860,7 @@ export function isReferenceSection(section: RoutineSection) {
 const routineSectionEmoji: Record<string, string> = {
   personal: "🌅",
   english: "🇬🇧",
+  "english-guide": "🇬🇧",
   work: "💻",
   career: "🚀",
   "house-cleaning": "🧹",
@@ -877,7 +878,23 @@ export function getRoutineSectionEmoji(section: Pick<RoutineSection, "key">) {
 }
 
 export const trackedRoutineSections = routineSections.filter((section) => !isReferenceSection(section));
-export const routineReferenceSections = routineSections.filter(isReferenceSection);
+export const routineReferenceSections: RoutineSection[] = routineSections.flatMap((section) => {
+  if (section.key === "english" && section.referenceGroups?.length) {
+    return [{
+      ...section,
+      key: "english-guide",
+      label: section.guideLabel ?? "Guia de Inglês",
+      shortLabel: "Guia Inglês",
+      time: "guia permanente",
+      note: "Marque o que você já domina. Os itens desmarcados mostram o que ainda precisa aprender e não entram no progresso da rotina.",
+      guideLabel: undefined,
+      days: undefined,
+      items: []
+    }];
+  }
+
+  return isReferenceSection(section) ? [section] : [];
+});
 
 function uniqueDays(days: Weekday[]) {
   return [...new Set(days)].sort();

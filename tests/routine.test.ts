@@ -67,6 +67,11 @@ test("English habits count toward progress while the complete guide remains belo
   assert.ok(english.referenceGroups?.some((group) => group.title === "Inglês para desenvolvimento de software"));
   assert.equal(trackedRoutineSections.some((section) => section.key === english.key), true);
   assert.equal(routineReferenceSections.some((section) => section.key === english.key), false);
+  const englishGuide = routineReferenceSections.find((section) => section.key === "english-guide");
+  assert.ok(englishGuide);
+  assert.equal(englishGuide.label, "Guia de Inglês");
+  assert.equal(getSectionScheduleLabel(englishGuide), "referência");
+  assert.equal(englishGuide.referenceGroups, english.referenceGroups);
 });
 
 test("developer curriculum is a permanent guide and does not count toward routine progress", () => {

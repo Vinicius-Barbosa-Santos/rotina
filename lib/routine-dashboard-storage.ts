@@ -14,13 +14,19 @@ export function readCompletedDates() {
 }
 
 export function normalizeRoutinePrefs(savedPrefs: Partial<RoutinePrefs>): RoutinePrefs {
+  const guideChecks = { ...(savedPrefs.guideChecks ?? {}) };
+  if (!guideChecks["english-guide"]?.length && guideChecks.english?.length) {
+    guideChecks["english-guide"] = [...guideChecks.english];
+  }
+  delete guideChecks.english;
+
   return {
     hiddenItems: savedPrefs.hiddenItems ?? {},
     customItems: savedPrefs.customItems ?? {},
     timeOverrides: savedPrefs.timeOverrides ?? {},
     labelOverrides: savedPrefs.labelOverrides ?? {},
     iconOverrides: savedPrefs.iconOverrides ?? {},
-    guideChecks: savedPrefs.guideChecks ?? {}
+    guideChecks
   };
 }
 
@@ -72,6 +78,7 @@ export function sanitizeRoutineSyncSnapshot(snapshot: RoutineSyncSnapshot): Rout
     ...snapshot,
     states: filterRoutineStatesByTrackingDate(snapshot.states),
     completedDates: snapshot.completedDates.filter((date) => date >= progressTrackingStartDate).sort(),
+    routinePrefs: normalizeRoutinePrefs(snapshot.routinePrefs),
     telegramReportsSent: filterTelegramReportsByTrackingDate(snapshot.telegramReportsSent)
   };
 }
