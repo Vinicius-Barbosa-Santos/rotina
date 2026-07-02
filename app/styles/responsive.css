@@ -71,6 +71,11 @@
     flex-direction: column;
   }
 
+  .dayStackShowcase {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
   .evolutionHeader > span {
     text-align: left;
   }

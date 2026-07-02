@@ -403,7 +403,11 @@ export default function HomePage() {
     }),
     [calendarProgressDays, routinePrefs, state]
   );
-  const stackPreview = profileStacks.length ? profileStacks.slice(0, 4) : ["React", "Java", "System design"];
+  const stackPreview = profileStacks.length ? profileStacks : ["React", "Java", "System design"];
+  const stackTickerItems = Array.from(
+    { length: Math.max(24, stackPreview.length) },
+    (_, index) => stackPreview[index % stackPreview.length]
+  );
   const dayModeLabel = isTodayProgressDay ? "Rotina de programação" : "Fluxo opcional";
 
   const manualEvents = useMemo(() => getManualMeetingEvents(manualMeetings), [manualMeetings]);
@@ -1067,10 +1071,22 @@ export default function HomePage() {
             <div className="wideProgress">
               <span style={{ width: `${totals.pct}%` }} />
             </div>
-            <div className="dayStackRow" aria-label="Contexto da rotina">
-              {stackPreview.map((stack) => (
-                <span key={stack}>{stack}</span>
-              ))}
+            <div className="dayStackShowcase">
+              <span className="dayStackLabel">
+                <i aria-hidden />
+                minhas stacks
+              </span>
+              <div className="dayStackTicker" role="img" aria-label={`Minhas stacks: ${stackPreview.join(", ")}`}>
+                <div className="dayStackTrack">
+                  {[0, 1].map((group) => (
+                    <div className="dayStackGroup" aria-hidden="true" key={group}>
+                      {stackTickerItems.map((stack, index) => (
+                        <span key={`${group}-${index}-${stack}`}>{stack}</span>
+                      ))}
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
 
