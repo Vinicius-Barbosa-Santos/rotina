@@ -52,6 +52,7 @@ import ManualMeetingsCard from "./components/ManualMeetingsCard";
 import ProfileStacksCard from "./components/ProfileStacksCard";
 import ProgressCharts from "./components/ProgressCharts";
 import RoutineSectionCard from "./components/RoutineSectionCard";
+import StackIcon from "./components/StackIcon";
 import TelegramReports from "./components/TelegramReports";
 import WeekendFlowPanel from "./components/WeekendFlowPanel";
 import { RoutineIcon } from "./components/RoutineIcon";
@@ -1081,7 +1082,7 @@ export default function HomePage() {
                   {[0, 1].map((group) => (
                     <div className="dayStackGroup" aria-hidden="true" key={group}>
                       {stackTickerItems.map((stack, index) => (
-                        <span key={`${group}-${index}-${stack}`}>{stack}</span>
+                        <StackIcon stack={stack} key={`${group}-${index}-${stack}`} />
                       ))}
                     </div>
                   ))}
