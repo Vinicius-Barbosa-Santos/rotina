@@ -18,7 +18,7 @@ const stackVisuals: StackVisual[] = [
   { src: "https://icon.icepanel.io/AWS/svg/Database/DynamoDB.svg", color: "#527fff", matches: ["dynamodb"] },
   { src: "https://icon.icepanel.io/AWS/svg/Management-Governance/CloudWatch.svg", color: "#759c3e", matches: ["cloudwatch"] },
   { src: "https://icon.icepanel.io/AWS/svg/Storage/Simple-Storage-Service.svg", color: "#7aa116", matches: ["amazon s3", "aws s3", "simple storage"] },
-  { src: "https://cdn.simpleicons.org/amazonwebservices/FF9900", color: "#ff9900", matches: ["aws", "amazon web services"] },
+  { src: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/amazonwebservices/amazonwebservices-original-wordmark.svg", color: "#ff9900", matches: ["aws", "amazon web services"] },
   { src: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/spring/spring-original.svg", color: "#6db33f", matches: ["spring boot", "spring"] },
   { src: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/angular/angular-original.svg", color: "#dd0031", matches: ["angular"] },
   { src: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/react/react-original.svg", color: "#61dafb", matches: ["react"] },
