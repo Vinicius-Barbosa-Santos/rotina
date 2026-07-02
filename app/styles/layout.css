@@ -266,6 +266,13 @@
   transform: translateY(-2px);
 }
 
+.dayStackIcon img {
+  display: block;
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+}
+
 @keyframes stackMarquee {
   to {
     transform: translateX(-50%);

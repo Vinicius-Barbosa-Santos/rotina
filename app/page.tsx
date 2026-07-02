@@ -33,6 +33,7 @@ import {
   writeSyncSnapshotToStorage
 } from "@/lib/routine-dashboard-storage";
 import { resolveInitialSyncSnapshot } from "@/lib/routine-sync-selection";
+import { mergeProfileStacks } from "@/lib/profile-stacks";
 import { readStorageJson } from "@/lib/storage";
 import type { CalendarProgressDays } from "@/lib/calendar-progress";
 import type {
@@ -404,7 +405,7 @@ export default function HomePage() {
     }),
     [calendarProgressDays, routinePrefs, state]
   );
-  const stackPreview = profileStacks.length ? profileStacks : ["React", "Java", "System design"];
+  const stackPreview = mergeProfileStacks(profileStacks);
   const stackTickerItems = Array.from(
     { length: Math.max(24, stackPreview.length) },
     (_, index) => stackPreview[index % stackPreview.length]
