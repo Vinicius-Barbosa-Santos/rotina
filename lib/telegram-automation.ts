@@ -1,5 +1,6 @@
 import { calculateProgressStreak, progressTrackingStartDate } from "./progress-history.ts";
 import { getVisibleItems, trackedRoutineSections } from "./routine.ts";
+import { isSaoPauloHolidayDate } from "./sao-paulo-holidays.ts";
 import type { RoutineSyncSnapshot, TelegramReportPeriod, TelegramRoutineReport } from "./types.ts";
 
 type AutomatedRoutineData = Pick<RoutineSyncSnapshot, "states" | "completedDates" | "routinePrefs">;
@@ -84,8 +85,9 @@ function getPeriodDateKeys(period: TelegramReportPeriod, reportDateKey: string) 
 }
 
 function isProgressDateKey(dateKey: string) {
-  const weekday = dateFromKey(dateKey).getUTCDay();
-  return weekday >= 1 && weekday <= 5 && dateKey >= progressTrackingStartDate;
+  const date = dateFromKey(dateKey);
+  const weekday = date.getUTCDay();
+  return weekday >= 1 && weekday <= 5 && !isSaoPauloHolidayDate(date) && dateKey >= progressTrackingStartDate;
 }
 
 function isLastDayOfMonth(date: Date) {

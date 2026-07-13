@@ -24,8 +24,9 @@ test("23h in Sao Paulo resolves to the previous UTC calendar date", () => {
 });
 
 test("automatic reports follow daily, weekly and monthly boundaries", () => {
-  assert.deepEqual(getDueTelegramReportPeriods("2026-06-30"), ["daily", "monthly"]);
-  assert.deepEqual(getDueTelegramReportPeriods("2026-07-05"), ["weekly"]);
+  assert.deepEqual(getDueTelegramReportPeriods("2026-07-19"), ["weekly"]);
+  assert.deepEqual(getDueTelegramReportPeriods("2026-07-20"), ["daily"]);
+  assert.deepEqual(getDueTelegramReportPeriods("2026-07-26"), ["weekly"]);
   assert.deepEqual(getDueTelegramReportPeriods("2026-07-31"), ["daily", "monthly"]);
 });
 
@@ -33,21 +34,21 @@ test("server report includes every weekday even when no task was checked", () =>
   const report = buildAutomatedTelegramReport(
     {
       states: {
-        "2026-06-29": { work: ["0"] }
+        "2026-07-20": { work: ["0"] }
       },
       completedDates: [],
       routinePrefs
     },
     "weekly",
-    "2026-07-05"
+    "2026-07-26"
   );
 
   assert.deepEqual(report.days.map((day) => day.date), [
-    "2026-06-29",
-    "2026-06-30",
-    "2026-07-01",
-    "2026-07-02",
-    "2026-07-03"
+    "2026-07-20",
+    "2026-07-21",
+    "2026-07-22",
+    "2026-07-23",
+    "2026-07-24"
   ]);
   assert.equal(report.days[0]?.sections.find((section) => section.label === "Programação")?.done, 1);
   assert.equal(report.days[0]?.sections.find((section) => section.label === "Inglês")?.total, 5);

@@ -825,7 +825,7 @@ export default function HomePage() {
 
   async function sendTelegramReport(period: TelegramReportPeriod) {
     if (todayKey() < progressTrackingStartDate) {
-      setTelegramMessage("Os relatórios começam em 29 de junho de 2026.");
+      setTelegramMessage("Os relatórios começam em 20 de julho de 2026.");
       return false;
     }
     if (telegramSendingInProgress.current) return false;

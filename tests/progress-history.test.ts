@@ -40,44 +40,44 @@ test("resets progress history once while preserving preferences", () => {
 });
 
 test("weekends are optional and do not count in progress reports or streak", () => {
-  const weeklyDates = getProgressReportDates("weekly", new Date("2026-07-06T12:00:00-03:00")).map(dateKey);
+  const weeklyDates = getProgressReportDates("weekly", new Date("2026-07-27T12:00:00-03:00")).map(dateKey);
 
-  assert.deepEqual(weeklyDates, ["2026-06-30", "2026-07-01", "2026-07-02", "2026-07-03", "2026-07-06"]);
-  assert.equal(isProgressTrackingDate(new Date("2026-07-04T12:00:00-03:00")), false);
-  assert.equal(isProgressTrackingDate(new Date("2026-07-06T12:00:00-03:00")), true);
+  assert.deepEqual(weeklyDates, ["2026-07-21", "2026-07-22", "2026-07-23", "2026-07-24", "2026-07-27"]);
+  assert.equal(isProgressTrackingDate(new Date("2026-07-25T12:00:00-03:00")), false);
+  assert.equal(isProgressTrackingDate(new Date("2026-07-27T12:00:00-03:00")), true);
   assert.equal(
     calculateProgressStreak(
-      ["2026-07-02", "2026-07-03", "2026-07-06"],
-      new Date("2026-07-06T12:00:00-03:00")
+      ["2026-07-23", "2026-07-24", "2026-07-27"],
+      new Date("2026-07-27T12:00:00-03:00")
     ),
     3
   );
 });
 
 test("São Paulo holidays are day off and do not count in progress", () => {
-  const weeklyDates = getProgressReportDates("weekly", new Date("2026-07-10T12:00:00-03:00")).map(dateKey);
+  const weeklyDates = getProgressReportDates("weekly", new Date("2026-11-20T12:00:00-03:00")).map(dateKey);
 
-  assert.deepEqual(weeklyDates, ["2026-07-06", "2026-07-07", "2026-07-08", "2026-07-10"]);
-  assert.equal(isProgressTrackingDate(new Date("2026-07-09T12:00:00-03:00")), false);
+  assert.deepEqual(weeklyDates, ["2026-11-16", "2026-11-17", "2026-11-18", "2026-11-19"]);
+  assert.equal(isProgressTrackingDate(new Date("2026-11-20T12:00:00-03:00")), false);
   assert.equal(
     calculateProgressStreak(
-      ["2026-07-07", "2026-07-08", "2026-07-10"],
-      new Date("2026-07-10T12:00:00-03:00")
+      ["2026-11-18", "2026-11-19"],
+      new Date("2026-11-20T12:00:00-03:00")
     ),
-    3
+    2
   );
 });
 
 test("reports and streak only count dates from the new start date", () => {
-  const dates = getProgressReportDates("weekly", new Date("2026-07-01T12:00:00-03:00")).map(dateKey);
+  const dates = getProgressReportDates("weekly", new Date("2026-07-22T12:00:00-03:00")).map(dateKey);
 
-  assert.deepEqual(dates, ["2026-06-29", "2026-06-30", "2026-07-01"]);
+  assert.deepEqual(dates, ["2026-07-20", "2026-07-21", "2026-07-22"]);
   assert.equal(
     calculateProgressStreak(
-      ["2026-06-27", "2026-06-28", "2026-06-29", "2026-06-30"],
-      new Date("2026-07-01T12:00:00-03:00")
+      ["2026-07-18", "2026-07-19", "2026-07-20", "2026-07-21"],
+      new Date("2026-07-22T12:00:00-03:00")
     ),
     2
   );
-  assert.equal(progressTrackingStartDate, "2026-06-29");
+  assert.equal(progressTrackingStartDate, "2026-07-20");
 });
