@@ -54,6 +54,20 @@ test("weekends are optional and do not count in progress reports or streak", () 
   );
 });
 
+test("São Paulo holidays are day off and do not count in progress", () => {
+  const weeklyDates = getProgressReportDates("weekly", new Date("2026-07-10T12:00:00-03:00")).map(dateKey);
+
+  assert.deepEqual(weeklyDates, ["2026-07-06", "2026-07-07", "2026-07-08", "2026-07-10"]);
+  assert.equal(isProgressTrackingDate(new Date("2026-07-09T12:00:00-03:00")), false);
+  assert.equal(
+    calculateProgressStreak(
+      ["2026-07-07", "2026-07-08", "2026-07-10"],
+      new Date("2026-07-10T12:00:00-03:00")
+    ),
+    3
+  );
+});
+
 test("reports and streak only count dates from the new start date", () => {
   const dates = getProgressReportDates("weekly", new Date("2026-07-01T12:00:00-03:00")).map(dateKey);
 

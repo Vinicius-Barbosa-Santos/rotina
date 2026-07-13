@@ -1,4 +1,5 @@
 import type { TelegramReportPeriod } from "@/lib/types";
+import { isSaoPauloHolidayDate } from "./sao-paulo-holidays.ts";
 
 export const progressTrackingStartDate = "2026-06-29";
 
@@ -16,7 +17,7 @@ function progressDateKey(date: Date) {
 
 export function isProgressTrackingDate(date: Date) {
   const weekday = date.getDay();
-  return weekday >= 1 && weekday <= 5 && progressDateKey(date) >= progressTrackingStartDate;
+  return weekday >= 1 && weekday <= 5 && !isSaoPauloHolidayDate(date) && progressDateKey(date) >= progressTrackingStartDate;
 }
 
 type StorageLike = {

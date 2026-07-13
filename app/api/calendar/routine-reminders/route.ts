@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { clearGoogleAuthCookies, getGoogleAccessToken, GoogleCalendarAuthError } from "@/lib/google-auth";
 import { clampCalendarRoutineSyncDays } from "@/lib/calendar-routine-sync";
 import { getRoutineSectionEmoji, routineReferenceSections, trackedRoutineSections, type RoutineSection } from "@/lib/routine";
+import { isSaoPauloHolidayDate } from "@/lib/sao-paulo-holidays";
 import { getTaskEmoji, type TaskIconName } from "@/lib/task-icons";
 
 export const maxDuration = 60;
@@ -55,7 +56,7 @@ export async function POST(request: Request) {
 
     const syncTasks = dates.flatMap((date) =>
       sourceSections
-        .filter((section) => parseTimeRange(section.time) && isSectionScheduledForDay(section, date.getUTCDay()))
+        .filter((section) => !isSaoPauloHolidayDate(date) && parseTimeRange(section.time) && isSectionScheduledForDay(section, date.getUTCDay()))
         .map((section) => ({ date, section }))
     );
 

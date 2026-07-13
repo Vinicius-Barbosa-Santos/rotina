@@ -76,6 +76,28 @@
   line-height: 1.45;
 }
 
+.historyClearButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  margin-top: 9px;
+  border: 1px solid rgba(255, 113, 113, 0.26);
+  border-radius: 10px;
+  padding: 8px 10px;
+  background: rgba(255, 113, 113, 0.08);
+  color: #ffaaa0;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.historyClearButton:hover {
+  border-color: rgba(255, 113, 113, 0.42);
+  background: rgba(255, 113, 113, 0.13);
+  color: #ffc1ba;
+}
+
 .stackForm {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 36px;

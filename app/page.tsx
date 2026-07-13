@@ -30,13 +30,16 @@ import {
   routineStatePrefix,
   sanitizeRoutineSyncSnapshot,
   telegramAutomaticKey,
+  telegramReportSentKey,
   writeSyncSnapshotToStorage
 } from "@/lib/routine-dashboard-storage";
 import { resolveInitialSyncSnapshot } from "@/lib/routine-sync-selection";
 import { mergeProfileStacks } from "@/lib/profile-stacks";
+import { getSaoPauloHoliday } from "@/lib/sao-paulo-holidays";
 import { readStorageJson } from "@/lib/storage";
 import type { CalendarProgressDays } from "@/lib/calendar-progress";
 import type {
+  CalendarEvent,
   CalendarResponse,
   ManualMeeting,
   PersonalizedRoutineItem,
@@ -370,7 +373,9 @@ export default function HomePage() {
     };
   }, [hydrated]);
 
-  const isTodayProgressDay = isProgressTrackingDate(new Date());
+  const currentDay = new Date();
+  const todayHoliday = getSaoPauloHoliday(currentDay);
+  const isTodayProgressDay = isProgressTrackingDate(currentDay);
   const todaySectionViews = useMemo(() => {
     const today = new Date();
     return trackedRoutineSections.map((section) => {
@@ -389,34 +394,36 @@ export default function HomePage() {
     state
   ]);
 
-  const totals = useMemo(() => {
-    if (!isTodayProgressDay) return { total: 0, done: 0, pending: 0, pct: 0 };
-    const routineTotal = todaySectionViews.reduce((sum, view) => sum + view.items.length, 0);
-    const routineDone = todaySectionViews.reduce((sum, view) => sum + view.doneItems.size, 0);
-    const total = routineTotal;
-    const done = routineDone;
-    return { total, done, pending: total - done, pct: total ? Math.round((done / total) * 100) : 0 };
-  }, [isTodayProgressDay, todaySectionViews]);
-
-  const evolution = useMemo(
-    () => ({
-      weekly: getProgressReportDates("weekly").map(buildProgressPoint),
-      monthly: getProgressReportDates("monthly").map(buildProgressPoint)
-    }),
-    [calendarProgressDays, routinePrefs, state]
-  );
   const stackPreview = mergeProfileStacks(profileStacks);
   const stackTickerItems = Array.from(
     { length: Math.max(24, stackPreview.length) },
     (_, index) => stackPreview[index % stackPreview.length]
   );
-  const dayModeLabel = isTodayProgressDay ? "Rotina de programação" : "Fluxo opcional";
-
   const manualEvents = useMemo(() => getManualMeetingEvents(manualMeetings), [manualMeetings]);
   const visibleAgendaEvents = useMemo(
     () => [...manualEvents, ...(calendar?.events ?? [])].filter((event) => Boolean(event.meetingUrl)),
     [calendar?.events, manualEvents]
   );
+  const doneMeetingIds = useMemo(() => {
+    const visibleIds = new Set(visibleAgendaEvents.map((event) => event.id));
+    return new Set((state.meetings ?? []).filter((id) => visibleIds.has(String(id))).map(String));
+  }, [state.meetings, visibleAgendaEvents]);
+  const totals = useMemo(() => {
+    if (!isTodayProgressDay) return { total: 0, done: 0, pending: 0, pct: 0 };
+    const routineTotal = todaySectionViews.reduce((sum, view) => sum + view.items.length, 0);
+    const routineDone = todaySectionViews.reduce((sum, view) => sum + view.doneItems.size, 0);
+    const total = routineTotal + visibleAgendaEvents.length;
+    const done = routineDone + doneMeetingIds.size;
+    return { total, done, pending: total - done, pct: total ? Math.round((done / total) * 100) : 0 };
+  }, [doneMeetingIds.size, isTodayProgressDay, todaySectionViews, visibleAgendaEvents.length]);
+  const evolution = useMemo(
+    () => ({
+      weekly: getProgressReportDates("weekly").map(buildProgressPoint),
+      monthly: getProgressReportDates("monthly").map(buildProgressPoint)
+    }),
+    [calendarProgressDays, manualMeetings, routinePrefs, state, visibleAgendaEvents]
+  );
+  const dayModeLabel = isTodayProgressDay ? "Rotina de programação" : todayHoliday ? "Feriado em SP" : "Fluxo opcional";
   const routineNotificationSections = useMemo<RoutineNotificationSection[]>(() => {
     const today = new Date();
 
@@ -490,6 +497,10 @@ export default function HomePage() {
       else selected.add(key);
       return { ...current, [sectionKey]: Array.from(selected) };
     });
+  }
+
+  function toggleMeeting(id: string) {
+    toggleItem("meetings", id);
   }
 
   function clearSection(sectionKey: string) {
@@ -727,6 +738,8 @@ export default function HomePage() {
           return { label: section.label, done, total };
         })
         .filter((section) => section.total > 0);
+      const meetingProgress = buildMeetingProgressForDate(date, dayState);
+      if (meetingProgress.total > 0) sections.push(meetingProgress);
 
       return [{
         date: key,
@@ -752,8 +765,13 @@ export default function HomePage() {
       },
       { done: 0, total: 0 }
     );
+    const meetingProgress = buildMeetingProgressForDate(date, dayState);
+    const localWithMeetings = {
+      done: localTotals.done + meetingProgress.done,
+      total: localTotals.total + meetingProgress.total
+    };
     const calendarTotals = !isToday ? calendarProgressDays[key] : undefined;
-    const totals = calendarTotals && calendarTotals.done > localTotals.done ? calendarTotals : localTotals;
+    const totals = calendarTotals && calendarTotals.done > localWithMeetings.done ? calendarTotals : localWithMeetings;
 
     return {
       date: key,
@@ -763,6 +781,46 @@ export default function HomePage() {
       total: totals.total,
       pct: totals.total ? Math.round((totals.done / totals.total) * 100) : 0
     };
+  }
+
+  function buildMeetingProgressForDate(date: Date, dayState: RoutineState) {
+    const key = dateKey(date);
+    const events: CalendarEvent[] = key === todayKey()
+      ? visibleAgendaEvents
+      : getManualMeetingEvents(manualMeetings, date).filter((event) => Boolean(event.meetingUrl));
+    const visibleIds = new Set(events.map((event) => event.id));
+    const done = (dayState.meetings ?? []).filter((id) => visibleIds.has(String(id))).length;
+    return { label: "Reuniões", done, total: events.length };
+  }
+
+  async function clearGeneralHistory() {
+    const confirmed = window.confirm("Limpar todo o histórico de progresso, streak e relatórios? Suas preferências, guias, reuniões e stacks serão mantidos.");
+    if (!confirmed) return;
+
+    const keys = Array.from({ length: localStorage.length }, (_, index) => localStorage.key(index)).filter(
+      (key): key is string => Boolean(key)
+    );
+    keys.filter((key) => key.startsWith(routineStatePrefix)).forEach((key) => localStorage.removeItem(key));
+    localStorage.removeItem("rotina_completed_dates");
+    localStorage.removeItem(telegramReportSentKey);
+    localStorage.removeItem(notifiedSectionsKey);
+
+    setState({});
+    setCalendarProgressDays({});
+    setStreak(0);
+    setSyncMessage("Histórico geral limpo neste aparelho.");
+
+    await saveRoutineSyncSnapshot({
+      ...buildLocalSyncSnapshot(),
+      states: {},
+      completedDates: [],
+      routinePrefs,
+      manualMeetings,
+      profileStacks,
+      telegramAutomaticEnabled,
+      telegramReportsSent: {},
+      updatedAt: new Date().toISOString()
+    });
   }
 
   async function sendTelegramReport(period: TelegramReportPeriod) {
@@ -1003,6 +1061,9 @@ export default function HomePage() {
           <section className="sideBlock">
             <p className="sideLabel">sincronização</p>
             <p className="syncStatus">{syncMessage || "Preparando sincronização..."}</p>
+            <button className="historyClearButton" type="button" onClick={clearGeneralHistory}>
+              Limpar histórico geral
+            </button>
           </section>
 
           <ProfileStacksCard
@@ -1021,12 +1082,12 @@ export default function HomePage() {
               <i>
                 <b
                   style={{
-                    width: manualMeetings.length ? "100%" : "0%",
+                    width: visibleAgendaEvents.length ? `${(doneMeetingIds.size / visibleAgendaEvents.length) * 100}%` : "0%",
                     background: "var(--blue)"
                   }}
                 />
               </i>
-              <em>{manualEvents.length}/{manualMeetings.length}</em>
+              <em>{visibleAgendaEvents.length ? `${doneMeetingIds.size}/${visibleAgendaEvents.length}` : "fora"}</em>
             </a>
             {todaySectionViews.map(({ section, items, doneItems }) => {
               const done = doneItems.size;
@@ -1066,7 +1127,7 @@ export default function HomePage() {
             <div className="dayCardHeader">
               <div>
                 <p className="eyebrow">{formatShortDate(new Date())}</p>
-                <h2>{isTodayProgressDay ? `${totals.done} itens concluídos hoje` : "Fim de semana opcional"}</h2>
+                <h2>{isTodayProgressDay ? `${totals.done} itens concluídos hoje` : todayHoliday ? `${todayHoliday.name}: dia off` : "Fim de semana opcional"}</h2>
               </div>
               <span className={isTodayProgressDay ? "dayMode" : "dayMode optional"}>{dayModeLabel}</span>
             </div>
@@ -1099,10 +1160,12 @@ export default function HomePage() {
           <div className="sections">
             <ManualMeetingsCard
               meetings={manualMeetings}
-              todayCount={manualEvents.length}
+              todayEvents={visibleAgendaEvents}
+              doneMeetingIds={doneMeetingIds}
               form={newMeeting}
               setForm={setNewMeeting}
               onToggleDay={toggleMeetingDay}
+              onToggleMeeting={toggleMeeting}
               onCreate={addManualMeeting}
               onDelete={deleteManualMeeting}
             />

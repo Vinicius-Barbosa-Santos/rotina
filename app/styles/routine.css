@@ -81,6 +81,69 @@
   padding: 12px 16px 10px;
 }
 
+.meetingToday {
+  display: grid;
+  gap: 8px;
+  padding: 14px 16px 8px;
+}
+
+.meetingSubtitle {
+  margin: 0;
+  color: var(--soft);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.meetingCheck {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 48px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 10px 11px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.035), transparent),
+    rgba(255, 255, 255, 0.025);
+  color: var(--text);
+  cursor: pointer;
+  text-align: left;
+  transition:
+    border-color 180ms ease,
+    background 180ms ease,
+    transform 180ms ease;
+}
+
+.meetingCheck:hover {
+  border-color: rgba(106, 167, 255, 0.38);
+  background: rgba(106, 167, 255, 0.09);
+  transform: translateY(-1px);
+}
+
+.meetingCheck.done {
+  border-color: rgba(82, 201, 142, 0.34);
+  background: rgba(82, 201, 142, 0.1);
+}
+
+.meetingCheck > span:last-child {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.meetingCheck strong {
+  overflow-wrap: anywhere;
+  font-size: 13px;
+}
+
+.meetingCheck small {
+  color: var(--muted);
+  font-size: 12px;
+}
+
 .meetingForm input {
   min-width: 0;
   width: 100%;
