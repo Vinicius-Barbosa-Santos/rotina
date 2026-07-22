@@ -64,6 +64,7 @@ import { RoutineIcon } from "./components/RoutineIcon";
 const syncSaveDelay = 900;
 const syncRefreshInterval = 60_000;
 const emptyItemKeys = new Set<string>();
+const historyAutoFillKey = "rotina_history_autofill_version";
 
 function getSectionStartDate(time: string, date = new Date()) {
   const match = time.match(/^(\d{1,2}):(\d{2})/);
@@ -95,6 +96,19 @@ function haveSameDoneKeys(previous: RoutineState[string] = [], current: RoutineS
   if (previous.length !== current.length) return false;
   const previousKeys = new Set(previous.map(String));
   return current.every((key) => previousKeys.has(String(key)));
+}
+
+function getHistoryFillDates(now = new Date()) {
+  const start = new Date(`${progressTrackingStartDate}T12:00:00`);
+  const end = new Date(now);
+  end.setHours(12, 0, 0, 0);
+  const dates: Date[] = [];
+
+  for (const cursor = new Date(start); cursor <= end; cursor.setDate(cursor.getDate() + 1)) {
+    if (isProgressTrackingDate(cursor)) dates.push(new Date(cursor));
+  }
+
+  return dates;
 }
 
 export default function HomePage() {
@@ -451,6 +465,53 @@ export default function HomePage() {
 
     return [...routineSections, ...meetingSections];
   }, [routinePrefs.timeOverrides, todaySectionViews, visibleAgendaEvents]);
+
+  useEffect(() => {
+    if (!hydrated || !syncReady || calendarLoading) return;
+    const fillVersion = `${progressTrackingStartDate}:100-percent`;
+    if (localStorage.getItem(historyAutoFillKey) === fillVersion) return;
+
+    const storedStates = readRoutineStatesFromStorage();
+    const completedDates = new Set(readCompletedDates());
+    const nextStates = { ...storedStates };
+
+    getHistoryFillDates().forEach((date) => {
+      const key = dateKey(date);
+      const dayState: RoutineState = { ...(nextStates[key] ?? {}) };
+
+      trackedRoutineSections.forEach((section) => {
+        dayState[section.key] = getPersonalizedItems(section, date).map((item) => item.key);
+      });
+
+      const meetingEvents = key === todayKey()
+        ? visibleAgendaEvents
+        : getManualMeetingEvents(manualMeetings, date).filter((event) => Boolean(event.meetingUrl));
+      dayState.meetings = meetingEvents.map((event) => event.id);
+      nextStates[key] = dayState;
+      completedDates.add(key);
+      localStorage.setItem(`${routineStatePrefix}${key}`, JSON.stringify(dayState));
+    });
+
+    const sortedCompletedDates = [...completedDates]
+      .filter((date) => date >= progressTrackingStartDate)
+      .sort();
+    localStorage.setItem("rotina_completed_dates", JSON.stringify(sortedCompletedDates));
+    localStorage.setItem(historyAutoFillKey, fillVersion);
+    setState(nextStates[todayKey()] ?? {});
+    setCalendarProgressDays({});
+    setStreak(calculateProgressStreak(sortedCompletedDates));
+    setSyncMessage("Histórico preenchido em 100% desde 20/07/2026.");
+  }, [
+    calendarLoading,
+    hydrated,
+    manualMeetings,
+    routinePrefs.customItems,
+    routinePrefs.hiddenItems,
+    routinePrefs.iconOverrides,
+    routinePrefs.labelOverrides,
+    syncReady,
+    visibleAgendaEvents
+  ]);
 
   useEffect(() => {
     notificationTimers.current.forEach((timer) => window.clearTimeout(timer));
