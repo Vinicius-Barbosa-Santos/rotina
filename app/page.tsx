@@ -427,7 +427,7 @@ export default function HomePage() {
   const routineNotificationSections = useMemo<RoutineNotificationSection[]>(() => {
     const today = new Date();
 
-    return todaySectionViews
+    const routineSections = todaySectionViews
       .map(({ section, items: personalizedItems }) => {
         const startsAt = getSectionStartDate(getSectionTime(section.key, section.time), today);
         const items = personalizedItems.map((item) => item.label);
@@ -435,7 +435,22 @@ export default function HomePage() {
         return { key: section.key, label: section.label, startsAt, items };
       })
       .filter((section): section is RoutineNotificationSection => Boolean(section));
-  }, [routinePrefs.timeOverrides, todaySectionViews]);
+    const meetingSections = visibleAgendaEvents
+      .filter((event) => !event.allDay)
+      .map((event) => {
+        const startsAt = new Date(event.startsAt);
+        if (Number.isNaN(startsAt.getTime())) return null;
+        return {
+          key: `meeting-${event.id}`,
+          label: event.title,
+          startsAt,
+          items: ["Reunião começando agora"]
+        };
+      })
+      .filter((section): section is RoutineNotificationSection => Boolean(section));
+
+    return [...routineSections, ...meetingSections];
+  }, [routinePrefs.timeOverrides, todaySectionViews, visibleAgendaEvents]);
 
   useEffect(() => {
     notificationTimers.current.forEach((timer) => window.clearTimeout(timer));
@@ -1038,11 +1053,11 @@ export default function HomePage() {
               <span>
                 {notificationPermission === "unsupported"
                   ? "Este navegador não suporta avisos do sistema."
-                  : notificationPermission === "denied"
-                    ? "Permissão bloqueada no navegador."
+                    : notificationPermission === "denied"
+                      ? "Permissão bloqueada no navegador."
                     : browserNotificationsEnabled
-                      ? `${routineNotificationSections.length} blocos com horário hoje.`
-                      : "Receba um aviso quando cada bloco começar."}
+                      ? `${routineNotificationSections.length} avisos com horário hoje.`
+                      : "Receba um aviso quando cada bloco ou reunião começar."}
               </span>
             </div>
           </section>

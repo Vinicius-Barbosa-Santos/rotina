@@ -294,6 +294,25 @@ export const routineSections: RoutineSection[] = [
     ]
   },
   {
+    key: "programming-study",
+    icon: "Code",
+    label: "Estudos de Programação",
+    shortLabel: "Estudos Dev",
+    color: "#38bdf8",
+    bg: "rgba(56, 189, 248, 0.12)",
+    time: "18:30-20:00",
+    days: weekdays,
+    note: "Bloco de estudo prático para evoluir como desenvolvedor. Use o Guia do Desenvolvedor como mapa e marque aqui o estudo executado no dia.",
+    items: [
+      { label: "Algoritmos e estruturas de dados" },
+      { label: "Java e Spring Boot" },
+      { label: "Frontend com Angular, React ou Next.js" },
+      { label: "Banco de dados, SQL e modelagem" },
+      { label: "Cloud AWS, Docker e Kubernetes" },
+      { label: "Testes, arquitetura e boas práticas" }
+    ]
+  },
+  {
     key: "career",
     icon: "Rocket",
     label: "Guia do Desenvolvedor",
@@ -862,6 +881,7 @@ const routineSectionEmoji: Record<string, string> = {
   english: "🇬🇧",
   "english-guide": "🇬🇧",
   work: "💻",
+  "programming-study": "📚",
   career: "🚀",
   "house-cleaning": "🧹",
   health: "💪",

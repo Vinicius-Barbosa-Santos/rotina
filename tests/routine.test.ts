@@ -88,6 +88,27 @@ test("developer curriculum is a permanent guide and does not count toward routin
   assert.equal(routineReferenceSections.some((section) => section.key === career.key), true);
 });
 
+test("programming study is a tracked routine section separate from the developer guide", () => {
+  const study = routineSections.find((item) => item.key === "programming-study");
+
+  assert.ok(study);
+  assert.equal(study.label, "Estudos de Programação");
+  assert.equal(getSectionScheduleLabel(study), "segunda a sexta");
+  assert.deepEqual(
+    getVisibleItems(study, new Date(2026, 6, 22)).map(({ item }) => item.label),
+    [
+      "Algoritmos e estruturas de dados",
+      "Java e Spring Boot",
+      "Frontend com Angular, React ou Next.js",
+      "Banco de dados, SQL e modelagem",
+      "Cloud AWS, Docker e Kubernetes",
+      "Testes, arquitetura e boas práticas",
+    ],
+  );
+  assert.equal(trackedRoutineSections.some((section) => section.key === study.key), true);
+  assert.equal(routineReferenceSections.some((section) => section.key === study.key), false);
+});
+
 test("house cleaning is distributed from Monday to Friday", () => {
   const cleaning = routineSections.find((item) => item.key === "house-cleaning");
 
