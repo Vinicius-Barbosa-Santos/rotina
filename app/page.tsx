@@ -65,6 +65,7 @@ const syncSaveDelay = 900;
 const syncRefreshInterval = 60_000;
 const emptyItemKeys = new Set<string>();
 const historyAutoFillKey = "rotina_history_autofill_version";
+const missedAugustThirdFillKey = "rotina_history_fill_2026_08_03";
 
 function getSectionStartDate(time: string, date = new Date()) {
   const match = time.match(/^(\d{1,2}):(\d{2})/);
@@ -111,6 +112,12 @@ function getHistoryFillDates(now = new Date()) {
   return dates;
 }
 
+function getYesterdayKey() {
+  const date = new Date();
+  date.setDate(date.getDate() - 1);
+  return dateKey(date);
+}
+
 export default function HomePage() {
   const [hydrated, setHydrated] = useState(false);
   const [syncReady, setSyncReady] = useState(false);
@@ -153,6 +160,7 @@ export default function HomePage() {
   const [telegramAutomaticEnabled, setTelegramAutomaticEnabled] = useState(false);
   const [telegramSending, setTelegramSending] = useState<TelegramReportPeriod | null>(null);
   const [telegramMessage, setTelegramMessage] = useState("");
+  const [historyControlDate, setHistoryControlDate] = useState(getYesterdayKey);
 
   useEffect(() => {
     resetProgressHistory(localStorage);
@@ -514,6 +522,15 @@ export default function HomePage() {
   ]);
 
   useEffect(() => {
+    if (!hydrated || !syncReady || calendarLoading) return;
+    if (localStorage.getItem(missedAugustThirdFillKey) === "true") return;
+
+    void markProgressDateComplete("2026-08-03", { automatic: true }).then((filled) => {
+      if (filled) localStorage.setItem(missedAugustThirdFillKey, "true");
+    });
+  }, [calendarLoading, hydrated, syncReady, manualMeetings, routinePrefs, visibleAgendaEvents]);
+
+  useEffect(() => {
     notificationTimers.current.forEach((timer) => window.clearTimeout(timer));
     notificationTimers.current = [];
 
@@ -869,6 +886,57 @@ export default function HomePage() {
     return { label: "Reuniões", done, total: events.length };
   }
 
+  async function markProgressDateComplete(value = historyControlDate, options: { automatic?: boolean } = {}) {
+    const date = new Date(`${value}T12:00:00`);
+    if (!value || Number.isNaN(date.getTime())) {
+      if (!options.automatic) setSyncMessage("Escolha uma data válida para preencher.");
+      return false;
+    }
+
+    if (!isProgressTrackingDate(date)) {
+      if (!options.automatic) setSyncMessage("Esse dia é fim de semana, feriado ou anterior ao início do histórico.");
+      return false;
+    }
+
+    const key = dateKey(date);
+    const storedStates = readRoutineStatesFromStorage();
+    const dayState: RoutineState = { ...(storedStates[key] ?? {}) };
+
+    trackedRoutineSections.forEach((section) => {
+      dayState[section.key] = getPersonalizedItems(section, date).map((item) => item.key);
+    });
+
+    const meetingEvents = key === todayKey()
+      ? visibleAgendaEvents
+      : getManualMeetingEvents(manualMeetings, date).filter((event) => Boolean(event.meetingUrl));
+    dayState.meetings = meetingEvents.map((event) => event.id);
+
+    const nextStates = { ...storedStates, [key]: dayState };
+    const completedDates = [...new Set([...readCompletedDates(), key])]
+      .filter((dateKeyValue) => dateKeyValue >= progressTrackingStartDate)
+      .sort();
+
+    localStorage.setItem(`${routineStatePrefix}${key}`, JSON.stringify(dayState));
+    localStorage.setItem("rotina_completed_dates", JSON.stringify(completedDates));
+    setCalendarProgressDays({});
+    setStreak(calculateProgressStreak(completedDates));
+    if (key === todayKey()) setState(dayState);
+    setSyncMessage(`${new Intl.DateTimeFormat("pt-BR").format(date)} preenchido em 100%.`);
+
+    await saveRoutineSyncSnapshot({
+      ...buildLocalSyncSnapshot(),
+      states: nextStates,
+      completedDates,
+      routinePrefs,
+      manualMeetings,
+      profileStacks,
+      telegramAutomaticEnabled,
+      updatedAt: new Date().toISOString()
+    });
+
+    return true;
+  }
+
   async function clearGeneralHistory() {
     const confirmed = window.confirm("Limpar todo o histórico de progresso, streak e relatórios? Suas preferências, guias, reuniões e stacks serão mantidos.");
     if (!confirmed) return;
@@ -1137,6 +1205,25 @@ export default function HomePage() {
           <section className="sideBlock">
             <p className="sideLabel">sincronização</p>
             <p className="syncStatus">{syncMessage || "Preparando sincronização..."}</p>
+            <form
+              className="historyFillForm"
+              onSubmit={(event) => {
+                event.preventDefault();
+                void markProgressDateComplete();
+              }}
+            >
+              <label>
+                Preencher dia
+                <input
+                  type="date"
+                  min={progressTrackingStartDate}
+                  max={todayKey()}
+                  value={historyControlDate}
+                  onChange={(event) => setHistoryControlDate(event.target.value)}
+                />
+              </label>
+              <button type="submit">Marcar 100%</button>
+            </form>
             <button className="historyClearButton" type="button" onClick={clearGeneralHistory}>
               Limpar histórico geral
             </button>

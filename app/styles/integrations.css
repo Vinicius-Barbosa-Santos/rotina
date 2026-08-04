@@ -92,6 +92,53 @@
   font-weight: 800;
 }
 
+.historyFillForm {
+  display: grid;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.historyFillForm label {
+  display: grid;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.historyFillForm input {
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 8px 9px;
+  background: var(--panel);
+  color: var(--text);
+  font-size: 12px;
+}
+
+.historyFillForm input:focus {
+  border-color: rgba(82, 201, 142, 0.55);
+  outline: none;
+}
+
+.historyFillForm button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  border: 0;
+  border-radius: 10px;
+  padding: 8px 10px;
+  background: var(--green);
+  color: #0d1012;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.historyFillForm button:hover {
+  filter: brightness(1.08);
+}
+
 .historyClearButton:hover {
   border-color: rgba(255, 113, 113, 0.42);
   background: rgba(255, 113, 113, 0.13);
