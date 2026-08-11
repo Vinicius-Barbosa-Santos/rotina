@@ -30,18 +30,17 @@ export const routineSections: RoutineSection[] = [
   {
     key: "personal",
     icon: "Sun",
-    label: "Desenvolvimento Pessoal",
-    shortLabel: "Pessoal",
+    label: "Início do Dia e Café da Manhã",
+    shortLabel: "Manhã",
     color: "#f7c948",
     bg: "rgba(247, 201, 72, 0.12)",
-    time: "06:30-08:00",
+    time: "03:00 e 07:00-08:00",
     days: weekdays,
     items: [
       { label: "Acordar" },
       { label: "Arrumar cama" },
       { label: "Beber água" },
       { label: "Oração" },
-      { label: "Alongamento (10 min)" },
       { label: "Café da manhã" },
       { label: "Planejamento do dia" }
     ]
@@ -53,7 +52,7 @@ export const routineSections: RoutineSection[] = [
     shortLabel: "Inglês",
     color: "#34d399",
     bg: "rgba(52, 211, 153, 0.12)",
-    time: "09:00-10:00",
+    time: "08:00-09:00",
     days: weekdays,
     guideLabel: "Guia de Inglês",
     note: "Estes cinco hábitos entram no progresso da rotina. O mapa completo de conhecimento fica no Guia de Inglês, junto aos outros guias para consultar.",
@@ -278,7 +277,7 @@ export const routineSections: RoutineSection[] = [
     shortLabel: "Código",
     color: "#4f8ef7",
     bg: "rgba(79, 142, 247, 0.12)",
-    time: "10:00-18:00",
+    time: "03:00-07:00",
     days: weekdays,
     items: [
       { label: "Daily técnica" },
@@ -288,28 +287,23 @@ export const routineSections: RoutineSection[] = [
       { label: "Escrever ou ajustar testes" },
       { label: "Atualizar Jira" },
       { label: "Documentação técnica" },
-      { label: "Almoço" },
-      { label: "Caminhada após almoço" },
       { label: "Fechar pendências e próximo passo" }
     ]
   },
   {
     key: "programming-study",
-    icon: "Code",
-    label: "Estudos de Programação",
-    shortLabel: "Estudos Dev",
+    icon: "TechnicalEnglish",
+    label: "Coders — Inglês Técnico",
+    shortLabel: "Coders",
     color: "#38bdf8",
     bg: "rgba(56, 189, 248, 0.12)",
-    time: "18:30-20:00",
+    time: "17:00-18:00",
     days: weekdays,
-    note: "Bloco de estudo prático para evoluir como desenvolvedor. Use o Guia do Desenvolvedor como mapa e marque aqui o estudo executado no dia.",
+    note: "Curso para dominar o inglês técnico usado no desenvolvimento de software.",
     items: [
-      { label: "Algoritmos e estruturas de dados" },
-      { label: "Java e Spring Boot" },
-      { label: "Frontend com Angular, React ou Next.js" },
-      { label: "Banco de dados, SQL e modelagem" },
-      { label: "Cloud AWS, Docker e Kubernetes" },
-      { label: "Testes, arquitetura e boas práticas" }
+      { label: "Assistir à aula do Coders" },
+      { label: "Anotar vocabulário técnico" },
+      { label: "Praticar o conteúdo da aula" }
     ]
   },
   {
@@ -563,7 +557,7 @@ export const routineSections: RoutineSection[] = [
     shortLabel: "Limpeza",
     color: "#6dd3b2",
     bg: "rgba(109, 211, 178, 0.12)",
-    time: "20:00-20:30",
+    time: "11:00-15:00",
     days: weekdays,
     note: "Pouco por dia para a casa não acumular. Proteja coluna e joelhos: evite torcer o tronco, ajoelhar e carregar peso excessivo.",
     items: [
@@ -583,7 +577,7 @@ export const routineSections: RoutineSection[] = [
     shortLabel: "Academia",
     color: "#8ec3f7",
     bg: "rgba(142, 195, 247, 0.12)",
-    time: "20:30-21:15",
+    time: "18:00-21:00",
     days: weekdays,
     note: "Treino inicial de baixo impacto. Ajuste carga, amplitude e aparelhos com um profissional que conheça sua coluna e seu joelho; pare se houver dor aguda, formigamento ou piora dos sintomas.",
     items: [
@@ -762,20 +756,18 @@ export const routineSections: RoutineSection[] = [
   },
   {
     key: "growth",
-    icon: "Growth",
-    label: "Crescimento",
-    shortLabel: "Crescer",
+    icon: "Learning",
+    label: "Crescimento — Aulas Diárias",
+    shortLabel: "Aulas",
     color: "#b57bee",
     bg: "rgba(181, 123, 238, 0.12)",
-    time: "21:30-22:30",
-    note: "Construir reputação e carreira como desenvolvedor.",
+    time: "11:00-15:00",
+    note: "Durante o bloco de afazeres da casa, assistir diariamente a uma aula de cada frente de crescimento.",
     days: weekdays,
     items: [
-      { label: "Leitura", days: [1] },
-      { label: "Certificação", days: [2] },
-      { label: "LinkedIn", days: [3] },
-      { label: "Portfólio", days: [4] },
-      { label: "Networking", days: [5] }
+      { label: "Assistir a uma aula de YouTube" },
+      { label: "Assistir a uma aula de investimentos" },
+      { label: "Assistir a uma aula de marketing" }
     ]
   },
   {
@@ -897,7 +889,9 @@ export function getRoutineSectionEmoji(section: Pick<RoutineSection, "key">) {
   return routineSectionEmoji[section.key] ?? "📌";
 }
 
-export const trackedRoutineSections = routineSections.filter((section) => !isReferenceSection(section));
+export const trackedRoutineSections = routineSections
+  .filter((section) => !isReferenceSection(section))
+  .sort((left, right) => getStartMinutes(left.time) - getStartMinutes(right.time));
 export const routineReferenceSections: RoutineSection[] = routineSections.flatMap((section) => {
   if (section.key === "english" && section.referenceGroups?.length) {
     return [{
@@ -918,6 +912,11 @@ export const routineReferenceSections: RoutineSection[] = routineSections.flatMa
 
 function uniqueDays(days: Weekday[]) {
   return [...new Set(days)].sort();
+}
+
+function getStartMinutes(time: string) {
+  const match = /^(\d{2}):(\d{2})/.exec(time);
+  return match ? Number(match[1]) * 60 + Number(match[2]) : Number.POSITIVE_INFINITY;
 }
 
 function isSameDays(a: Weekday[], b: Weekday[]) {

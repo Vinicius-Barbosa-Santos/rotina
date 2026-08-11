@@ -35,11 +35,26 @@ test("getSectionScheduleLabel describes weekdays", () => {
   assert.equal(getSectionScheduleLabel(section), "segunda a sexta");
 });
 
-test("weekday routine is centered on programming work", () => {
+test("tracked routine is displayed in chronological order", () => {
+  const weekdaySections = trackedRoutineSections.filter((item) => item.days?.includes(1));
+  const workIndex = weekdaySections.findIndex((item) => item.key === "work");
+  const englishIndex = weekdaySections.findIndex((item) => item.key === "english");
+  const cleaningIndex = weekdaySections.findIndex((item) => item.key === "house-cleaning");
+  const codersIndex = weekdaySections.findIndex((item) => item.key === "programming-study");
+  const gymIndex = weekdaySections.findIndex((item) => item.key === "health");
+
+  assert.ok(workIndex < englishIndex);
+  assert.ok(englishIndex < cleaningIndex);
+  assert.ok(cleaningIndex < codersIndex);
+  assert.ok(codersIndex < gymIndex);
+});
+
+test("weekday work runs from 03:00 to 07:00", () => {
   const programming = routineSections.find((item) => item.key === "work");
 
   assert.ok(programming);
   assert.equal(programming.label, "Programação");
+  assert.equal(programming.time, "03:00-07:00");
   assert.deepEqual(
     programming.items.map((item) => item.label).slice(0, 5),
     [
@@ -88,21 +103,19 @@ test("developer curriculum is a permanent guide and does not count toward routin
   assert.equal(routineReferenceSections.some((section) => section.key === career.key), true);
 });
 
-test("programming study is a tracked routine section separate from the developer guide", () => {
+test("Coders is a tracked technical English course at 17:00", () => {
   const study = routineSections.find((item) => item.key === "programming-study");
 
   assert.ok(study);
-  assert.equal(study.label, "Estudos de Programação");
+  assert.equal(study.label, "Coders — Inglês Técnico");
+  assert.equal(study.time, "17:00-18:00");
   assert.equal(getSectionScheduleLabel(study), "segunda a sexta");
   assert.deepEqual(
     getVisibleItems(study, new Date(2026, 6, 22)).map(({ item }) => item.label),
     [
-      "Algoritmos e estruturas de dados",
-      "Java e Spring Boot",
-      "Frontend com Angular, React ou Next.js",
-      "Banco de dados, SQL e modelagem",
-      "Cloud AWS, Docker e Kubernetes",
-      "Testes, arquitetura e boas práticas",
+      "Assistir à aula do Coders",
+      "Anotar vocabulário técnico",
+      "Praticar o conteúdo da aula",
     ],
   );
   assert.equal(trackedRoutineSections.some((section) => section.key === study.key), true);
@@ -114,6 +127,7 @@ test("house cleaning is distributed from Monday to Friday", () => {
 
   assert.ok(cleaning);
   assert.equal(cleaning.label, "Limpeza da Casa");
+  assert.equal(cleaning.time, "11:00-15:00");
   assert.deepEqual(
     getVisibleItems(cleaning, new Date(2026, 5, 22)).map(({ item }) => item.label),
     [
@@ -137,12 +151,28 @@ test("gym routine alternates muscle groups, cardio and recovery", () => {
 
   assert.ok(health);
   assert.equal(health.label, "Academia");
+  assert.equal(health.time, "18:00-21:00");
   assert.match(health.note ?? "", /baixo impacto/i);
   assert.ok(getVisibleItems(health, new Date(2026, 5, 22)).some(({ item }) => item.label.includes("Peito")));
   assert.ok(getVisibleItems(health, new Date(2026, 5, 23)).some(({ item }) => item.label.includes("Costas")));
   assert.ok(getVisibleItems(health, new Date(2026, 5, 24)).some(({ item }) => item.label.includes("Cardio de baixo impacto")));
   assert.ok(getVisibleItems(health, new Date(2026, 5, 25)).some(({ item }) => item.label.includes("Glúteos")));
   assert.ok(getVisibleItems(health, new Date(2026, 5, 26)).some(({ item }) => item.label.includes("Ombros")));
+});
+
+test("growth includes one daily class for YouTube, investments and marketing", () => {
+  const growth = routineSections.find((item) => item.key === "growth");
+
+  assert.ok(growth);
+  assert.equal(growth.time, "11:00-15:00");
+  assert.deepEqual(
+    getVisibleItems(growth, new Date(2026, 5, 22)).map(({ item }) => item.label),
+    [
+      "Assistir a uma aula de YouTube",
+      "Assistir a uma aula de investimentos",
+      "Assistir a uma aula de marketing",
+    ],
+  );
 });
 
 test("functional adult section is a permanent, categorized reference guide", () => {

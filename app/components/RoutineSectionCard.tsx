@@ -5,7 +5,6 @@ import { Check, CheckIcon, ChevronDown, ChevronLeft, ChevronRight, Pencil, Plus,
 import { getSectionScheduleLabel, isReferenceSection, type RoutineSection } from "@/lib/routine";
 import { getTaskIconName, taskIconOptions, type TaskIconName } from "@/lib/task-icons";
 import type { PersonalizedRoutineItem } from "@/lib/types";
-import EnglishTutor from "../EnglishTutor";
 import { RoutineIcon } from "./RoutineIcon";
 import TaskIcon, { getTaskIconComponent } from "./TaskIcon";
 
@@ -119,7 +118,6 @@ export default function RoutineSectionCard({
         <div className={isOpen ? "checklistShell open" : "checklistShell"} aria-hidden={!isOpen}>
           <div className="checklist">
             {section.note && <p className="sectionNote">{section.note}</p>}
-            {section.key === "english" && <EnglishTutor />}
             {!referenceSection && (
               <div className="sectionEditor">
                 <label>

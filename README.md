@@ -19,7 +19,7 @@
 
 Minha Rotina nasceu para reunir, em uma única experiência, o planejamento diário, compromissos, desenvolvimento profissional, saúde e aprendizado contínuo.
 
-Em vez de usar vários aplicativos isolados, a aplicação organiza tarefas por blocos de horário, acompanha o progresso do dia, mantém um streak de consistência e conecta a rotina com Google Calendar, Telegram e uma tutora de inglês com IA.
+Em vez de usar vários aplicativos isolados, a aplicação organiza tarefas por blocos de horário, acompanha o progresso do dia, mantém um streak de consistência e conecta a rotina com Google Calendar e Telegram.
 
 ## Funcionalidades
 
@@ -33,6 +33,16 @@ Em vez de usar vários aplicativos isolados, a aplicação organiza tarefas por 
 - Criação e exclusão de tarefas personalizadas.
 - Sincronização do histórico entre computador, celular e PWA quando o Supabase está configurado.
 
+### Rotina atual
+
+- **03:00-07:00:** trabalho com programação.
+- **07:00-08:00:** café da manhã e preparação do dia.
+- **08:00-09:00:** inglês.
+- **11:00-15:00:** afazeres da casa e aulas diárias de YouTube, investimentos e marketing.
+- **15:00-16:30:** intervalo sem tarefas obrigatórias.
+- **17:00-18:00:** Coders, curso de inglês técnico.
+- **18:00-21:00:** academia.
+
 ### Agenda e notificações
 
 - Login seguro com Google OAuth.
@@ -44,15 +54,6 @@ Em vez de usar vários aplicativos isolados, a aplicação organiza tarefas por 
 - Eventos da rotina com status de conclusão e lembrete antes do início.
 - Avisos do próprio navegador quando um bloco da rotina começa.
 - Instalação como PWA no celular, com ícone na tela inicial e aparência de aplicativo.
-
-### Inglês com inteligência artificial
-
-- Conversação voltada ao cotidiano de desenvolvimento de software.
-- Prática de daily, bugs, tarefas, code review e entrevistas.
-- Respostas faladas pela tutora e entrada por microfone em navegadores compatíveis.
-- Correções durante a conversa.
-- Relatório da sessão com gramática, comunicação, vocabulário técnico e próximos focos.
-- Geração de arquivo com o relatório da prática.
 
 ### Relatórios pelo Telegram
 
@@ -72,8 +73,6 @@ flowchart LR
     C --> D["Progresso e streak"]
     C --> E["Relatórios do Telegram"]
     A --> I["Google Calendar"]
-    F["Gemini"] --> G["Tutora de inglês"]
-    G --> H["Relatório de aprendizado"]
 ```
 
 As personalizações e o histórico funcionam no `localStorage` do navegador e, quando o Supabase está configurado, são sincronizados no banco. Tokens privados e chamadas externas ficam protegidos nas rotas de servidor do Next.js.
@@ -84,7 +83,6 @@ As personalizações e o histórico funcionam no `localStorage` do navegador e, 
 | --- | --- |
 | Aplicação | Next.js 15, React 18 e TypeScript |
 | Interface | CSS modularizado e Lucide React |
-| Inteligência artificial | Google Gemini |
 | Agenda | Google Calendar API e OAuth 2.0 |
 | Relatórios | Telegram Bot API |
 | Sincronização | Supabase |
@@ -95,10 +93,9 @@ As personalizações e o histórico funcionam no `localStorage` do navegador e, 
 
 ```text
 app/
-  api/                 Rotas de autenticação, calendário, IA e Telegram
+  api/                 Rotas de autenticação, calendário e Telegram
   components/          Componentes reutilizáveis da interface
   styles/              Estilos separados por responsabilidade
-  EnglishTutor.tsx     Experiência de prática de inglês
   page.tsx             Composição e estado da página principal
 lib/
   calendar.ts          Leitura e normalização de eventos
@@ -115,7 +112,6 @@ tests/                 Testes automatizados
 
 - Node.js 20 ou superior.
 - Projeto OAuth configurado no Google Cloud.
-- Chave do Gemini para utilizar a tutora de inglês.
 - Bot do Telegram para utilizar os relatórios.
 
 ### Instalação
@@ -140,13 +136,6 @@ GOOGLE_CALENDAR_IDS=primary
 GOOGLE_CLIENT_ID=
 GOOGLE_CLIENT_SECRET=
 GOOGLE_REDIRECT_URI=http://localhost:3000/api/auth/google/callback
-
-GEMINI_API_KEY=
-GEMINI_ENGLISH_TUTOR_MODEL=gemini-2.5-flash
-GEMINI_ENGLISH_TUTOR_FALLBACK_MODEL=gemini-2.5-flash-lite
-GEMINI_DAILY_CHAT_LIMIT=30
-GEMINI_DAILY_SUMMARY_LIMIT=3
-GEMINI_DAILY_TRANSCRIPTION_LIMIT=30
 
 TELEGRAM_BOT_TOKEN=
 TELEGRAM_CHAT_ID=
@@ -176,14 +165,6 @@ https://seu-projeto.vercel.app/api/auth/google/callback
 ```
 
 `GOOGLE_CALENDAR_IDS` aceita múltiplos IDs separados por vírgula. Use `primary` para o calendário principal da conta conectada.
-
-### Gemini
-
-1. Crie uma chave no Google AI Studio.
-2. Configure `GEMINI_API_KEY`.
-3. Use `gemini-2.5-flash` como modelo principal.
-
-A chave fica somente no servidor. Evite enviar informações confidenciais durante as práticas.
 
 ### Telegram
 

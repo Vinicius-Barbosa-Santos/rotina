@@ -8,6 +8,10 @@ test("maps routine tasks to contextual icons", () => {
   assert.equal(getTaskIconName("Revisar carteira de investimentos"), "wallet");
   assert.equal(getTaskIconName("Planejar pauta para YouTube"), "youtube");
   assert.equal(getTaskIconName("Estudar marketing digital"), "megaphone");
+  assert.equal(getTaskIconName("Assistir à aula do Coders"), "languages");
+  assert.equal(getTaskIconName("Assistir a uma aula de YouTube"), "youtube");
+  assert.equal(getTaskIconName("Assistir a uma aula de investimentos"), "wallet");
+  assert.equal(getTaskIconName("Assistir a uma aula de marketing"), "megaphone");
   assert.equal(getTaskIconName("Preparar uma refeição simples e saudável"), "utensils");
   assert.equal(getTaskIconName("Organizar casa, roupa ou documentos"), "home");
   assert.equal(getTaskIconName("Banheiro: vaso, pia, espelho e box"), "home");

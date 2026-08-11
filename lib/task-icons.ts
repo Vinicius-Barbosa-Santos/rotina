@@ -14,6 +14,7 @@ export type TaskIconName =
   | "heart"
   | "home"
   | "lightbulb"
+  | "languages"
   | "megaphone"
   | "message"
   | "mic"
@@ -35,6 +36,7 @@ export const taskIconOptions: Array<{ name: TaskIconName; label: string }> = [
   { name: "gitPullRequest", label: "Review" },
   { name: "checklist", label: "Checklist" },
   { name: "book", label: "Estudo" },
+  { name: "languages", label: "Idiomas" },
   { name: "message", label: "Comunicação" },
   { name: "calendar", label: "Agenda" },
   { name: "briefcase", label: "Trabalho" },
@@ -77,6 +79,7 @@ const taskEmojiMap: Record<TaskIconName, string> = {
   heart: "❤️",
   home: "🏠",
   lightbulb: "💡",
+  languages: "🌐",
   megaphone: "📣",
   message: "💬",
   mic: "🎙️",
@@ -105,8 +108,9 @@ const taskIconRules: Array<{ icon: TaskIconName; keywords: string[] }> = [
   { icon: "wallet", keywords: ["investimento", "investimentos", "patrimonio", "aportes", "financeiro"] },
   { icon: "youtube", keywords: ["youtube"] },
   { icon: "play", keywords: ["gravar", "video", "roteiro", "pauta"] },
-  { icon: "megaphone", keywords: ["marketing", "conteudo", "distribuicao", "posicionamento"] },
-  { icon: "book", keywords: ["leitura", "vocabulario", "listening", "ingles", "estudar", "aprendi"] },
+  { icon: "megaphone", keywords: ["marketing", "distribuicao", "posicionamento"] },
+  { icon: "languages", keywords: ["coders", "vocabulario tecnico", "ingles tecnico"] },
+  { icon: "book", keywords: ["aula", "curso", "leitura", "vocabulario", "listening", "ingles", "estudar", "aprendi", "praticar"] },
   { icon: "code", keywords: ["programacao", "codigo", "feature", "correcao", "frontend", "backend", "react", "java"] },
   { icon: "gitPullRequest", keywords: ["pull request", "pull requests", "revisar codigo", "review"] },
   { icon: "checklist", keywords: ["testes", "teste", "pendencias", "task", "tasks"] },
