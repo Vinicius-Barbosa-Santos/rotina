@@ -4,6 +4,7 @@ import {
   CircleDollarSign,
   ClipboardList,
   Code2,
+  Coffee,
   Dumbbell,
   GraduationCap,
   Heart,
@@ -21,6 +22,7 @@ import {
 const iconMap = {
   Mind: Sparkles,
   Sun: Sunrise,
+  Coffee,
   EN: Sparkles,
   Fit: Dumbbell,
   Job: Briefcase,

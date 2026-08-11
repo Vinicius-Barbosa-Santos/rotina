@@ -38,12 +38,15 @@ test("getSectionScheduleLabel describes weekdays", () => {
 test("tracked routine is displayed in chronological order", () => {
   const weekdaySections = trackedRoutineSections.filter((item) => item.days?.includes(1));
   const workIndex = weekdaySections.findIndex((item) => item.key === "work");
+  const breakfastIndex = weekdaySections.findIndex((item) => item.key === "personal");
   const englishIndex = weekdaySections.findIndex((item) => item.key === "english");
   const cleaningIndex = weekdaySections.findIndex((item) => item.key === "house-cleaning");
   const codersIndex = weekdaySections.findIndex((item) => item.key === "programming-study");
   const gymIndex = weekdaySections.findIndex((item) => item.key === "health");
 
-  assert.ok(workIndex < englishIndex);
+  assert.equal(workIndex, 0);
+  assert.ok(workIndex < breakfastIndex);
+  assert.ok(breakfastIndex < englishIndex);
   assert.ok(englishIndex < cleaningIndex);
   assert.ok(cleaningIndex < codersIndex);
   assert.ok(codersIndex < gymIndex);
@@ -189,20 +192,8 @@ test("functional adult section is a permanent, categorized reference guide", () 
   assert.equal(routineReferenceSections.some((section) => section.key === functional.key), true);
 });
 
-test("weekend optional focus includes investments, digital marketing and YouTube", () => {
-  const optional = routineSections.find((item) => item.key === "saturday");
-
-  assert.ok(optional);
-  assert.equal(optional.label, "Foco Opcional");
-  assert.deepEqual(optional.days, [6, 0]);
-  assert.deepEqual(
-    getVisibleItems(optional, new Date(2026, 5, 20)).map(({ item }) => item.label),
-    [
-      "Revisar carteira de investimentos",
-      "Estudar marketing digital",
-      "Planejar pauta para YouTube",
-      "Gravar ou roteirizar um vídeo curto",
-      "Anotar ideias para renda extra digital",
-    ],
-  );
+test("removed optional sections are no longer part of the routine", () => {
+  for (const key of ["saturday", "finance", "relationships", "sunday-review"]) {
+    assert.equal(routineSections.some((item) => item.key === key), false);
+  }
 });

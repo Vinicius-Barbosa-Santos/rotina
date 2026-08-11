@@ -25,7 +25,7 @@ Em vez de usar vários aplicativos isolados, a aplicação organiza tarefas por 
 
 ### Organização da rotina
 
-- Rotinas diferentes para dias úteis, sábado e domingo.
+- Rotina principal organizada de segunda a sexta.
 - Blocos por horário para a rotina e guias permanentes de inglês, desenvolvimento e vida funcional.
 - Checklist diário com progresso geral e progresso por seção.
 - Streak para acompanhar dias completamente concluídos.

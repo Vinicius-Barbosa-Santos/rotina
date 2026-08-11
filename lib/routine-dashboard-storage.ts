@@ -15,6 +15,7 @@ export function readCompletedDates() {
 
 export function normalizeRoutinePrefs(savedPrefs: Partial<RoutinePrefs>): RoutinePrefs {
   const guideChecks = { ...(savedPrefs.guideChecks ?? {}) };
+  const timeOverrides = removeLegacyTimeOverrides(savedPrefs.timeOverrides ?? {});
   if (!guideChecks["english-guide"]?.length && guideChecks.english?.length) {
     guideChecks["english-guide"] = [...guideChecks.english];
   }
@@ -23,11 +24,30 @@ export function normalizeRoutinePrefs(savedPrefs: Partial<RoutinePrefs>): Routin
   return {
     hiddenItems: savedPrefs.hiddenItems ?? {},
     customItems: savedPrefs.customItems ?? {},
-    timeOverrides: savedPrefs.timeOverrides ?? {},
+    timeOverrides,
     labelOverrides: savedPrefs.labelOverrides ?? {},
     iconOverrides: savedPrefs.iconOverrides ?? {},
     guideChecks
   };
+}
+
+function removeLegacyTimeOverrides(savedOverrides: Record<string, string>) {
+  const timeOverrides = { ...savedOverrides };
+  const legacyTimes: Record<string, string[]> = {
+    personal: ["06:00-08:00", "06:30-08:00", "03:00 e 07:00-08:00"],
+    english: ["09:00-10:00"],
+    work: ["10:00-18:00"],
+    "programming-study": ["18:30-20:00"],
+    "house-cleaning": ["20:00-20:30"],
+    health: ["20:30-21:15"],
+    growth: ["21:30-22:30"]
+  };
+
+  Object.entries(legacyTimes).forEach(([sectionKey, values]) => {
+    if (values.includes(timeOverrides[sectionKey])) delete timeOverrides[sectionKey];
+  });
+
+  return timeOverrides;
 }
 
 export function readRoutineStatesFromStorage() {

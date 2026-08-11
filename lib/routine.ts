@@ -29,19 +29,17 @@ const weekdays: Weekday[] = [1, 2, 3, 4, 5];
 export const routineSections: RoutineSection[] = [
   {
     key: "personal",
-    icon: "Sun",
-    label: "Início do Dia e Café da Manhã",
-    shortLabel: "Manhã",
+    icon: "Coffee",
+    label: "Café da Manhã",
+    shortLabel: "Café",
     color: "#f7c948",
     bg: "rgba(247, 201, 72, 0.12)",
-    time: "03:00 e 07:00-08:00",
+    time: "07:00-08:00",
     days: weekdays,
     items: [
-      { label: "Acordar" },
-      { label: "Arrumar cama" },
-      { label: "Beber água" },
-      { label: "Oração" },
-      { label: "Café da manhã" },
+      { label: "Preparar o café da manhã" },
+      { label: "Tomar o café da manhã" },
+      { label: "Organizar a cozinha após o café" },
       { label: "Planejamento do dia" }
     ]
   },
@@ -769,78 +767,6 @@ export const routineSections: RoutineSection[] = [
       { label: "Assistir a uma aula de investimentos" },
       { label: "Assistir a uma aula de marketing" }
     ]
-  },
-  {
-    key: "saturday",
-    icon: "Growth",
-    label: "Foco Opcional",
-    shortLabel: "Opcional",
-    color: "#fb923c",
-    bg: "rgba(251, 146, 60, 0.12)",
-    time: "fim de semana",
-    note: "Sem cobrança de progresso: escolha uma alavanca para crescer com calma.",
-    days: [6, 0],
-    items: [
-      { label: "Revisar carteira de investimentos" },
-      { label: "Estudar marketing digital" },
-      { label: "Planejar pauta para YouTube" },
-      { label: "Gravar ou roteirizar um vídeo curto" },
-      { label: "Anotar ideias para renda extra digital" }
-    ]
-  },
-  {
-    key: "finance",
-    icon: "Cash",
-    label: "Financeiro",
-    shortLabel: "Finanças",
-    color: "#52c98e",
-    bg: "rgba(82, 201, 142, 0.12)",
-    time: "semanal",
-    note: "Durante a semana conta como rotina; no domingo vira reflexão opcional.",
-    items: [
-      { label: "Revisar investimentos", days: [1] },
-      { label: "Atualizar patrimônio", days: [5] },
-      { label: "Planejamento financeiro", days: [0] },
-      { label: "Registrar gastos da semana", days: [0] },
-      { label: "Acompanhar evolução rumo ao primeiro milhão", days: [0] }
-    ]
-  },
-  {
-    key: "relationships",
-    icon: "Heart",
-    label: "Relacionamentos",
-    shortLabel: "Relações",
-    color: "#e87eb8",
-    bg: "rgba(232, 126, 184, 0.12)",
-    time: "toda semana",
-    note: "Aparece no fim de semana para manter vínculos vivos.",
-    days: [6, 0],
-    items: [
-      { label: "Conversar com família" },
-      { label: "Conversar com amigos" },
-      { label: "Fazer algo fora de casa" },
-      { label: "Conhecer pessoas novas" },
-      { label: "Sair para um hobby ou atividade social" }
-    ]
-  },
-  {
-    key: "sunday-review",
-    icon: "Review",
-    label: "Revisão de Domingo",
-    shortLabel: "Domingo",
-    color: "#9ba8b5",
-    bg: "rgba(155, 168, 181, 0.12)",
-    time: "domingo",
-    note: "Opcional: use como fechamento leve para voltar forte na segunda.",
-    days: [0],
-    items: [
-      { label: "O que aprendi esta semana?", days: [0] },
-      { label: "Quanto investi?", days: [0] },
-      { label: "O que publiquei ou aprendi sobre YouTube?", days: [0] },
-      { label: "Qual ideia de marketing digital vale testar?", days: [0] },
-      { label: "Qual investimento ou hábito financeiro vou acompanhar?", days: [0] },
-      { label: "Qual é a prioridade profissional da próxima semana?", days: [0] }
-    ]
   }
 ];
 
@@ -869,7 +795,7 @@ export function isReferenceSection(section: RoutineSection) {
 }
 
 const routineSectionEmoji: Record<string, string> = {
-  personal: "🌅",
+  personal: "☕",
   english: "🇬🇧",
   "english-guide": "🇬🇧",
   work: "💻",
@@ -878,11 +804,7 @@ const routineSectionEmoji: Record<string, string> = {
   "house-cleaning": "🧹",
   health: "💪",
   "functional-life": "🏠",
-  growth: "📈",
-  saturday: "🎯",
-  finance: "💰",
-  relationships: "❤️",
-  "sunday-review": "🗓️"
+  growth: "📈"
 };
 
 export function getRoutineSectionEmoji(section: Pick<RoutineSection, "key">) {
