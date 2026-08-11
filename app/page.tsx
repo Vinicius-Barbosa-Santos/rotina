@@ -112,12 +112,6 @@ function getHistoryFillDates(now = new Date()) {
   return dates;
 }
 
-function getYesterdayKey() {
-  const date = new Date();
-  date.setDate(date.getDate() - 1);
-  return dateKey(date);
-}
-
 export default function HomePage() {
   const [hydrated, setHydrated] = useState(false);
   const [syncReady, setSyncReady] = useState(false);
@@ -160,7 +154,7 @@ export default function HomePage() {
   const [telegramAutomaticEnabled, setTelegramAutomaticEnabled] = useState(false);
   const [telegramSending, setTelegramSending] = useState<TelegramReportPeriod | null>(null);
   const [telegramMessage, setTelegramMessage] = useState("");
-  const [historyControlDate, setHistoryControlDate] = useState(getYesterdayKey);
+  const [historyControlDate, setHistoryControlDate] = useState(todayKey);
 
   useEffect(() => {
     resetProgressHistory(localStorage);
@@ -937,6 +931,53 @@ export default function HomePage() {
     return true;
   }
 
+  async function reconcileCompletedProgress() {
+    const completedDates = readCompletedDates()
+      .filter((value) => value >= progressTrackingStartDate)
+      .sort();
+
+    if (!completedDates.length) {
+      setSyncMessage("Ainda não há dias concluídos para ajustar.");
+      return;
+    }
+
+    const storedStates = readRoutineStatesFromStorage();
+    const nextStates = { ...storedStates };
+
+    completedDates.forEach((value) => {
+      const date = new Date(`${value}T12:00:00`);
+      if (!isProgressTrackingDate(date)) return;
+
+      const dayState: RoutineState = { ...(nextStates[value] ?? {}) };
+      trackedRoutineSections.forEach((section) => {
+        dayState[section.key] = getPersonalizedItems(section, date).map((item) => item.key);
+      });
+
+      const meetingEvents = value === todayKey()
+        ? visibleAgendaEvents
+        : getManualMeetingEvents(manualMeetings, date).filter((event) => Boolean(event.meetingUrl));
+      dayState.meetings = meetingEvents.map((event) => event.id);
+      nextStates[value] = dayState;
+      localStorage.setItem(`${routineStatePrefix}${value}`, JSON.stringify(dayState));
+    });
+
+    if (nextStates[todayKey()]) setState(nextStates[todayKey()]);
+    setCalendarProgressDays({});
+    setStreak(calculateProgressStreak(completedDates));
+    setSyncMessage(`${completedDates.length} dias concluídos foram ajustados à rotina atual.`);
+
+    await saveRoutineSyncSnapshot({
+      ...buildLocalSyncSnapshot(),
+      states: nextStates,
+      completedDates,
+      routinePrefs,
+      manualMeetings,
+      profileStacks,
+      telegramAutomaticEnabled,
+      updatedAt: new Date().toISOString()
+    });
+  }
+
   async function clearGeneralHistory() {
     const confirmed = window.confirm("Limpar todo o histórico de progresso, streak e relatórios? Suas preferências, guias, reuniões e stacks serão mantidos.");
     if (!confirmed) return;
@@ -1203,7 +1244,10 @@ export default function HomePage() {
           </section>
 
           <section className="sideBlock">
-            <p className="sideLabel">sincronização</p>
+            <p className="sideLabel">ajustar progresso</p>
+            <p className="historyHelp">
+              Corrija um dia específico ou reaplique 100% aos dias que já estavam concluídos antes de uma mudança na rotina.
+            </p>
             <p className="syncStatus">{syncMessage || "Preparando sincronização..."}</p>
             <form
               className="historyFillForm"
@@ -1213,7 +1257,7 @@ export default function HomePage() {
               }}
             >
               <label>
-                Preencher dia
+                Data para ajustar
                 <input
                   type="date"
                   min={progressTrackingStartDate}
@@ -1222,8 +1266,11 @@ export default function HomePage() {
                   onChange={(event) => setHistoryControlDate(event.target.value)}
                 />
               </label>
-              <button type="submit">Marcar 100%</button>
+              <button type="submit">Marcar este dia como 100%</button>
             </form>
+            <button className="historyReconcileButton" type="button" onClick={() => void reconcileCompletedProgress()}>
+              Atualizar todos os dias já concluídos
+            </button>
             <button className="historyClearButton" type="button" onClick={clearGeneralHistory}>
               Limpar histórico geral
             </button>

@@ -92,6 +92,34 @@
   font-weight: 800;
 }
 
+.historyHelp {
+  margin: 0 0 8px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.historyReconcileButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  margin-top: 8px;
+  border: 1px solid rgba(79, 142, 247, 0.34);
+  border-radius: 10px;
+  padding: 8px 10px;
+  background: rgba(79, 142, 247, 0.11);
+  color: #a9caff;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.historyReconcileButton:hover {
+  border-color: rgba(79, 142, 247, 0.55);
+  background: rgba(79, 142, 247, 0.17);
+}
+
 .historyFillForm {
   display: grid;
   gap: 8px;
