@@ -360,6 +360,7 @@ function buildRoutineEvent(section: SyncSection, timeZone: string, date: Date) {
   if (!range) throw new Error(`A seção ${section.label} não tem horário válido.`);
 
   const startDate = formatDateForCalendar(date);
+  const endDate = isOvernightRange(range) ? formatDateForCalendar(addUtcDays(date, 1)) : startDate;
   const items = section.items.filter((item) => !item.days?.length || item.days.includes(date.getUTCDay() as 0 | 1 | 2 | 3 | 4 | 5 | 6));
   const isToday = startDate === formatDateInTimeZone(new Date(), timeZone);
   const completedCount = isToday ? items.filter((item) => item.completed).length : 0;
@@ -379,7 +380,7 @@ function buildRoutineEvent(section: SyncSection, timeZone: string, date: Date) {
       timeZone
     },
     end: {
-      dateTime: `${startDate}T${range.end}:00`,
+      dateTime: `${endDate}T${range.end}:00`,
       timeZone
     },
     reminders: {
@@ -402,6 +403,21 @@ function parseTimeRange(time: string) {
   const match = time.match(/^(\d{2}:\d{2})-(\d{2}:\d{2})$/);
   if (!match) return undefined;
   return { start: match[1], end: match[2] };
+}
+
+function isOvernightRange(range: { start: string; end: string }) {
+  return timeToMinutes(range.end) <= timeToMinutes(range.start);
+}
+
+function timeToMinutes(value: string) {
+  const [hours, minutes] = value.split(":").map(Number);
+  return hours * 60 + minutes;
+}
+
+function addUtcDays(date: Date, days: number) {
+  const result = new Date(date);
+  result.setUTCDate(result.getUTCDate() + days);
+  return result;
 }
 
 function daysForSection(section: SyncSection) {

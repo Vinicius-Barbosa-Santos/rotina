@@ -38,9 +38,9 @@ function removeLegacyTimeOverrides(savedOverrides: Record<string, string>) {
     english: ["09:00-10:00"],
     work: ["10:00-18:00"],
     "programming-study": ["18:30-20:00"],
-    "house-cleaning": ["20:00-20:30"],
-    health: ["20:30-21:15"],
-    growth: ["21:30-22:30"]
+    "house-cleaning": ["20:00-20:30", "11:00-15:00"],
+    health: ["20:30-21:15", "18:00-21:00"],
+    growth: ["21:30-22:30", "11:00-15:00"]
   };
 
   Object.entries(legacyTimes).forEach(([sectionKey, values]) => {

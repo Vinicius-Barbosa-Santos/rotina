@@ -40,16 +40,28 @@ test("tracked routine is displayed in chronological order", () => {
   const workIndex = weekdaySections.findIndex((item) => item.key === "work");
   const breakfastIndex = weekdaySections.findIndex((item) => item.key === "personal");
   const englishIndex = weekdaySections.findIndex((item) => item.key === "english");
+  const technicalStudyIndex = weekdaySections.findIndex((item) => item.key === "technical-study");
   const cleaningIndex = weekdaySections.findIndex((item) => item.key === "house-cleaning");
+  const growthIndex = weekdaySections.findIndex((item) => item.key === "growth");
+  const projectsIndex = weekdaySections.findIndex((item) => item.key === "projects-meetings");
+  const transitionIndex = weekdaySections.findIndex((item) => item.key === "transition");
   const codersIndex = weekdaySections.findIndex((item) => item.key === "programming-study");
   const gymIndex = weekdaySections.findIndex((item) => item.key === "health");
+  const eveningIndex = weekdaySections.findIndex((item) => item.key === "evening");
+  const sleepIndex = weekdaySections.findIndex((item) => item.key === "sleep");
 
   assert.equal(workIndex, 0);
   assert.ok(workIndex < breakfastIndex);
   assert.ok(breakfastIndex < englishIndex);
-  assert.ok(englishIndex < cleaningIndex);
-  assert.ok(cleaningIndex < codersIndex);
+  assert.ok(englishIndex < technicalStudyIndex);
+  assert.ok(technicalStudyIndex < cleaningIndex);
+  assert.ok(cleaningIndex < growthIndex);
+  assert.ok(growthIndex < projectsIndex);
+  assert.ok(projectsIndex < transitionIndex);
+  assert.ok(transitionIndex < codersIndex);
   assert.ok(codersIndex < gymIndex);
+  assert.ok(gymIndex < eveningIndex);
+  assert.ok(eveningIndex < sleepIndex);
 });
 
 test("weekday work runs from 03:00 to 07:00", () => {
@@ -116,9 +128,9 @@ test("Coders is a tracked technical English course at 17:00", () => {
   assert.deepEqual(
     getVisibleItems(study, new Date(2026, 6, 22)).map(({ item }) => item.label),
     [
-      "Assistir à aula do Coders",
-      "Anotar vocabulário técnico",
-      "Praticar o conteúdo da aula",
+      "Assistir à aula diária do curso Coders",
+      "Anotar e fichar novos termos de vocabulário técnico",
+      "Praticar pronúncia e simular contextos técnicos de trabalho",
     ],
   );
   assert.equal(trackedRoutineSections.some((section) => section.key === study.key), true);
@@ -130,7 +142,7 @@ test("house cleaning is distributed from Monday to Friday", () => {
 
   assert.ok(cleaning);
   assert.equal(cleaning.label, "Limpeza da Casa");
-  assert.equal(cleaning.time, "11:00-15:00");
+  assert.equal(cleaning.time, "11:00-12:30");
   assert.deepEqual(
     getVisibleItems(cleaning, new Date(2026, 5, 22)).map(({ item }) => item.label),
     [
@@ -154,7 +166,7 @@ test("gym routine alternates muscle groups, cardio and recovery", () => {
 
   assert.ok(health);
   assert.equal(health.label, "Academia");
-  assert.equal(health.time, "18:00-21:00");
+  assert.equal(health.time, "18:00-20:30");
   assert.match(health.note ?? "", /baixo impacto/i);
   assert.ok(getVisibleItems(health, new Date(2026, 5, 22)).some(({ item }) => item.label.includes("Peito")));
   assert.ok(getVisibleItems(health, new Date(2026, 5, 23)).some(({ item }) => item.label.includes("Costas")));
@@ -163,19 +175,47 @@ test("gym routine alternates muscle groups, cardio and recovery", () => {
   assert.ok(getVisibleItems(health, new Date(2026, 5, 26)).some(({ item }) => item.label.includes("Ombros")));
 });
 
-test("growth includes one daily class for YouTube, investments and marketing", () => {
+test("growth combines lunch, recovery and three daily classes", () => {
   const growth = routineSections.find((item) => item.key === "growth");
 
   assert.ok(growth);
-  assert.equal(growth.time, "11:00-15:00");
+  assert.equal(growth.time, "12:30-14:00");
   assert.deepEqual(
     getVisibleItems(growth, new Date(2026, 5, 22)).map(({ item }) => item.label),
     [
-      "Assistir a uma aula de YouTube",
-      "Assistir a uma aula de investimentos",
-      "Assistir a uma aula de marketing",
+      "Almoçar com tranquilidade",
+      "Descansar e desacelerar após a refeição",
+      "Assistir a uma aula de YouTube e criação de conteúdo",
+      "Assistir a uma aula de investimentos e finanças pessoais",
+      "Assistir a uma aula de marketing digital e posicionamento",
     ],
   );
+});
+
+test("optimized routine includes dedicated study, projects, transition, evening and sleep blocks", () => {
+  const expectedTimes = {
+    "technical-study": "09:00-11:00",
+    "projects-meetings": "14:00-16:30",
+    transition: "16:30-17:00",
+    evening: "20:30-21:30",
+    sleep: "21:30-03:00",
+  };
+
+  for (const [key, time] of Object.entries(expectedTimes)) {
+    const section = trackedRoutineSections.find((item) => item.key === key);
+    assert.ok(section);
+    assert.equal(section.time, time);
+    assert.equal(getSectionScheduleLabel(section), "segunda a sexta");
+  }
+});
+
+test("active courses are a permanent eight-track guide totaling 430 hours", () => {
+  const courses = routineReferenceSections.find((section) => section.key === "active-courses");
+
+  assert.ok(courses);
+  assert.equal(getSectionScheduleLabel(courses), "referência");
+  assert.equal(courses.referenceGroups?.length, 8);
+  assert.match(courses.note ?? "", /430 horas/);
 });
 
 test("functional adult section is a permanent, categorized reference guide", () => {

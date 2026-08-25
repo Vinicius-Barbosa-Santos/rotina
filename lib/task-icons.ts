@@ -98,12 +98,12 @@ const taskEmojiMap: Record<TaskIconName, string> = {
 
 const taskIconRules: Array<{ icon: TaskIconName; keywords: string[] }> = [
   { icon: "alarm", keywords: ["acordar"] },
-  { icon: "bed", keywords: ["arrumar cama", "cama"] },
-  { icon: "water", keywords: ["agua", "beber"] },
-  { icon: "sparkles", keywords: ["oracao", "alongamento", "mindfulness"] },
+  { icon: "bed", keywords: ["arrumar cama", "cama", "dormir", "sono"] },
+  { icon: "water", keywords: ["agua", "beber", "hidratar", "hidratacao"] },
+  { icon: "sparkles", keywords: ["oracao", "alongamento", "mindfulness", "banho"] },
   { icon: "coffee", keywords: ["cafe"] },
   { icon: "home", keywords: ["casa", "cozinha", "banheiro", "quarto", "sala", "roupa", "louca", "pia", "bancada", "fogao", "lixo", "aspirar", "pisos", "documentos"] },
-  { icon: "calendar", keywords: ["planejamento", "priorizar", "sprint", "jira", "agenda"] },
+  { icon: "calendar", keywords: ["planejamento", "priorizar", "sprint", "jira", "agenda", "reunioes"] },
   { icon: "message", keywords: ["daily", "conversacao", "conversar", "comunicacao", "feedback", "respeito", "networking"] },
   { icon: "wallet", keywords: ["investimento", "investimentos", "patrimonio", "aportes", "financeiro"] },
   { icon: "youtube", keywords: ["youtube"] },

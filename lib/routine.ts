@@ -289,6 +289,23 @@ export const routineSections: RoutineSection[] = [
     ]
   },
   {
+    key: "technical-study",
+    icon: "Code",
+    label: "Estudos Técnicos — Cursos",
+    shortLabel: "Cursos",
+    color: "#a78bfa",
+    bg: "rgba(167, 139, 250, 0.12)",
+    time: "09:00-11:00",
+    days: weekdays,
+    note: "Bloco dedicado às formações técnicas ativas. Priorize prática deliberada: assista, programe, exercite e registre o aprendizado.",
+    items: [
+      { label: "Assistir às aulas do módulo em andamento" },
+      { label: "Escrever código prático junto com a aula" },
+      { label: "Implementar os exercícios ou o projeto do módulo" },
+      { label: "Anotar conceitos-chave, padrões e dúvidas para revisão" }
+    ]
+  },
+  {
     key: "programming-study",
     icon: "TechnicalEnglish",
     label: "Coders — Inglês Técnico",
@@ -299,9 +316,9 @@ export const routineSections: RoutineSection[] = [
     days: weekdays,
     note: "Curso para dominar o inglês técnico usado no desenvolvimento de software.",
     items: [
-      { label: "Assistir à aula do Coders" },
-      { label: "Anotar vocabulário técnico" },
-      { label: "Praticar o conteúdo da aula" }
+      { label: "Assistir à aula diária do curso Coders" },
+      { label: "Anotar e fichar novos termos de vocabulário técnico" },
+      { label: "Praticar pronúncia e simular contextos técnicos de trabalho" }
     ]
   },
   {
@@ -555,7 +572,7 @@ export const routineSections: RoutineSection[] = [
     shortLabel: "Limpeza",
     color: "#6dd3b2",
     bg: "rgba(109, 211, 178, 0.12)",
-    time: "11:00-15:00",
+    time: "11:00-12:30",
     days: weekdays,
     note: "Pouco por dia para a casa não acumular. Proteja coluna e joelhos: evite torcer o tronco, ajoelhar e carregar peso excessivo.",
     items: [
@@ -575,10 +592,11 @@ export const routineSections: RoutineSection[] = [
     shortLabel: "Academia",
     color: "#8ec3f7",
     bg: "rgba(142, 195, 247, 0.12)",
-    time: "18:00-21:00",
+    time: "18:00-20:30",
     days: weekdays,
     note: "Treino inicial de baixo impacto. Ajuste carga, amplitude e aparelhos com um profissional que conheça sua coluna e seu joelho; pare se houver dor aguda, formigamento ou piora dos sintomas.",
     items: [
+      { label: "Alongamento suave e hidratação após o treino" },
       { label: "Segunda — Aquecimento: bicicleta leve (5-10 min)", days: [1] },
       { label: "Segunda — Peito: chest press na máquina", days: [1] },
       { label: "Segunda — Peito: crucifixo na máquina", days: [1] },
@@ -753,19 +771,177 @@ export const routineSections: RoutineSection[] = [
     ]
   },
   {
+    key: "active-courses",
+    icon: "Learning",
+    label: "Trilhas Técnicas em Andamento",
+    shortLabel: "Trilhas",
+    color: "#c084fc",
+    bg: "rgba(192, 132, 252, 0.12)",
+    time: "guia permanente",
+    note: "Mapa das oito formações ativas, com carga total aproximada de 430 horas. Use no bloco das 09:00 às 11:00 para escolher o próximo módulo; este guia não entra no progresso diário.",
+    items: [],
+    referenceGroups: [
+      {
+        title: "Full-Stack JavaScript e TypeScript — 181h",
+        items: [
+          "Dominar escopo, closures, protótipos, hoisting e assincronismo",
+          "Aplicar TypeScript avançado com generics, mapped types e utility types",
+          "Construir APIs com validação, tratamento de erros, JWT, sessões e RBAC",
+          "Modelar dados SQL e NoSQL e trabalhar com ORMs, migrations, transações e índices",
+          "Integrar frontend, estado, cache, CSR e SSR",
+          "Configurar segurança, CI/CD, Docker e deploy"
+        ]
+      },
+      {
+        title: "React — 19h",
+        items: [
+          "Dominar JSX, componentes, props, estado e ciclo de vida",
+          "Usar hooks, custom hooks e otimizações com memoização",
+          "Trabalhar com Context, TanStack Query ou SWR e App Router",
+          "Criar formulários acessíveis com React Hook Form e Zod",
+          "Aplicar estratégias modernas de estilização e acessibilidade"
+        ]
+      },
+      {
+        title: "Angular — 46h",
+        items: [
+          "Dominar componentes standalone, diretivas, pipes e data binding",
+          "Aplicar injeção de dependências e serviços com escopos adequados",
+          "Trabalhar com RxJS, Observables, Subjects e Signals",
+          "Criar Reactive Forms, rotas, lazy loading, guards e resolvers",
+          "Consumir APIs com HttpClient e interceptors"
+        ]
+      },
+      {
+        title: "Java e Spring Boot — 100h",
+        items: [
+          "Consolidar orientação a objetos, collections, streams, generics e concorrência",
+          "Criar APIs Spring com controllers, DTOs, mappers e validação",
+          "Usar JPA, Hibernate, relacionamentos, queries e transações",
+          "Implementar autenticação e autorização com Spring Security e JWT",
+          "Escrever testes com JUnit, Mockito, MockMvc e Testcontainers"
+        ]
+      },
+      {
+        title: "Microsserviços com Node.js — 50h",
+        items: [
+          "Decompor domínios e comparar comunicação REST, gRPC e orientada a eventos",
+          "Usar RabbitMQ, Kafka ou Redis PubSub com idempotência, DLQ e retries",
+          "Aplicar API Gateway, health checks, circuit breaker, fallback e timeout",
+          "Implementar sagas para transações distribuídas",
+          "Criar imagens Docker multi-stage e ambientes com Docker Compose"
+        ]
+      },
+      {
+        title: "GraphQL Full-Stack — 5h",
+        items: [
+          "Dominar schemas, types, queries, mutations e subscriptions",
+          "Criar resolvers seguros e resolver N+1 com DataLoader",
+          "Integrar Apollo Client ou Urql",
+          "Gerenciar cache, atualizações otimistas e fragmentos reutilizáveis"
+        ]
+      },
+      {
+        title: "Introdução à AWS — 19h",
+        items: [
+          "Entender regiões, zonas de disponibilidade e responsabilidade compartilhada",
+          "Configurar IAM aplicando o princípio do menor privilégio",
+          "Trabalhar com EC2, VPC, Lambda e API Gateway",
+          "Usar S3, RDS e DynamoDB",
+          "Monitorar com CloudWatch e controlar custos e Free Tier"
+        ]
+      },
+      {
+        title: "Desenvolvimento com IA — 10h",
+        items: [
+          "Usar Cursor com regras, contexto e edição em múltiplos arquivos",
+          "Operar Claude Code e Codex em refatorações, testes e diagnósticos",
+          "Gerenciar contexto e consumo de tokens em projetos grandes",
+          "Aplicar prompting, documentação, diagramas e testes assistidos por IA",
+          "Realizar code review e análise de segurança com assistência de IA"
+        ]
+      }
+    ]
+  },
+  {
     key: "growth",
     icon: "Learning",
-    label: "Crescimento — Aulas Diárias",
-    shortLabel: "Aulas",
+    label: "Almoço & Aulas de Crescimento",
+    shortLabel: "Almoço",
     color: "#b57bee",
     bg: "rgba(181, 123, 238, 0.12)",
-    time: "11:00-15:00",
-    note: "Durante o bloco de afazeres da casa, assistir diariamente a uma aula de cada frente de crescimento.",
+    time: "12:30-14:00",
+    note: "Alimentação, recuperação e aprendizado diário em áreas complementares.",
     days: weekdays,
     items: [
-      { label: "Assistir a uma aula de YouTube" },
-      { label: "Assistir a uma aula de investimentos" },
-      { label: "Assistir a uma aula de marketing" }
+      { label: "Almoçar com tranquilidade" },
+      { label: "Descansar e desacelerar após a refeição" },
+      { label: "Assistir a uma aula de YouTube e criação de conteúdo" },
+      { label: "Assistir a uma aula de investimentos e finanças pessoais" },
+      { label: "Assistir a uma aula de marketing digital e posicionamento" }
+    ]
+  },
+  {
+    key: "projects-meetings",
+    icon: "Admin",
+    label: "Reuniões & Projetos Práticos",
+    shortLabel: "Projetos",
+    color: "#f59e0b",
+    bg: "rgba(245, 158, 11, 0.12)",
+    time: "14:00-16:30",
+    days: weekdays,
+    note: "Janela flexível para compromissos do calendário, prática dos cursos e demandas complementares.",
+    items: [
+      { label: "Participar das reuniões agendadas no Google Calendar" },
+      { label: "Avançar em projetos pessoais ou laboratórios dos cursos" },
+      { label: "Resolver demandas administrativas ou complementares" }
+    ]
+  },
+  {
+    key: "transition",
+    icon: "Coffee",
+    label: "Intervalo & Transição",
+    shortLabel: "Intervalo",
+    color: "#2dd4bf",
+    bg: "rgba(45, 212, 191, 0.12)",
+    time: "16:30-17:00",
+    days: weekdays,
+    note: "Pausa curta para recuperar energia e preparar o restante do dia.",
+    items: [
+      { label: "Fazer um lanche pré-treino leve e nutritivo" },
+      { label: "Hidratar-se adequadamente" },
+      { label: "Preparar roupas e mochila da academia" }
+    ]
+  },
+  {
+    key: "evening",
+    icon: "Night",
+    label: "Jantar & Encerramento do Dia",
+    shortLabel: "Noite",
+    color: "#818cf8",
+    bg: "rgba(129, 140, 248, 0.12)",
+    time: "20:30-21:30",
+    days: weekdays,
+    note: "Encerramento consciente para reduzir estímulos e preparar o sono.",
+    items: [
+      { label: "Jantar de forma leve e nutritiva" },
+      { label: "Tomar um banho relaxante" },
+      { label: "Conferir o checklist diário no Minha Rotina" },
+      { label: "Desligar telas luminosas e iniciar a desaceleração" }
+    ]
+  },
+  {
+    key: "sleep",
+    icon: "Night",
+    label: "Sono",
+    shortLabel: "Sono",
+    color: "#6366f1",
+    bg: "rgba(99, 102, 241, 0.12)",
+    time: "21:30-03:00",
+    days: weekdays,
+    note: "Bloco noturno que termina às 03:00 do dia seguinte.",
+    items: [
+      { label: "Dormir no horário planejado" }
     ]
   }
 ];
@@ -799,12 +975,17 @@ const routineSectionEmoji: Record<string, string> = {
   english: "🇬🇧",
   "english-guide": "🇬🇧",
   work: "💻",
+  "technical-study": "🧑‍💻",
   "programming-study": "📚",
   career: "🚀",
   "house-cleaning": "🧹",
   health: "💪",
   "functional-life": "🏠",
-  growth: "📈"
+  growth: "📈",
+  "projects-meetings": "🗓️",
+  transition: "🥤",
+  evening: "🌙",
+  sleep: "😴"
 };
 
 export function getRoutineSectionEmoji(section: Pick<RoutineSection, "key">) {

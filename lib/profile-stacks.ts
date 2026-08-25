@@ -5,6 +5,7 @@ export const currentProfileStacks = [
   "React",
   "Next.js",
   "Node.js",
+  "GraphQL",
   "TypeScript",
   "AWS",
   "AWS Lambda",
@@ -22,7 +23,10 @@ export const currentProfileStacks = [
   "MongoDB",
   "Redis",
   "REST APIs",
-  "Microservices"
+  "Microservices",
+  "Codex",
+  "Claude Code",
+  "Cursor"
 ] as const;
 
 export function mergeProfileStacks(stacks: readonly string[]) {

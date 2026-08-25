@@ -24,6 +24,7 @@ const stackVisuals: StackVisual[] = [
   { src: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/react/react-original.svg", color: "#61dafb", matches: ["react"] },
   { src: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/nextjs/nextjs-original.svg", color: "#ffffff", matches: ["next.js", "nextjs", "next"], invert: true },
   { src: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/nodejs/nodejs-original.svg", color: "#68a063", matches: ["node.js", "nodejs", "node"] },
+  { src: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/graphql/graphql-plain.svg", color: "#e10098", matches: ["graphql"] },
   { src: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/typescript/typescript-original.svg", color: "#3178c6", matches: ["typescript", "type script"] },
   { src: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/java/java-original.svg", color: "#f89820", matches: ["java", "jvm"] },
   { src: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/docker/docker-original.svg", color: "#2496ed", matches: ["docker"] },

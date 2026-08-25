@@ -38,10 +38,17 @@ Em vez de usar vários aplicativos isolados, a aplicação organiza tarefas por 
 - **03:00-07:00:** trabalho com programação.
 - **07:00-08:00:** café da manhã e preparação do dia.
 - **08:00-09:00:** inglês.
-- **11:00-15:00:** afazeres da casa e aulas diárias de YouTube, investimentos e marketing.
-- **15:00-16:30:** intervalo sem tarefas obrigatórias.
+- **09:00-11:00:** estudos técnicos com aula, código, exercícios e anotações.
+- **11:00-12:30:** manutenção da casa e limpeza específica do dia.
+- **12:30-14:00:** almoço, descanso e aulas de YouTube, investimentos e marketing.
+- **14:00-16:30:** reuniões, projetos práticos e demandas complementares.
+- **16:30-17:00:** intervalo, hidratação, lanche e preparação para a academia.
 - **17:00-18:00:** Coders, curso de inglês técnico.
-- **18:00-21:00:** academia.
+- **18:00-20:30:** academia com treino de baixo impacto.
+- **20:30-21:30:** jantar, banho e encerramento do dia.
+- **21:30-03:00:** sono.
+
+O Guia de Trilhas Técnicas organiza oito formações ativas — Full-Stack, React, Angular, Java, Node.js, GraphQL, AWS e desenvolvimento com IA — com aproximadamente 430 horas de conteúdo.
 
 ### Agenda e notificações
 
@@ -222,7 +229,6 @@ Os testes cobrem datas, rotina, calendário, validação de relatórios, reset d
 ## Próximos passos
 
 - Autenticação própria e perfis de usuário.
-- Relatórios automáticos mesmo com o app fechado.
 - Interações com tarefas diretamente pelo Telegram.
 
 ## Deploy
