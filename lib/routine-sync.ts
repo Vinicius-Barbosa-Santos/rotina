@@ -28,7 +28,8 @@ export function getDefaultRoutineSyncData(): RoutineSyncData {
       timeOverrides: {},
       labelOverrides: {},
       iconOverrides: {},
-      guideChecks: {}
+      guideChecks: {},
+      stackProgress: {}
     },
     manualMeetings: [],
     profileStacks: [],
@@ -115,7 +116,8 @@ function normalizeRoutineSyncData(data: Partial<RoutineSyncData>): RoutineSyncDa
       timeOverrides: isObject(data.routinePrefs?.timeOverrides) ? data.routinePrefs.timeOverrides : {},
       labelOverrides: isObject(data.routinePrefs?.labelOverrides) ? data.routinePrefs.labelOverrides : {},
       iconOverrides: isObject(data.routinePrefs?.iconOverrides) ? data.routinePrefs.iconOverrides : {},
-      guideChecks: isObject(data.routinePrefs?.guideChecks) ? data.routinePrefs.guideChecks as Record<string, string[]> : {}
+      guideChecks: isObject(data.routinePrefs?.guideChecks) ? data.routinePrefs.guideChecks as Record<string, string[]> : {},
+      stackProgress: normalizeStackProgress(data.routinePrefs?.stackProgress)
     },
     manualMeetings: Array.isArray(data.manualMeetings) ? data.manualMeetings : [],
     profileStacks: Array.isArray(data.profileStacks)
@@ -124,6 +126,16 @@ function normalizeRoutineSyncData(data: Partial<RoutineSyncData>): RoutineSyncDa
     telegramAutomaticEnabled: Boolean(data.telegramAutomaticEnabled),
     telegramReportsSent: isObject(data.telegramReportsSent) ? data.telegramReportsSent as Record<string, boolean> : {}
   };
+}
+
+function normalizeStackProgress(value: unknown) {
+  if (!isObject(value)) return {};
+
+  return Object.fromEntries(
+    Object.entries(value)
+      .filter(([stack, progress]) => stack.trim() && typeof progress === "number" && Number.isFinite(progress))
+      .map(([stack, progress]) => [stack, Math.min(100, Math.max(0, Math.round(progress as number)))])
+  );
 }
 
 function isObject(value: unknown): value is Record<string, unknown> {

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Bell, CalendarDays, Flame, Loader2 } from "lucide-react";
+import { Bell, CalendarDays, Flame, GraduationCap, Loader2 } from "lucide-react";
 import {
   getVisibleItems,
   isReferenceSection,
@@ -53,10 +53,9 @@ import type {
 } from "@/lib/types";
 import AgendaPanel from "./components/AgendaPanel";
 import ManualMeetingsCard from "./components/ManualMeetingsCard";
-import ProfileStacksCard from "./components/ProfileStacksCard";
+import LearningProgressPanel from "./components/LearningProgressPanel";
 import ProgressCharts from "./components/ProgressCharts";
 import RoutineSectionCard from "./components/RoutineSectionCard";
-import StackIcon from "./components/StackIcon";
 import TelegramReports from "./components/TelegramReports";
 import WeekendFlowPanel from "./components/WeekendFlowPanel";
 import { RoutineIcon } from "./components/RoutineIcon";
@@ -147,7 +146,8 @@ export default function HomePage() {
     timeOverrides: {},
     labelOverrides: {},
     iconOverrides: {},
-    guideChecks: {}
+    guideChecks: {},
+    stackProgress: {}
   });
   const [newRoutineItems, setNewRoutineItems] = useState<Record<string, string>>({});
   const [streak, setStreak] = useState(0);
@@ -411,10 +411,10 @@ export default function HomePage() {
   ]);
 
   const stackPreview = mergeProfileStacks(profileStacks);
-  const stackTickerItems = Array.from(
-    { length: Math.max(24, stackPreview.length) },
-    (_, index) => stackPreview[index % stackPreview.length]
-  );
+  const englishView = todaySectionViews.find(({ section }) => section.key === "english");
+  const englishGuideSection = routineReferenceSections.find((section) => section.key === "english-guide");
+  const englishGuideTotal = englishGuideSection?.referenceGroups?.reduce((sum, group) => sum + group.items.length, 0) ?? 0;
+  const englishGuideDone = Math.min(routinePrefs.guideChecks["english-guide"]?.length ?? 0, englishGuideTotal);
   const manualEvents = useMemo(() => getManualMeetingEvents(manualMeetings), [manualMeetings]);
   const visibleAgendaEvents = useMemo(
     () => [...manualEvents, ...(calendar?.events ?? [])].filter((event) => Boolean(event.meetingUrl)),
@@ -470,7 +470,7 @@ export default function HomePage() {
 
   useEffect(() => {
     if (!hydrated || !syncReady || calendarLoading) return;
-    const fillVersion = `${progressTrackingStartDate}:100-percent`;
+    const fillVersion = `${progressTrackingStartDate}:balanced-week-v2`;
     if (localStorage.getItem(historyAutoFillKey) === fillVersion) return;
 
     const storedStates = readRoutineStatesFromStorage();
@@ -638,12 +638,31 @@ export default function HomePage() {
   function addProfileStack() {
     const stack = newStack.trim();
     if (!stack) return;
-    setProfileStacks((current) => [...new Set([...current, stack])].slice(0, 20));
+    setProfileStacks((current) => {
+      const known = new Set(mergeProfileStacks(current).map((item) => item.toLocaleLowerCase("pt-BR")));
+      return known.has(stack.toLocaleLowerCase("pt-BR")) ? current : [...current, stack].slice(0, 20);
+    });
     setNewStack("");
   }
 
   function deleteProfileStack(stack: string) {
     setProfileStacks((current) => current.filter((item) => item !== stack));
+    setRoutinePrefs((current) => {
+      const stackProgress = { ...current.stackProgress };
+      delete stackProgress[stack];
+      return { ...current, stackProgress };
+    });
+  }
+
+  function updateStackProgress(stack: string, value: number) {
+    const progress = Math.min(100, Math.max(0, Math.round(value)));
+    setRoutinePrefs((current) => ({
+      ...current,
+      stackProgress: {
+        ...current.stackProgress,
+        [stack]: progress
+      }
+    }));
   }
 
   function getSectionTime(sectionKey: string, fallback: string) {
@@ -1276,16 +1295,14 @@ export default function HomePage() {
             </button>
           </section>
 
-          <ProfileStacksCard
-            stacks={profileStacks}
-            newStack={newStack}
-            onNewStackChange={setNewStack}
-            onAddStack={addProfileStack}
-            onDeleteStack={deleteProfileStack}
-          />
-
           <section className="sideBlock navList">
             <p className="sideLabel">seções</p>
+            <a href="#learning-progress" className="navItem">
+              <GraduationCap size={16} aria-hidden />
+              <span>Evolução</span>
+              <i><b style={{ width: `${englishGuideTotal ? (englishGuideDone / englishGuideTotal) * 100 : 0}%`, background: "#b57bee" }} /></i>
+              <em>{englishGuideTotal ? `${englishGuideDone}/${englishGuideTotal}` : "novo"}</em>
+            </a>
             <a href="#meetings" className="navItem">
               <CalendarDays size={16} aria-hidden />
               <span>Reuniões</span>
@@ -1344,26 +1361,22 @@ export default function HomePage() {
             <div className="wideProgress">
               <span style={{ width: `${totals.pct}%` }} />
             </div>
-            <div className="dayStackShowcase">
-              <span className="dayStackLabel">
-                <i aria-hidden />
-                minhas stacks
-              </span>
-              <div className="dayStackTicker" role="img" aria-label={`Minhas stacks: ${stackPreview.join(", ")}`}>
-                <div className="dayStackTrack">
-                  {[0, 1].map((group) => (
-                    <div className="dayStackGroup" aria-hidden="true" key={group}>
-                      {stackTickerItems.map((stack, index) => (
-                        <StackIcon stack={stack} key={`${group}-${index}-${stack}`} />
-                      ))}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
           </div>
 
           {!isTodayProgressDay && <WeekendFlowPanel stacks={profileStacks} />}
+
+          <LearningProgressPanel
+            stacks={stackPreview}
+            customStacks={profileStacks}
+            stackProgress={routinePrefs.stackProgress}
+            englishDaily={{ done: englishView?.doneItems.size ?? 0, total: englishView?.items.length ?? 0 }}
+            englishGuide={{ done: englishGuideDone, total: englishGuideTotal }}
+            newStack={newStack}
+            onNewStackChange={setNewStack}
+            onAddStack={addProfileStack}
+            onDeleteStack={deleteProfileStack}
+            onStackProgressChange={updateStackProgress}
+          />
 
           <ProgressCharts weekly={evolution.weekly} monthly={evolution.monthly} />
 

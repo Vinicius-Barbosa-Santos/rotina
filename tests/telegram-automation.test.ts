@@ -13,7 +13,8 @@ const routinePrefs: RoutinePrefs = {
   timeOverrides: {},
   labelOverrides: {},
   iconOverrides: {},
-  guideChecks: {}
+  guideChecks: {},
+  stackProgress: {}
 };
 
 test("23h in Sao Paulo resolves to the previous UTC calendar date", () => {

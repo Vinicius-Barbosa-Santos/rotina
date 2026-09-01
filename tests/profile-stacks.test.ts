@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { currentProfileStacks, mergeProfileStacks } from "../lib/profile-stacks.ts";
+import { currentProfileStacks, getStackCategory, mergeProfileStacks } from "../lib/profile-stacks.ts";
 
 test("current profile includes the complete development stack", () => {
   assert.ok(currentProfileStacks.includes("Java"));
@@ -20,4 +20,13 @@ test("custom profile stacks are appended without duplicates", () => {
 
   assert.equal(stacks.filter((stack) => stack.toLowerCase() === "react").length, 1);
   assert.ok(stacks.includes("Terraform"));
+});
+
+test("stacks are grouped into useful learning categories", () => {
+  assert.equal(getStackCategory("React"), "Frontend");
+  assert.equal(getStackCategory("Spring Boot"), "Backend & APIs");
+  assert.equal(getStackCategory("AWS Lambda"), "Cloud AWS");
+  assert.equal(getStackCategory("PostgreSQL"), "Dados & DevOps");
+  assert.equal(getStackCategory("Codex"), "IA & Ferramentas");
+  assert.equal(getStackCategory("Terraform"), "Outras");
 });

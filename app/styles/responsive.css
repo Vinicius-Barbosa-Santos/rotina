@@ -9,6 +9,7 @@
 
   .sidebar {
     position: static;
+    grid-row: 2;
     height: auto;
     border-right: 0;
     border-bottom: 1px solid var(--line);
@@ -16,10 +17,15 @@
   }
 
   .content {
+    grid-row: 1;
     padding: 20px 16px 36px;
   }
 
   .evolutionCharts {
+    grid-template-columns: 1fr;
+  }
+
+  .learningHubGrid {
     grid-template-columns: 1fr;
   }
 
@@ -71,9 +77,23 @@
     flex-direction: column;
   }
 
-  .dayStackShowcase {
+  .learningHubHeader,
+  .stackProgressHeader {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .learningHubSummary {
+    width: 100%;
+  }
+
+  .stackProgressForm {
+    grid-template-columns: minmax(0, 1fr) 40px;
+    width: 100%;
+  }
+
+  .stackCategoryList {
     grid-template-columns: 1fr;
-    gap: 8px;
   }
 
   .evolutionHeader > span {

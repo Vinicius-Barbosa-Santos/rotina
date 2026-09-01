@@ -53,6 +53,7 @@ export type RoutinePrefs = {
   labelOverrides: Record<string, Record<string, string>>;
   iconOverrides: Record<string, Record<string, TaskIconName>>;
   guideChecks: Record<string, string[]>;
+  stackProgress: Record<string, number>;
 };
 
 export type PersonalizedRoutineItem = {

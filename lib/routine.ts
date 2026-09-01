@@ -25,6 +25,7 @@ export type RoutineSection = {
 };
 
 const weekdays: Weekday[] = [1, 2, 3, 4, 5];
+const focusedWeekdays: Weekday[] = [2, 3, 4];
 
 export const routineSections: RoutineSection[] = [
   {
@@ -34,7 +35,7 @@ export const routineSections: RoutineSection[] = [
     shortLabel: "Café",
     color: "#f7c948",
     bg: "rgba(247, 201, 72, 0.12)",
-    time: "07:00-08:00",
+    time: "05:00-06:00",
     days: weekdays,
     items: [
       { label: "Preparar o café da manhã" },
@@ -50,7 +51,7 @@ export const routineSections: RoutineSection[] = [
     shortLabel: "Inglês",
     color: "#34d399",
     bg: "rgba(52, 211, 153, 0.12)",
-    time: "08:00-09:00",
+    time: "10:00-11:00",
     days: weekdays,
     guideLabel: "Guia de Inglês",
     note: "Estes cinco hábitos entram no progresso da rotina. O mapa completo de conhecimento fica no Guia de Inglês, junto aos outros guias para consultar.",
@@ -275,7 +276,7 @@ export const routineSections: RoutineSection[] = [
     shortLabel: "Código",
     color: "#4f8ef7",
     bg: "rgba(79, 142, 247, 0.12)",
-    time: "03:00-07:00",
+    time: "06:00-09:00",
     days: weekdays,
     items: [
       { label: "Daily técnica" },
@@ -295,7 +296,7 @@ export const routineSections: RoutineSection[] = [
     shortLabel: "Cursos",
     color: "#a78bfa",
     bg: "rgba(167, 139, 250, 0.12)",
-    time: "09:00-11:00",
+    time: "09:00-10:00",
     days: weekdays,
     note: "Bloco dedicado às formações técnicas ativas. Priorize prática deliberada: assista, programe, exercite e registre o aprendizado.",
     items: [
@@ -312,9 +313,9 @@ export const routineSections: RoutineSection[] = [
     shortLabel: "Coders",
     color: "#38bdf8",
     bg: "rgba(56, 189, 248, 0.12)",
-    time: "17:00-18:00",
-    days: weekdays,
-    note: "Curso para dominar o inglês técnico usado no desenvolvimento de software.",
+    time: "16:00-17:00",
+    days: focusedWeekdays,
+    note: "Curso de inglês técnico concentrado de terça a quinta para preservar uma segunda-feira de entrada gradual e uma sexta-feira de fechamento leve.",
     items: [
       { label: "Assistir à aula diária do curso Coders" },
       { label: "Anotar e fichar novos termos de vocabulário técnico" },
@@ -572,17 +573,17 @@ export const routineSections: RoutineSection[] = [
     shortLabel: "Limpeza",
     color: "#6dd3b2",
     bg: "rgba(109, 211, 178, 0.12)",
-    time: "11:00-12:30",
+    time: "11:00-12:00",
     days: weekdays,
     note: "Pouco por dia para a casa não acumular. Proteja coluna e joelhos: evite torcer o tronco, ajoelhar e carregar peso excessivo.",
     items: [
       { label: "Manutenção diária: guardar o que está fora do lugar (10 min)" },
       { label: "Manutenção diária: lavar louça e limpar pia e bancada" },
-      { label: "Segunda — Cozinha: fogão, mesa, geladeira por fora e lixo", days: [1] },
+      { label: "Segunda — Cozinha leve: fogão, mesa e lixo", days: [1] },
       { label: "Terça — Banheiro: vaso, pia, espelho, box e trocar toalhas", days: [2] },
       { label: "Quarta — Quarto e roupas: tirar pó, organizar e lavar roupa", days: [3] },
-      { label: "Quinta — Sala e escritório: tirar pó, organizar e aspirar", days: [4] },
-      { label: "Sexta — Pisos, roupa de cama e revisão geral da casa", days: [5] }
+      { label: "Quinta — Sala, escritório e pisos: organizar, tirar pó e aspirar", days: [4] },
+      { label: "Sexta — Trocar roupa de cama e fazer uma revisão leve", days: [5] }
     ]
   },
   {
@@ -592,35 +593,27 @@ export const routineSections: RoutineSection[] = [
     shortLabel: "Academia",
     color: "#8ec3f7",
     bg: "rgba(142, 195, 247, 0.12)",
-    time: "18:00-20:30",
+    time: "18:00-19:30",
     days: weekdays,
     note: "Treino inicial de baixo impacto. Ajuste carga, amplitude e aparelhos com um profissional que conheça sua coluna e seu joelho; pare se houver dor aguda, formigamento ou piora dos sintomas.",
     items: [
       { label: "Alongamento suave e hidratação após o treino" },
-      { label: "Segunda — Aquecimento: bicicleta leve (5-10 min)", days: [1] },
-      { label: "Segunda — Peito: chest press na máquina", days: [1] },
-      { label: "Segunda — Peito: crucifixo na máquina", days: [1] },
-      { label: "Segunda — Tríceps: extensão na polia", days: [1] },
-      { label: "Segunda — Cardio leve para finalizar (10 min)", days: [1] },
+      { label: "Segunda leve — Bicicleta ou caminhada confortável (20-30 min)", days: [1] },
+      { label: "Segunda leve — Mobilidade de quadril, ombros e coluna torácica", days: [1] },
       { label: "Terça — Aquecimento: bicicleta leve (5-10 min)", days: [2] },
-      { label: "Terça — Costas: puxada frontal com pegada confortável", days: [2] },
-      { label: "Terça — Costas: remada sentada com apoio", days: [2] },
-      { label: "Terça — Bíceps: rosca na polia ou máquina", days: [2] },
-      { label: "Terça — Mobilidade confortável (5-10 min)", days: [2] },
-      { label: "Quarta — Cardio de baixo impacto: bicicleta ou elíptico (25-35 min)", days: [3] },
-      { label: "Quarta — Core orientado: estabilidade sem dor (10 min)", days: [3] },
-      { label: "Quarta — Mobilidade de quadril, tornozelo e coluna torácica", days: [3] },
-      { label: "Quarta — Recuperação: caminhada leve e hidratação", days: [3] },
+      { label: "Terça — Peito: chest press e crucifixo na máquina", days: [2] },
+      { label: "Terça — Tríceps: extensão na polia", days: [2] },
+      { label: "Terça — Cardio leve para finalizar (10 min)", days: [2] },
+      { label: "Quarta — Aquecimento: bicicleta leve (5-10 min)", days: [3] },
+      { label: "Quarta — Costas: puxada frontal e remada sentada com apoio", days: [3] },
+      { label: "Quarta — Bíceps: rosca na polia ou máquina", days: [3] },
+      { label: "Quarta — Mobilidade confortável (5-10 min)", days: [3] },
       { label: "Quinta — Aquecimento: bicicleta leve (5-10 min)", days: [4] },
       { label: "Quinta — Glúteos: ponte ou hip thrust orientado", days: [4] },
       { label: "Quinta — Posterior: mesa flexora com carga confortável", days: [4] },
-      { label: "Quinta — Quadril: cadeira abdutora", days: [4] },
-      { label: "Quinta — Panturrilha com apoio", days: [4] },
-      { label: "Sexta — Aquecimento: bicicleta leve (5-10 min)", days: [5] },
-      { label: "Sexta — Ombros: elevação lateral sentada", days: [5] },
-      { label: "Sexta — Ombros: desenvolvimento na máquina, se liberado", days: [5] },
-      { label: "Sexta — Braços: bíceps e tríceps na polia", days: [5] },
-      { label: "Sexta — Cardio de baixo impacto em ritmo confortável (15-20 min)", days: [5] }
+      { label: "Quinta — Quadril e panturrilha com apoio", days: [4] },
+      { label: "Sexta leve — Cardio de baixo impacto (20-30 min)", days: [5] },
+      { label: "Sexta leve — Core orientado e mobilidade sem dor", days: [5] }
     ]
   },
   {
@@ -870,15 +863,17 @@ export const routineSections: RoutineSection[] = [
     shortLabel: "Almoço",
     color: "#b57bee",
     bg: "rgba(181, 123, 238, 0.12)",
-    time: "12:30-14:00",
-    note: "Alimentação, recuperação e aprendizado diário em áreas complementares.",
+    time: "12:00-13:30",
+    note: "Alimentação, recuperação e apenas uma aula de crescimento por dia, alternando as trilhas para evitar sobrecarga.",
     days: weekdays,
     items: [
       { label: "Almoçar com tranquilidade" },
       { label: "Descansar e desacelerar após a refeição" },
-      { label: "Assistir a uma aula de YouTube e criação de conteúdo" },
-      { label: "Assistir a uma aula de investimentos e finanças pessoais" },
-      { label: "Assistir a uma aula de marketing digital e posicionamento" }
+      { label: "Segunda — Aula de YouTube e criação de conteúdo", days: [1] },
+      { label: "Terça — Aula de investimentos e finanças pessoais", days: [2] },
+      { label: "Quarta — Aula de marketing digital e posicionamento", days: [3] },
+      { label: "Quinta — Aula de YouTube e criação de conteúdo", days: [4] },
+      { label: "Sexta — Aula leve de investimentos ou revisão", days: [5] }
     ]
   },
   {
@@ -888,13 +883,14 @@ export const routineSections: RoutineSection[] = [
     shortLabel: "Projetos",
     color: "#f59e0b",
     bg: "rgba(245, 158, 11, 0.12)",
-    time: "14:00-16:30",
+    time: "13:30-16:00",
     days: weekdays,
-    note: "Janela flexível para compromissos do calendário, prática dos cursos e demandas complementares.",
+    note: "Terça a quinta concentram a prática mais intensa. Segunda e sexta ficam voltadas a alinhamento, organização e fechamento leve.",
     items: [
       { label: "Participar das reuniões agendadas no Google Calendar" },
-      { label: "Avançar em projetos pessoais ou laboratórios dos cursos" },
-      { label: "Resolver demandas administrativas ou complementares" }
+      { label: "Avançar em projetos pessoais ou laboratórios dos cursos", days: focusedWeekdays },
+      { label: "Segunda — Organizar a semana e definir próximos passos", days: [1] },
+      { label: "Sexta — Fechar pendências e revisar a semana", days: [5] }
     ]
   },
   {
@@ -904,7 +900,7 @@ export const routineSections: RoutineSection[] = [
     shortLabel: "Intervalo",
     color: "#2dd4bf",
     bg: "rgba(45, 212, 191, 0.12)",
-    time: "16:30-17:00",
+    time: "17:00-18:00",
     days: weekdays,
     note: "Pausa curta para recuperar energia e preparar o restante do dia.",
     items: [
@@ -920,7 +916,7 @@ export const routineSections: RoutineSection[] = [
     shortLabel: "Noite",
     color: "#818cf8",
     bg: "rgba(129, 140, 248, 0.12)",
-    time: "20:30-21:30",
+    time: "19:30-21:00",
     days: weekdays,
     note: "Encerramento consciente para reduzir estímulos e preparar o sono.",
     items: [
@@ -937,9 +933,9 @@ export const routineSections: RoutineSection[] = [
     shortLabel: "Sono",
     color: "#6366f1",
     bg: "rgba(99, 102, 241, 0.12)",
-    time: "21:30-03:00",
+    time: "21:00-05:00",
     days: weekdays,
-    note: "Bloco noturno que termina às 03:00 do dia seguinte.",
+    note: "Oito horas completas de sono, das 21:00 às 05:00 do dia seguinte.",
     items: [
       { label: "Dormir no horário planejado" }
     ]

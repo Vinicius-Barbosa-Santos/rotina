@@ -27,20 +27,26 @@ export function normalizeRoutinePrefs(savedPrefs: Partial<RoutinePrefs>): Routin
     timeOverrides,
     labelOverrides: savedPrefs.labelOverrides ?? {},
     iconOverrides: savedPrefs.iconOverrides ?? {},
-    guideChecks
+    guideChecks,
+    stackProgress: normalizeStackProgress(savedPrefs.stackProgress)
   };
 }
 
 function removeLegacyTimeOverrides(savedOverrides: Record<string, string>) {
   const timeOverrides = { ...savedOverrides };
   const legacyTimes: Record<string, string[]> = {
-    personal: ["06:00-08:00", "06:30-08:00", "03:00 e 07:00-08:00"],
-    english: ["09:00-10:00"],
-    work: ["10:00-18:00"],
-    "programming-study": ["18:30-20:00"],
-    "house-cleaning": ["20:00-20:30", "11:00-15:00"],
-    health: ["20:30-21:15", "18:00-21:00"],
-    growth: ["21:30-22:30", "11:00-15:00"]
+    personal: ["06:00-08:00", "06:30-08:00", "03:00 e 07:00-08:00", "07:00-08:00"],
+    english: ["09:00-10:00", "08:00-09:00"],
+    work: ["10:00-18:00", "03:00-07:00"],
+    "technical-study": ["09:00-11:00"],
+    "programming-study": ["18:30-20:00", "17:00-18:00"],
+    "house-cleaning": ["20:00-20:30", "11:00-15:00", "11:00-12:30"],
+    health: ["20:30-21:15", "18:00-21:00", "18:00-20:30"],
+    growth: ["21:30-22:30", "11:00-15:00", "12:30-14:00"],
+    "projects-meetings": ["14:00-16:30"],
+    transition: ["16:30-17:00"],
+    evening: ["20:30-21:30"],
+    sleep: ["21:30-03:00"]
   };
 
   Object.entries(legacyTimes).forEach(([sectionKey, values]) => {
@@ -141,7 +147,16 @@ function hasRoutinePrefsData(prefs: RoutinePrefs) {
       Object.keys(prefs.timeOverrides).length ||
       Object.keys(prefs.labelOverrides).length ||
       Object.keys(prefs.iconOverrides).length ||
-      Object.keys(prefs.guideChecks).length
+      Object.keys(prefs.guideChecks).length ||
+      Object.keys(prefs.stackProgress).length
+  );
+}
+
+function normalizeStackProgress(progress?: Record<string, number>) {
+  return Object.fromEntries(
+    Object.entries(progress ?? {})
+      .filter(([stack, value]) => stack.trim() && Number.isFinite(value))
+      .map(([stack, value]) => [stack, Math.min(100, Math.max(0, Math.round(value)))])
   );
 }
 

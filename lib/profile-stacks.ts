@@ -29,6 +29,44 @@ export const currentProfileStacks = [
   "Cursor"
 ] as const;
 
+export const stackCategoryOrder = ["Frontend", "Backend & APIs", "Cloud AWS", "Dados & DevOps", "IA & Ferramentas", "Outras"] as const;
+export type StackCategory = (typeof stackCategoryOrder)[number];
+
+const stackCategories: Record<string, StackCategory> = {
+  angular: "Frontend",
+  react: "Frontend",
+  "next.js": "Frontend",
+  typescript: "Frontend",
+  java: "Backend & APIs",
+  "spring boot": "Backend & APIs",
+  "node.js": "Backend & APIs",
+  graphql: "Backend & APIs",
+  "rest apis": "Backend & APIs",
+  microservices: "Backend & APIs",
+  aws: "Cloud AWS",
+  "aws lambda": "Cloud AWS",
+  "amazon api gateway": "Cloud AWS",
+  "amazon sqs": "Cloud AWS",
+  "amazon dynamodb": "Cloud AWS",
+  "amazon cloudwatch": "Cloud AWS",
+  "amazon s3": "Cloud AWS",
+  docker: "Dados & DevOps",
+  kubernetes: "Dados & DevOps",
+  jenkins: "Dados & DevOps",
+  git: "Dados & DevOps",
+  oracle: "Dados & DevOps",
+  postgresql: "Dados & DevOps",
+  mongodb: "Dados & DevOps",
+  redis: "Dados & DevOps",
+  codex: "IA & Ferramentas",
+  "claude code": "IA & Ferramentas",
+  cursor: "IA & Ferramentas"
+};
+
+export function getStackCategory(stack: string): StackCategory {
+  return stackCategories[stack.trim().toLocaleLowerCase("pt-BR")] ?? "Outras";
+}
+
 export function mergeProfileStacks(stacks: readonly string[]) {
   const unique = new Map<string, string>();
 

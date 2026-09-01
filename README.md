@@ -28,6 +28,8 @@ Em vez de usar vários aplicativos isolados, a aplicação organiza tarefas por 
 - Rotina principal organizada de segunda a sexta.
 - Blocos por horário para a rotina e guias permanentes de inglês, desenvolvimento e vida funcional.
 - Checklist diário com progresso geral e progresso por seção.
+- Painel dedicado ao inglês, com hábitos do dia e domínio do guia completo.
+- Stacks agrupadas por área, com ícones e percentual de evolução ajustável.
 - Streak para acompanhar dias completamente concluídos.
 - Edição de nomes, horários e tarefas.
 - Criação e exclusão de tarefas personalizadas.
@@ -35,18 +37,20 @@ Em vez de usar vários aplicativos isolados, a aplicação organiza tarefas por 
 
 ### Rotina atual
 
-- **03:00-07:00:** trabalho com programação.
-- **07:00-08:00:** café da manhã e preparação do dia.
-- **08:00-09:00:** inglês.
-- **09:00-11:00:** estudos técnicos com aula, código, exercícios e anotações.
-- **11:00-12:30:** manutenção da casa e limpeza específica do dia.
-- **12:30-14:00:** almoço, descanso e aulas de YouTube, investimentos e marketing.
-- **14:00-16:30:** reuniões, projetos práticos e demandas complementares.
-- **16:30-17:00:** intervalo, hidratação, lanche e preparação para a academia.
-- **17:00-18:00:** Coders, curso de inglês técnico.
-- **18:00-20:30:** academia com treino de baixo impacto.
-- **20:30-21:30:** jantar, banho e encerramento do dia.
-- **21:30-03:00:** sono.
+- **05:00-06:00:** café da manhã e preparação do dia.
+- **06:00-09:00:** trabalho com programação.
+- **09:00-10:00:** estudos técnicos com aula, código, exercícios e anotações.
+- **10:00-11:00:** inglês.
+- **11:00-12:00:** manutenção da casa e limpeza específica do dia.
+- **12:00-13:30:** almoço, descanso e uma aula alternada de crescimento.
+- **13:30-16:00:** reuniões e projetos; segunda e sexta priorizam organização e fechamento leve.
+- **16:00-17:00:** Coders de terça a quinta.
+- **17:00-18:00:** intervalo, hidratação, lanche e preparação para a academia.
+- **18:00-19:30:** academia; segunda e sexta possuem treinos leves.
+- **19:30-21:00:** jantar, banho e encerramento do dia.
+- **21:00-05:00:** oito horas de sono.
+
+As aulas de crescimento alternam entre YouTube, investimentos e marketing, com somente uma trilha por dia. Segunda e sexta reduzem a carga de projetos, não incluem Coders e usam treinos de recuperação ou baixo impacto.
 
 O Guia de Trilhas Técnicas organiza oito formações ativas — Full-Stack, React, Angular, Java, Node.js, GraphQL, AWS e desenvolvimento com IA — com aproximadamente 430 horas de conteúdo.
 
