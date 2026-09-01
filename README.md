@@ -46,11 +46,11 @@ Em vez de usar vários aplicativos isolados, a aplicação organiza tarefas por 
 - **13:30-16:00:** reuniões e projetos; segunda e sexta priorizam organização e fechamento leve.
 - **16:00-17:00:** Coders de terça a quinta.
 - **17:00-18:00:** intervalo, hidratação, lanche e preparação para a academia.
-- **18:00-19:30:** academia; segunda e sexta possuem treinos leves.
+- **18:00-19:00:** caminhada, bicicleta ou treino em casa com o app Home Workout; segunda e sexta são leves.
 - **19:30-21:00:** jantar, banho e encerramento do dia.
 - **21:00-05:00:** oito horas de sono.
 
-As aulas de crescimento alternam entre YouTube, investimentos e marketing, com somente uma trilha por dia. Segunda e sexta reduzem a carga de projetos, não incluem Coders e usam treinos de recuperação ou baixo impacto.
+As aulas de crescimento alternam entre YouTube, investimentos e marketing, com somente uma trilha por dia. Segunda e sexta reduzem a carga de projetos, não incluem Coders e usam caminhada, bicicleta ou mobilidade leve.
 
 O Guia de Trilhas Técnicas organiza oito formações ativas — Full-Stack, React, Angular, Java, Node.js, GraphQL, AWS e desenvolvimento com IA — com aproximadamente 430 horas de conteúdo.
 

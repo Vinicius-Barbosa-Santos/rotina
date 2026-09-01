@@ -157,13 +157,13 @@ test("gym routine alternates muscle groups, cardio and recovery", () => {
   const health = routineSections.find((item) => item.key === "health");
 
   assert.ok(health);
-  assert.equal(health.label, "Academia");
-  assert.equal(health.time, "18:00-19:30");
+  assert.equal(health.label, "Movimento & Treino em Casa");
+  assert.equal(health.time, "18:00-19:00");
   assert.match(health.note ?? "", /baixo impacto/i);
   assert.ok(getVisibleItems(health, new Date(2026, 5, 22)).some(({ item }) => item.label.includes("Segunda leve")));
-  assert.ok(getVisibleItems(health, new Date(2026, 5, 23)).some(({ item }) => item.label.includes("Peito")));
-  assert.ok(getVisibleItems(health, new Date(2026, 5, 24)).some(({ item }) => item.label.includes("Costas")));
-  assert.ok(getVisibleItems(health, new Date(2026, 5, 25)).some(({ item }) => item.label.includes("Glúteos")));
+  assert.ok(getVisibleItems(health, new Date(2026, 5, 23)).some(({ item }) => item.label.includes("Corpo Inteiro")));
+  assert.ok(getVisibleItems(health, new Date(2026, 5, 24)).some(({ item }) => item.label.includes("Bicicleta")));
+  assert.ok(getVisibleItems(health, new Date(2026, 5, 25)).some(({ item }) => item.label.includes("Peito & Braços")));
   assert.ok(getVisibleItems(health, new Date(2026, 5, 26)).some(({ item }) => item.label.includes("Sexta leve")));
 });
 
