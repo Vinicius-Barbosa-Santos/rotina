@@ -29,7 +29,8 @@ export function getDefaultRoutineSyncData(): RoutineSyncData {
       labelOverrides: {},
       iconOverrides: {},
       guideChecks: {},
-      stackProgress: {}
+      stackProgress: {},
+      stackTopicChecks: {}
     },
     manualMeetings: [],
     profileStacks: [],
@@ -117,7 +118,8 @@ function normalizeRoutineSyncData(data: Partial<RoutineSyncData>): RoutineSyncDa
       labelOverrides: isObject(data.routinePrefs?.labelOverrides) ? data.routinePrefs.labelOverrides : {},
       iconOverrides: isObject(data.routinePrefs?.iconOverrides) ? data.routinePrefs.iconOverrides : {},
       guideChecks: isObject(data.routinePrefs?.guideChecks) ? data.routinePrefs.guideChecks as Record<string, string[]> : {},
-      stackProgress: normalizeStackProgress(data.routinePrefs?.stackProgress)
+      stackProgress: normalizeStackProgress(data.routinePrefs?.stackProgress),
+      stackTopicChecks: normalizeStackTopicChecks(data.routinePrefs?.stackTopicChecks)
     },
     manualMeetings: Array.isArray(data.manualMeetings) ? data.manualMeetings : [],
     profileStacks: Array.isArray(data.profileStacks)
@@ -135,6 +137,16 @@ function normalizeStackProgress(value: unknown) {
     Object.entries(value)
       .filter(([stack, progress]) => stack.trim() && typeof progress === "number" && Number.isFinite(progress))
       .map(([stack, progress]) => [stack, Math.min(100, Math.max(0, Math.round(progress as number)))])
+  );
+}
+
+function normalizeStackTopicChecks(value: unknown) {
+  if (!isObject(value)) return {};
+
+  return Object.fromEntries(
+    Object.entries(value)
+      .filter(([stack, topics]) => stack.trim() && Array.isArray(topics))
+      .map(([stack, topics]) => [stack, [...new Set((topics as unknown[]).filter(isString).map((topic) => topic.trim()).filter(Boolean))]])
   );
 }
 

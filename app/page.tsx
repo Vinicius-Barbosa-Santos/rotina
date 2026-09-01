@@ -147,7 +147,8 @@ export default function HomePage() {
     labelOverrides: {},
     iconOverrides: {},
     guideChecks: {},
-    stackProgress: {}
+    stackProgress: {},
+    stackTopicChecks: {}
   });
   const [newRoutineItems, setNewRoutineItems] = useState<Record<string, string>>({});
   const [streak, setStreak] = useState(0);
@@ -649,18 +650,21 @@ export default function HomePage() {
     setProfileStacks((current) => current.filter((item) => item !== stack));
     setRoutinePrefs((current) => {
       const stackProgress = { ...current.stackProgress };
+      const stackTopicChecks = { ...current.stackTopicChecks };
       delete stackProgress[stack];
-      return { ...current, stackProgress };
+      delete stackTopicChecks[stack];
+      return { ...current, stackProgress, stackTopicChecks };
     });
   }
 
-  function updateStackProgress(stack: string, value: number) {
-    const progress = Math.min(100, Math.max(0, Math.round(value)));
+  function toggleStackTopic(stack: string, topic: string) {
     setRoutinePrefs((current) => ({
       ...current,
-      stackProgress: {
-        ...current.stackProgress,
-        [stack]: progress
+      stackTopicChecks: {
+        ...current.stackTopicChecks,
+        [stack]: (current.stackTopicChecks[stack] ?? []).includes(topic)
+          ? (current.stackTopicChecks[stack] ?? []).filter((item) => item !== topic)
+          : [...(current.stackTopicChecks[stack] ?? []), topic]
       }
     }));
   }
@@ -1368,14 +1372,14 @@ export default function HomePage() {
           <LearningProgressPanel
             stacks={stackPreview}
             customStacks={profileStacks}
-            stackProgress={routinePrefs.stackProgress}
+            stackTopicChecks={routinePrefs.stackTopicChecks}
             englishDaily={{ done: englishView?.doneItems.size ?? 0, total: englishView?.items.length ?? 0 }}
             englishGuide={{ done: englishGuideDone, total: englishGuideTotal }}
             newStack={newStack}
             onNewStackChange={setNewStack}
             onAddStack={addProfileStack}
             onDeleteStack={deleteProfileStack}
-            onStackProgressChange={updateStackProgress}
+            onToggleStackTopic={toggleStackTopic}
           />
 
           <ProgressCharts weekly={evolution.weekly} monthly={evolution.monthly} />

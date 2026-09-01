@@ -42,6 +42,7 @@ function hasRoutinePrefsData(prefs: RoutinePrefs) {
       Object.keys(prefs.labelOverrides ?? {}).length ||
       Object.keys(prefs.iconOverrides ?? {}).length ||
       Object.keys(prefs.guideChecks ?? {}).length ||
-      Object.keys(prefs.stackProgress ?? {}).length
+      Object.keys(prefs.stackProgress ?? {}).length ||
+      Object.keys(prefs.stackTopicChecks ?? {}).length
   );
 }

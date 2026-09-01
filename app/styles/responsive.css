@@ -92,8 +92,13 @@
     width: 100%;
   }
 
-  .stackCategoryList {
+  .stackExplorer {
     grid-template-columns: 1fr;
+  }
+
+  .stackPicker {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    max-height: 220px;
   }
 
   .evolutionHeader > span {

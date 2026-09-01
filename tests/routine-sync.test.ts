@@ -20,6 +20,7 @@ function snapshot(overrides: Partial<RoutineSyncSnapshot> = {}): RoutineSyncSnap
       iconOverrides: {},
       guideChecks: {},
       stackProgress: {},
+      stackTopicChecks: {},
     },
     manualMeetings: [],
     profileStacks: [],
@@ -75,4 +76,20 @@ test("stack progress counts as synchronized preference data", () => {
   assert.equal(hasSyncSnapshotData(local), true);
   assert.equal(result.shouldSave, true);
   assert.equal(result.snapshot.routinePrefs.stackProgress.React, 65);
+});
+
+test("completed stack topics count as synchronized preference data", () => {
+  const local = snapshot({
+    routinePrefs: {
+      ...snapshot().routinePrefs,
+      stackTopicChecks: { React: ["0", "2"] },
+    },
+  });
+  const remote = snapshot({ updatedAt: "1970-01-01T00:00:00.000Z" });
+
+  const result = resolveInitialSyncSnapshot(local, remote);
+
+  assert.equal(hasSyncSnapshotData(local), true);
+  assert.equal(result.shouldSave, true);
+  assert.deepEqual(result.snapshot.routinePrefs.stackTopicChecks.React, ["0", "2"]);
 });

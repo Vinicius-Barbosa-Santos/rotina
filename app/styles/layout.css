@@ -516,88 +516,128 @@
   opacity: 0.45;
 }
 
-.stackCategoryList {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
-}
-
-.stackCategory {
-  min-width: 0;
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  padding: 11px;
-  background: rgba(255, 255, 255, 0.018);
-}
-
-.stackCategoryHeading {
+.stackCategoryTabs {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  margin-bottom: 9px;
-  padding-bottom: 8px;
-  border-bottom: 1px solid var(--line);
+  gap: 6px;
+  overflow-x: auto;
+  padding-bottom: 12px;
+  scrollbar-width: thin;
 }
 
-.stackCategoryHeading strong {
+.stackCategoryTabs button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex: 0 0 auto;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 7px 10px;
+  background: rgba(255, 255, 255, 0.025);
+  color: var(--muted);
   font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
+  font-weight: 800;
+  cursor: pointer;
 }
 
-.stackCategoryHeading span {
-  color: var(--soft);
+.stackCategoryTabs button span {
+  display: grid;
+  place-items: center;
+  min-width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.07);
   font-size: 9px;
 }
 
-.stackProgressGrid {
-  display: grid;
-  gap: 7px;
+.stackCategoryTabs button.active {
+  border-color: rgba(82, 201, 142, 0.45);
+  background: rgba(82, 201, 142, 0.1);
+  color: var(--green);
 }
 
-.stackProgressItem {
+.stackExplorer {
   display: grid;
-  gap: 4px;
+  grid-template-columns: minmax(180px, 0.72fr) minmax(250px, 1.28fr);
+  gap: 12px;
 }
 
-.stackProgressIdentity {
+.stackPicker {
+  display: grid;
+  align-content: start;
+  gap: 5px;
+  max-height: 330px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.stackPicker > button {
+  display: grid;
+  grid-template-columns: 30px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
   min-width: 0;
-  gap: 7px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  padding: 8px;
+  background: transparent;
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
 }
 
-.stackProgressIdentity strong {
+.stackPicker > button:hover,
+.stackPicker > button.active {
+  border-color: var(--line-2);
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.stackPicker > button.active {
+  border-color: rgba(82, 201, 142, 0.32);
+  background: rgba(82, 201, 142, 0.07);
+}
+
+.stackPickerLabel {
+  display: grid;
+  gap: 2px;
   overflow: hidden;
-  min-width: 0;
-  flex: 1;
+}
+
+.stackPickerLabel strong {
+  overflow: hidden;
   font-size: 11px;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.stackProgressIdentity output {
-  min-width: 34px;
+.stackPickerLabel small {
+  color: var(--soft);
+  font-size: 9px;
+}
+
+.stackPicker output {
+  min-width: 32px;
   color: var(--green);
   font-size: 10px;
   font-weight: 900;
   text-align: right;
 }
 
-.stackProgressIdentity button {
-  display: grid;
-  place-items: center;
-  width: 22px;
-  height: 22px;
-  border: 0;
-  border-radius: 6px;
-  background: transparent;
-  color: var(--soft);
-  cursor: pointer;
+.stackPickerProgress {
+  grid-column: 2 / -1;
+  overflow: hidden;
+  height: 3px;
+  margin-top: -4px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.07);
 }
 
-.stackProgressIdentity button:hover {
-  background: rgba(244, 133, 90, 0.12);
-  color: var(--danger);
+.stackPickerProgress i,
+.stackTopicBar i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--green), #7be3ad);
 }
 
 .stackProgressIcon,
@@ -624,32 +664,135 @@
   height: 19px;
 }
 
-.stackProgressItem > input[type="range"] {
-  width: 100%;
-  height: 4px;
-  margin: 0;
-  border-radius: 999px;
-  appearance: none;
-  background: linear-gradient(90deg, var(--green) var(--stack-progress), rgba(255, 255, 255, 0.08) 0);
+.stackProgressIcon.large,
+.stackProgressIcon.large .dayStackIcon {
+  width: 38px;
+  height: 38px;
+}
+
+.stackProgressIcon.large .dayStackIcon img {
+  width: 25px;
+  height: 25px;
+}
+
+.stackTopicPanel {
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 13px;
+  padding: 13px;
+  background: linear-gradient(145deg, rgba(82, 201, 142, 0.055), rgba(255, 255, 255, 0.015));
+}
+
+.stackTopicHeader {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.stackTopicTitle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  flex: 1;
+}
+
+.stackTopicTitle > div {
+  min-width: 0;
+}
+
+.stackTopicTitle span,
+.stackTopicSummary span {
+  color: var(--soft);
+  font-size: 9px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.stackTopicTitle h4 {
+  overflow: hidden;
+  margin: 2px 0 0;
+  font-size: 15px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.stackTopicSummary {
+  display: grid;
+  text-align: right;
+}
+
+.stackTopicSummary strong {
+  color: var(--green);
+  font-size: 18px;
+}
+
+.stackDeleteButton {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border: 0;
+  border-radius: 8px;
+  background: rgba(244, 133, 90, 0.09);
+  color: var(--danger);
   cursor: pointer;
 }
 
-.stackProgressItem > input[type="range"]::-webkit-slider-thumb {
-  width: 12px;
-  height: 12px;
-  border: 2px solid #121214;
-  border-radius: 50%;
-  appearance: none;
-  background: var(--green);
-  box-shadow: 0 0 0 1px rgba(82, 201, 142, 0.4);
+.stackTopicBar {
+  overflow: hidden;
+  height: 5px;
+  margin: 12px 0;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.07);
 }
 
-.stackProgressItem > input[type="range"]::-moz-range-thumb {
-  width: 9px;
-  height: 9px;
-  border: 2px solid #121214;
-  border-radius: 50%;
+.stackTopicList {
+  display: grid;
+  gap: 7px;
+}
+
+.stackTopicCheck {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  padding: 9px 10px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 140ms ease;
+}
+
+.stackTopicCheck input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.stackTopicCheckbox {
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  flex: 0 0 auto;
+  border: 1px solid var(--line-2);
+  border-radius: 6px;
+  color: transparent;
+}
+
+.stackTopicCheck.checked {
+  border-color: rgba(82, 201, 142, 0.3);
+  background: rgba(82, 201, 142, 0.065);
+  color: var(--text);
+}
+
+.stackTopicCheck.checked .stackTopicCheckbox {
+  border-color: var(--green);
   background: var(--green);
+  color: #0d1012;
 }
 
 .weekendFlow {

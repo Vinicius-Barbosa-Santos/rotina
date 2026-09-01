@@ -29,7 +29,7 @@ Em vez de usar vários aplicativos isolados, a aplicação organiza tarefas por 
 - Blocos por horário para a rotina e guias permanentes de inglês, desenvolvimento e vida funcional.
 - Checklist diário com progresso geral e progresso por seção.
 - Painel dedicado ao inglês, com hábitos do dia e domínio do guia completo.
-- Stacks agrupadas por área, com ícones e percentual de evolução ajustável.
+- Stacks agrupadas por área, com ícones, tópicos marcáveis e progresso automático.
 - Streak para acompanhar dias completamente concluídos.
 - Edição de nomes, horários e tarefas.
 - Criação e exclusão de tarefas personalizadas.

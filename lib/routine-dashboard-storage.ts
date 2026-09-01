@@ -28,7 +28,8 @@ export function normalizeRoutinePrefs(savedPrefs: Partial<RoutinePrefs>): Routin
     labelOverrides: savedPrefs.labelOverrides ?? {},
     iconOverrides: savedPrefs.iconOverrides ?? {},
     guideChecks,
-    stackProgress: normalizeStackProgress(savedPrefs.stackProgress)
+    stackProgress: normalizeStackProgress(savedPrefs.stackProgress),
+    stackTopicChecks: normalizeStackTopicChecks(savedPrefs.stackTopicChecks)
   };
 }
 
@@ -148,7 +149,8 @@ function hasRoutinePrefsData(prefs: RoutinePrefs) {
       Object.keys(prefs.labelOverrides).length ||
       Object.keys(prefs.iconOverrides).length ||
       Object.keys(prefs.guideChecks).length ||
-      Object.keys(prefs.stackProgress).length
+      Object.keys(prefs.stackProgress).length ||
+      Object.keys(prefs.stackTopicChecks).length
   );
 }
 
@@ -157,6 +159,14 @@ function normalizeStackProgress(progress?: Record<string, number>) {
     Object.entries(progress ?? {})
       .filter(([stack, value]) => stack.trim() && Number.isFinite(value))
       .map(([stack, value]) => [stack, Math.min(100, Math.max(0, Math.round(value)))])
+  );
+}
+
+function normalizeStackTopicChecks(checks?: Record<string, string[]>) {
+  return Object.fromEntries(
+    Object.entries(checks ?? {})
+      .filter(([stack, topics]) => stack.trim() && Array.isArray(topics))
+      .map(([stack, topics]) => [stack, [...new Set(topics.filter((topic) => typeof topic === "string" && topic.trim()))]])
   );
 }
 
