@@ -1,4 +1,4 @@
-import { progressTrackingStartDate } from "./progress-history";
+import { progressResetVersion, progressTrackingStartDate } from "./progress-history";
 import { readStorageJson } from "./storage";
 import type { ManualMeeting, RoutinePrefs, RoutineState, RoutineSyncSnapshot } from "./types";
 
@@ -14,7 +14,8 @@ export function readCompletedDates() {
 }
 
 export function normalizeRoutinePrefs(savedPrefs: Partial<RoutinePrefs>): RoutinePrefs {
-  const guideChecks = { ...(savedPrefs.guideChecks ?? {}) };
+  const resetProgress = savedPrefs.progressResetVersion !== progressResetVersion;
+  const guideChecks = resetProgress ? {} : { ...(savedPrefs.guideChecks ?? {}) };
   const timeOverrides = removeLegacyTimeOverrides(savedPrefs.timeOverrides ?? {});
   if (!guideChecks["english-guide"]?.length && guideChecks.english?.length) {
     guideChecks["english-guide"] = [...guideChecks.english];
@@ -22,14 +23,15 @@ export function normalizeRoutinePrefs(savedPrefs: Partial<RoutinePrefs>): Routin
   delete guideChecks.english;
 
   return {
+    progressResetVersion,
     hiddenItems: savedPrefs.hiddenItems ?? {},
     customItems: savedPrefs.customItems ?? {},
     timeOverrides,
     labelOverrides: savedPrefs.labelOverrides ?? {},
     iconOverrides: savedPrefs.iconOverrides ?? {},
     guideChecks,
-    stackProgress: normalizeStackProgress(savedPrefs.stackProgress),
-    stackTopicChecks: normalizeStackTopicChecks(savedPrefs.stackTopicChecks)
+    stackProgress: resetProgress ? {} : normalizeStackProgress(savedPrefs.stackProgress),
+    stackTopicChecks: resetProgress ? {} : normalizeStackTopicChecks(savedPrefs.stackTopicChecks)
   };
 }
 

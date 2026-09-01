@@ -5,6 +5,7 @@ import {
   resolveInitialSyncSnapshot,
 } from "../lib/routine-sync-selection.ts";
 import type { RoutineSyncSnapshot } from "../lib/types.ts";
+import { progressResetVersion } from "../lib/progress-history.ts";
 
 function snapshot(overrides: Partial<RoutineSyncSnapshot> = {}): RoutineSyncSnapshot {
   return {
@@ -13,6 +14,7 @@ function snapshot(overrides: Partial<RoutineSyncSnapshot> = {}): RoutineSyncSnap
     states: {},
     completedDates: [],
     routinePrefs: {
+      progressResetVersion,
       hiddenItems: {},
       customItems: {},
       timeOverrides: {},

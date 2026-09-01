@@ -1,5 +1,6 @@
 import "server-only";
 
+import { progressResetVersion } from "@/lib/progress-history";
 import type { ManualMeeting, RoutinePrefs, RoutineState } from "@/lib/types";
 
 export type RoutineSyncData = {
@@ -23,6 +24,7 @@ export function getDefaultRoutineSyncData(): RoutineSyncData {
     states: {},
     completedDates: [],
     routinePrefs: {
+      progressResetVersion,
       hiddenItems: {},
       customItems: {},
       timeOverrides: {},
@@ -105,28 +107,30 @@ function getSupabaseHeaders(serviceRoleKey: string) {
 
 function normalizeRoutineSyncData(data: Partial<RoutineSyncData>): RoutineSyncData {
   const defaults = getDefaultRoutineSyncData();
+  const resetProgress = data.routinePrefs?.progressResetVersion !== progressResetVersion;
 
   return {
     version: 1,
     updatedAt: typeof data.updatedAt === "string" ? data.updatedAt : defaults.updatedAt,
-    states: isObject(data.states) ? data.states as Record<string, RoutineState> : defaults.states,
-    completedDates: Array.isArray(data.completedDates) ? data.completedDates.filter(isString).sort() : [],
+    states: resetProgress ? {} : isObject(data.states) ? data.states as Record<string, RoutineState> : defaults.states,
+    completedDates: resetProgress ? [] : Array.isArray(data.completedDates) ? data.completedDates.filter(isString).sort() : [],
     routinePrefs: {
+      progressResetVersion,
       hiddenItems: isObject(data.routinePrefs?.hiddenItems) ? data.routinePrefs.hiddenItems : {},
       customItems: isObject(data.routinePrefs?.customItems) ? data.routinePrefs.customItems : {},
       timeOverrides: isObject(data.routinePrefs?.timeOverrides) ? data.routinePrefs.timeOverrides : {},
       labelOverrides: isObject(data.routinePrefs?.labelOverrides) ? data.routinePrefs.labelOverrides : {},
       iconOverrides: isObject(data.routinePrefs?.iconOverrides) ? data.routinePrefs.iconOverrides : {},
-      guideChecks: isObject(data.routinePrefs?.guideChecks) ? data.routinePrefs.guideChecks as Record<string, string[]> : {},
-      stackProgress: normalizeStackProgress(data.routinePrefs?.stackProgress),
-      stackTopicChecks: normalizeStackTopicChecks(data.routinePrefs?.stackTopicChecks)
+      guideChecks: resetProgress ? {} : isObject(data.routinePrefs?.guideChecks) ? data.routinePrefs.guideChecks as Record<string, string[]> : {},
+      stackProgress: resetProgress ? {} : normalizeStackProgress(data.routinePrefs?.stackProgress),
+      stackTopicChecks: resetProgress ? {} : normalizeStackTopicChecks(data.routinePrefs?.stackTopicChecks)
     },
     manualMeetings: Array.isArray(data.manualMeetings) ? data.manualMeetings : [],
     profileStacks: Array.isArray(data.profileStacks)
       ? data.profileStacks.filter(isString).map((stack) => stack.trim()).filter(Boolean).slice(0, 20)
       : [],
     telegramAutomaticEnabled: Boolean(data.telegramAutomaticEnabled),
-    telegramReportsSent: isObject(data.telegramReportsSent) ? data.telegramReportsSent as Record<string, boolean> : {}
+    telegramReportsSent: resetProgress ? {} : isObject(data.telegramReportsSent) ? data.telegramReportsSent as Record<string, boolean> : {}
   };
 }
 

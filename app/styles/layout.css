@@ -747,18 +747,51 @@
   background: rgba(255, 255, 255, 0.07);
 }
 
-.stackTopicList {
+.stackTopicSlider {
   display: grid;
-  gap: 7px;
+  gap: 12px;
 }
 
-.stackTopicCheck {
+.stackTopicSliderNav {
   display: flex;
   align-items: center;
-  gap: 9px;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.stackTopicSliderNav button {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
   border: 1px solid var(--line);
   border-radius: 9px;
-  padding: 9px 10px;
+  background: rgba(255, 255, 255, 0.035);
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.stackTopicSliderNav button:hover {
+  border-color: rgba(82, 201, 142, 0.4);
+  color: var(--green);
+}
+
+.stackTopicSliderNav > span {
+  color: var(--soft);
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.stackTopicSlide {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 90px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.025);
   color: var(--muted);
   font-size: 11px;
   font-weight: 700;
@@ -766,10 +799,29 @@
   transition: 140ms ease;
 }
 
-.stackTopicCheck input {
+.stackTopicSlide input {
   position: absolute;
   opacity: 0;
   pointer-events: none;
+}
+
+.stackTopicSlide > span:last-child {
+  display: grid;
+  gap: 5px;
+}
+
+.stackTopicSlide small {
+  color: var(--green);
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.stackTopicSlide strong {
+  color: var(--text);
+  font-size: 13px;
+  line-height: 1.4;
 }
 
 .stackTopicCheckbox {
@@ -783,16 +835,38 @@
   color: transparent;
 }
 
-.stackTopicCheck.checked {
+.stackTopicSlide.checked {
   border-color: rgba(82, 201, 142, 0.3);
   background: rgba(82, 201, 142, 0.065);
   color: var(--text);
 }
 
-.stackTopicCheck.checked .stackTopicCheckbox {
+.stackTopicSlide.checked .stackTopicCheckbox {
   border-color: var(--green);
   background: var(--green);
   color: #0d1012;
+}
+
+.stackTopicDots {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+}
+
+.stackTopicDots button {
+  width: 7px;
+  height: 7px;
+  border: 0;
+  border-radius: 999px;
+  padding: 0;
+  background: rgba(255, 255, 255, 0.16);
+  cursor: pointer;
+  transition: 140ms ease;
+}
+
+.stackTopicDots button.active {
+  width: 22px;
+  background: var(--green);
 }
 
 .weekendFlow {

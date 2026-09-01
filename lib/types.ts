@@ -47,6 +47,7 @@ export type RoutineCustomItem = {
 };
 
 export type RoutinePrefs = {
+  progressResetVersion: string;
   hiddenItems: Record<string, number[]>;
   customItems: Record<string, RoutineCustomItem[]>;
   timeOverrides: Record<string, string>;

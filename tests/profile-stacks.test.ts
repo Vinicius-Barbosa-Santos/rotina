@@ -3,16 +3,12 @@ import test from "node:test";
 import { currentProfileStacks, getStackCategory, getStackTopics, mergeProfileStacks } from "../lib/profile-stacks.ts";
 
 test("current profile includes the complete development stack", () => {
-  assert.ok(currentProfileStacks.includes("Java"));
-  assert.ok(currentProfileStacks.includes("Spring Boot"));
+  assert.ok(currentProfileStacks.includes("Java & Spring Boot"));
   assert.ok(currentProfileStacks.includes("Angular"));
-  assert.ok(currentProfileStacks.includes("AWS Lambda"));
-  assert.ok(currentProfileStacks.includes("Amazon API Gateway"));
-  assert.ok(currentProfileStacks.includes("Amazon SQS"));
-  assert.ok(currentProfileStacks.includes("Amazon DynamoDB"));
-  assert.ok(currentProfileStacks.includes("Amazon CloudWatch"));
-  assert.ok(currentProfileStacks.includes("Amazon S3"));
-  assert.ok(currentProfileStacks.includes("Microservices"));
+  assert.ok(currentProfileStacks.includes("Full-Stack TypeScript"));
+  assert.ok(currentProfileStacks.includes("Microsserviços Node.js"));
+  assert.ok(currentProfileStacks.includes("Desenvolvimento com IA"));
+  assert.equal(currentProfileStacks.length, 8);
 });
 
 test("custom profile stacks are appended without duplicates", () => {
@@ -23,25 +19,25 @@ test("custom profile stacks are appended without duplicates", () => {
 });
 
 test("stacks are grouped into useful learning categories", () => {
+  assert.equal(getStackCategory("Full-Stack TypeScript"), "Base Full-Stack");
   assert.equal(getStackCategory("React"), "Frontend");
-  assert.equal(getStackCategory("Spring Boot"), "Backend & APIs");
-  assert.equal(getStackCategory("AWS Lambda"), "Cloud AWS");
-  assert.equal(getStackCategory("PostgreSQL"), "Dados & DevOps");
-  assert.equal(getStackCategory("Codex"), "IA & Ferramentas");
+  assert.equal(getStackCategory("Java & Spring Boot"), "Backend");
+  assert.equal(getStackCategory("AWS"), "Cloud");
+  assert.equal(getStackCategory("Desenvolvimento com IA"), "IA");
   assert.equal(getStackCategory("Terraform"), "Outras");
 });
 
 test("known and custom stacks receive trackable learning topics", () => {
   assert.deepEqual(getStackTopics("React"), [
-    "Componentes e estado",
-    "Hooks",
-    "Rotas e dados do servidor",
-    "Testes e acessibilidade"
+    "Componentes, props, estado e hooks",
+    "Dados do servidor, cache e rotas",
+    "Formulários acessíveis e validação",
+    "Testes, performance e boas práticas"
   ]);
   assert.deepEqual(getStackTopics("Terraform"), [
-    "Fundamentos e ambiente",
-    "Prática guiada",
-    "Projeto aplicado",
-    "Testes e boas práticas"
+    "Entender os fundamentos essenciais",
+    "Praticar com um exercício real",
+    "Aplicar em um pequeno projeto",
+    "Validar com testes e boas práticas"
   ]);
 });

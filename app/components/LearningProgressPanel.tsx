@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, type CSSProperties } from "react";
-import { BookOpen, Check, Languages, Plus, Sparkles, X } from "lucide-react";
+import { BookOpen, Check, ChevronLeft, ChevronRight, Languages, Plus, Sparkles, X } from "lucide-react";
 import { getStackCategory, getStackTopics, stackCategoryOrder, type StackCategory } from "@/lib/profile-stacks";
 import StackIcon from "./StackIcon";
 
@@ -44,6 +44,7 @@ export default function LearningProgressPanel({
   const category = categories.includes(activeCategory) ? activeCategory : categories[0];
   const categoryStacks = stacks.filter((stack) => getStackCategory(stack) === category);
   const [activeStack, setActiveStack] = useState(stacks[0] ?? "");
+  const [activeTopicIndex, setActiveTopicIndex] = useState(0);
   const selectedStack = categoryStacks.includes(activeStack) ? activeStack : categoryStacks[0] ?? "";
   const selectedTopics = selectedStack ? getStackTopics(selectedStack) : [];
   const selectedChecks = new Set(stackTopicChecks[selectedStack] ?? []);
@@ -95,7 +96,11 @@ export default function LearningProgressPanel({
           <div className="stackCategoryTabs" role="tablist" aria-label="Categorias de tecnologias">
             {categories.map((item) => (
               <button key={item} type="button" role="tab" aria-selected={item === category} className={item === category ? "active" : ""}
-                onClick={() => { setActiveCategory(item); setActiveStack(stacks.find((stack) => getStackCategory(stack) === item) ?? ""); }}>
+                onClick={() => {
+                  setActiveCategory(item);
+                  setActiveStack(stacks.find((stack) => getStackCategory(stack) === item) ?? "");
+                  setActiveTopicIndex(0);
+                }}>
                 {item}<span>{stacks.filter((stack) => getStackCategory(stack) === item).length}</span>
               </button>
             ))}
@@ -106,7 +111,7 @@ export default function LearningProgressPanel({
               {categoryStacks.map((stack) => {
                 const progress = getTopicProgress(stack, stackTopicChecks);
                 return (
-                  <button key={stack} type="button" role="tab" aria-selected={stack === selectedStack} className={stack === selectedStack ? "active" : ""} onClick={() => setActiveStack(stack)}>
+                  <button key={stack} type="button" role="tab" aria-selected={stack === selectedStack} className={stack === selectedStack ? "active" : ""} onClick={() => { setActiveStack(stack); setActiveTopicIndex(0); }}>
                     <span className="stackProgressIcon"><StackIcon stack={stack} /></span>
                     <span className="stackPickerLabel"><strong>{stack}</strong><small>{progress.done}/{progress.total} tópicos</small></span>
                     <span className="stackPickerProgress"><i style={{ width: `${progress.pct}%` }} /></span>
@@ -124,17 +129,32 @@ export default function LearningProgressPanel({
                   {customKeys.has(stackKey(selectedStack)) && <button className="stackDeleteButton" type="button" onClick={() => onDeleteStack(selectedStack)} aria-label={`Remover ${selectedStack}`}><X size={15} aria-hidden /></button>}
                 </div>
                 <div className="stackTopicBar"><i style={{ width: `${selectedProgress.pct}%` }} /></div>
-                <div className="stackTopicList">
-                  {selectedTopics.map((topic, index) => {
-                    const topicKey = String(index);
+                <div className="stackTopicSlider">
+                  <div className="stackTopicSliderNav">
+                    <button type="button" onClick={() => setActiveTopicIndex((current) => (current - 1 + selectedTopics.length) % selectedTopics.length)} aria-label="Tópico anterior">
+                      <ChevronLeft size={18} aria-hidden />
+                    </button>
+                    <span>Tópico {activeTopicIndex + 1} de {selectedTopics.length}</span>
+                    <button type="button" onClick={() => setActiveTopicIndex((current) => (current + 1) % selectedTopics.length)} aria-label="Próximo tópico">
+                      <ChevronRight size={18} aria-hidden />
+                    </button>
+                  </div>
+                  {selectedTopics[activeTopicIndex] && (() => {
+                    const topicKey = String(activeTopicIndex);
                     const checked = selectedChecks.has(topicKey);
                     return (
-                      <label className={checked ? "stackTopicCheck checked" : "stackTopicCheck"} key={topic}>
+                      <label className={checked ? "stackTopicSlide checked" : "stackTopicSlide"}>
                         <input type="checkbox" checked={checked} onChange={() => onToggleStackTopic(selectedStack, topicKey)} />
-                        <span className="stackTopicCheckbox"><Check size={14} aria-hidden /></span><span>{topic}</span>
+                        <span className="stackTopicCheckbox"><Check size={16} aria-hidden /></span>
+                        <span><small>Foco essencial</small><strong>{selectedTopics[activeTopicIndex]}</strong></span>
                       </label>
                     );
-                  })}
+                  })()}
+                  <div className="stackTopicDots" aria-label="Escolher tópico">
+                    {selectedTopics.map((topic, index) => (
+                      <button type="button" className={index === activeTopicIndex ? "active" : ""} key={topic} onClick={() => setActiveTopicIndex(index)} aria-label={`Abrir tópico ${index + 1}`} aria-current={index === activeTopicIndex ? "step" : undefined} />
+                    ))}
+                  </div>
                 </div>
               </section>
             )}

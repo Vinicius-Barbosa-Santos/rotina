@@ -209,7 +209,7 @@ A chave `service_role` deve ficar somente no servidor, dentro da Vercel ou do `.
 
 ## Persistência e relatórios
 
-O histórico atual começa em **20 de julho de 2026**. O reset preserva tarefas personalizadas, horários, reuniões e integrações.
+O histórico atual começa em **1º de setembro de 2026**. O reset preserva tarefas personalizadas, horários, reuniões e integrações, mas reinicia o progresso dos guias e das trilhas.
 
 Chaves principais utilizadas no navegador:
 

@@ -771,7 +771,7 @@ export const routineSections: RoutineSection[] = [
     color: "#c084fc",
     bg: "rgba(192, 132, 252, 0.12)",
     time: "guia permanente",
-    note: "Mapa das oito formações ativas, com carga total aproximada de 430 horas. Use no bloco das 09:00 às 11:00 para escolher o próximo módulo; este guia não entra no progresso diário.",
+    note: "Mapa das oito formações ativas, com carga total aproximada de 430 horas. Use no bloco das 09:00 às 10:00 para escolher o próximo módulo; este guia não entra no progresso diário.",
     items: [],
     referenceGroups: [
       {

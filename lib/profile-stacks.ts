@@ -1,112 +1,97 @@
+// Conteúdo condensado a partir da seção "Trilhas Técnicas em Andamento".
 export const currentProfileStacks = [
-  "Java",
-  "Spring Boot",
-  "Angular",
+  "Full-Stack TypeScript",
   "React",
-  "Next.js",
-  "Node.js",
+  "Angular",
+  "Java & Spring Boot",
+  "Microsserviços Node.js",
   "GraphQL",
-  "TypeScript",
   "AWS",
-  "AWS Lambda",
-  "Amazon API Gateway",
-  "Amazon SQS",
-  "Amazon DynamoDB",
-  "Amazon CloudWatch",
-  "Amazon S3",
-  "Docker",
-  "Kubernetes",
-  "Jenkins",
-  "Git",
-  "Oracle",
-  "PostgreSQL",
-  "MongoDB",
-  "Redis",
-  "REST APIs",
-  "Microservices",
-  "Codex",
-  "Claude Code",
-  "Cursor"
+  "Desenvolvimento com IA"
 ] as const;
 
-export const stackCategoryOrder = ["Frontend", "Backend & APIs", "Cloud AWS", "Dados & DevOps", "IA & Ferramentas", "Outras"] as const;
+export const stackCategoryOrder = ["Base Full-Stack", "Frontend", "Backend", "Cloud", "IA", "Outras"] as const;
 export type StackCategory = (typeof stackCategoryOrder)[number];
 
 const defaultStackTopics = [
-  "Fundamentos e ambiente",
-  "Prática guiada",
-  "Projeto aplicado",
-  "Testes e boas práticas"
+  "Entender os fundamentos essenciais",
+  "Praticar com um exercício real",
+  "Aplicar em um pequeno projeto",
+  "Validar com testes e boas práticas"
 ] as const;
 
 const stackTopics: Record<string, readonly string[]> = {
-  java: ["Orientação a objetos", "Collections e Streams", "Concorrência", "Testes e build"],
-  "spring boot": ["REST e injeção de dependência", "JPA e transações", "Spring Security", "Testes e observabilidade"],
-  angular: ["Componentes e Signals", "RxJS", "Forms e Router", "Testes e performance"],
-  react: ["Componentes e estado", "Hooks", "Rotas e dados do servidor", "Testes e acessibilidade"],
-  "next.js": ["App Router e renderização", "Server e Client Components", "Dados e cache", "Deploy e performance"],
-  "node.js": ["Runtime e assincronismo", "APIs", "Persistência e autenticação", "Testes e performance"],
-  graphql: ["Schema, queries e mutations", "Resolvers e contexto", "DataLoader e cache", "Subscriptions e testes"],
-  typescript: ["Tipos e narrowing", "Generics e utility types", "Tipos avançados", "Configuração e integração"],
-  aws: ["IAM e responsabilidade compartilhada", "Computação e rede", "Dados e armazenamento", "Monitoramento e custos"],
-  "aws lambda": ["Funções e runtimes", "Eventos e integrações", "Permissões", "Observabilidade e performance"],
-  "amazon api gateway": ["Rotas e integrações", "Autorização", "Throttling e cache", "Monitoramento e deploy"],
-  "amazon sqs": ["Filas e ciclo da mensagem", "Retries e DLQ", "Idempotência", "Monitoramento e escala"],
-  "amazon dynamodb": ["Chaves e modelagem", "Índices e consultas", "Capacidade", "Streams e transações"],
-  "amazon cloudwatch": ["Logs e métricas", "Alarmes", "Dashboards", "Tracing e Insights"],
-  "amazon s3": ["Buckets e objetos", "IAM e políticas", "Lifecycle e versionamento", "Eventos e hospedagem"],
-  docker: ["Dockerfile e imagens", "Containers, redes e volumes", "Docker Compose", "Segurança e otimização"],
-  kubernetes: ["Pods e Deployments", "Services e Ingress", "ConfigMaps e Secrets", "Escala e observabilidade"],
-  jenkins: ["Pipelines", "Agents e stages", "Credenciais e artefatos", "Automação e notificações"],
-  git: ["Commits e branches", "Merge e rebase", "Pull requests e revisão", "Recuperação e tags"],
-  oracle: ["SQL e PL/SQL", "Modelagem e índices", "Transações", "Administração e performance"],
-  postgresql: ["Modelagem e SQL", "Índices e planos", "Transações", "Backup e segurança"],
-  mongodb: ["Documentos e schema", "Consultas e índices", "Aggregation", "Replicação e transações"],
-  redis: ["Estruturas de dados", "Estratégias de cache", "Pub/Sub e Streams", "Persistência e alta disponibilidade"],
-  "rest apis": ["Recursos e HTTP", "Validação e erros", "Autenticação e versionamento", "Documentação e testes"],
-  microservices: ["Limites e DDD", "Comunicação síncrona e assíncrona", "Resiliência", "Observabilidade e deploy"],
-  codex: ["Prompts e contexto", "Alterações no projeto", "Testes e revisão", "Automação e segurança"],
-  "claude code": ["Contexto do projeto", "Edição e refatoração", "Testes e depuração", "Agentes e custos"],
-  cursor: ["Rules e contexto", "Composer", "Refatoração e depuração", "Fluxos de trabalho"]
+  "full-stack typescript": [
+    "JavaScript: escopo, closures e assincronismo",
+    "TypeScript: generics e utility types",
+    "APIs seguras com autenticação e validação",
+    "Dados, testes, Docker e deploy"
+  ],
+  react: [
+    "Componentes, props, estado e hooks",
+    "Dados do servidor, cache e rotas",
+    "Formulários acessíveis e validação",
+    "Testes, performance e boas práticas"
+  ],
+  angular: [
+    "Componentes standalone e data binding",
+    "Serviços, injeção de dependência e Signals",
+    "RxJS e programação reativa",
+    "Forms, rotas e consumo de APIs"
+  ],
+  "java & spring boot": [
+    "Java: orientação a objetos, collections e streams",
+    "APIs Spring com camadas, DTOs e validação",
+    "JPA, relacionamentos e transações",
+    "Security, testes e observabilidade"
+  ],
+  "microsserviços node.js": [
+    "Limites de domínio e comunicação entre serviços",
+    "Mensageria, idempotência, retries e DLQ",
+    "Resiliência com gateway, timeout e circuit breaker",
+    "Docker Compose e transações distribuídas"
+  ],
+  graphql: [
+    "Schemas, queries, mutations e subscriptions",
+    "Resolvers seguros e DataLoader",
+    "Cliente, cache e fragmentos",
+    "Atualizações otimistas e testes"
+  ],
+  aws: [
+    "Regiões, disponibilidade e responsabilidade compartilhada",
+    "IAM e princípio do menor privilégio",
+    "EC2, VPC, Lambda e API Gateway",
+    "S3, bancos, CloudWatch e controle de custos"
+  ],
+  "desenvolvimento com ia": [
+    "Contexto, regras e prompts objetivos",
+    "Codex e Claude Code para implementar e diagnosticar",
+    "Testes, revisão e segurança assistidos por IA",
+    "Controle de contexto, tokens e documentação"
+  ]
 };
 
 const stackCategories: Record<string, StackCategory> = {
-  angular: "Frontend",
+  "full-stack typescript": "Base Full-Stack",
   react: "Frontend",
-  "next.js": "Frontend",
-  typescript: "Frontend",
-  java: "Backend & APIs",
-  "spring boot": "Backend & APIs",
-  "node.js": "Backend & APIs",
-  graphql: "Backend & APIs",
-  "rest apis": "Backend & APIs",
-  microservices: "Backend & APIs",
-  aws: "Cloud AWS",
-  "aws lambda": "Cloud AWS",
-  "amazon api gateway": "Cloud AWS",
-  "amazon sqs": "Cloud AWS",
-  "amazon dynamodb": "Cloud AWS",
-  "amazon cloudwatch": "Cloud AWS",
-  "amazon s3": "Cloud AWS",
-  docker: "Dados & DevOps",
-  kubernetes: "Dados & DevOps",
-  jenkins: "Dados & DevOps",
-  git: "Dados & DevOps",
-  oracle: "Dados & DevOps",
-  postgresql: "Dados & DevOps",
-  mongodb: "Dados & DevOps",
-  redis: "Dados & DevOps",
-  codex: "IA & Ferramentas",
-  "claude code": "IA & Ferramentas",
-  cursor: "IA & Ferramentas"
+  angular: "Frontend",
+  "java & spring boot": "Backend",
+  "microsserviços node.js": "Backend",
+  graphql: "Backend",
+  aws: "Cloud",
+  "desenvolvimento com ia": "IA"
 };
 
+function normalizeStackName(stack: string) {
+  return stack.trim().toLocaleLowerCase("pt-BR");
+}
+
 export function getStackCategory(stack: string): StackCategory {
-  return stackCategories[stack.trim().toLocaleLowerCase("pt-BR")] ?? "Outras";
+  return stackCategories[normalizeStackName(stack)] ?? "Outras";
 }
 
 export function getStackTopics(stack: string) {
-  return [...(stackTopics[stack.trim().toLocaleLowerCase("pt-BR")] ?? defaultStackTopics)];
+  return [...(stackTopics[normalizeStackName(stack)] ?? defaultStackTopics)];
 }
 
 export function mergeProfileStacks(stacks: readonly string[]) {
@@ -114,7 +99,7 @@ export function mergeProfileStacks(stacks: readonly string[]) {
 
   [...currentProfileStacks, ...stacks].forEach((stack) => {
     const value = stack.trim();
-    if (value) unique.set(value.toLocaleLowerCase("pt-BR"), value);
+    if (value) unique.set(normalizeStackName(value), value);
   });
 
   return [...unique.values()];

@@ -1,7 +1,8 @@
 import type { TelegramReportPeriod } from "@/lib/types";
 import { isSaoPauloHolidayDate } from "./sao-paulo-holidays.ts";
 
-export const progressTrackingStartDate = "2026-07-20";
+export const progressTrackingStartDate = "2026-09-01";
+export const progressResetVersion = "2026-09-01-essential-trails-v1";
 
 const progressResetKey = "rotina_progress_reset_version";
 const completedDatesKey = "rotina_completed_dates";
@@ -29,7 +30,7 @@ type StorageLike = {
 };
 
 export function resetProgressHistory(storage: StorageLike) {
-  if (storage.getItem(progressResetKey) === progressTrackingStartDate) return false;
+  if (storage.getItem(progressResetKey) === progressResetVersion) return false;
 
   const keys = Array.from({ length: storage.length }, (_, index) => storage.key(index)).filter(
     (key): key is string => Boolean(key)
@@ -37,7 +38,7 @@ export function resetProgressHistory(storage: StorageLike) {
   keys.filter((key) => key.startsWith(routineStatePrefix)).forEach((key) => storage.removeItem(key));
   storage.removeItem(completedDatesKey);
   storage.removeItem(telegramReportsSentKey);
-  storage.setItem(progressResetKey, progressTrackingStartDate);
+  storage.setItem(progressResetKey, progressResetVersion);
   return true;
 }
 
