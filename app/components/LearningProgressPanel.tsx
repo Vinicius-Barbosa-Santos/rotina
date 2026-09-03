@@ -62,7 +62,7 @@ export default function LearningProgressPanel({
         <div>
           <p className="eyebrow">painel de evolução</p>
           <h2 id="learning-hub-title">Inglês e stacks</h2>
-          <span>Escolha uma tecnologia e marque os tópicos que você já domina.</span>
+          <span>Siga cada trilha do fundamento ao projeto final e marque as etapas dominadas.</span>
         </div>
         <div className="learningHubSummary"><Sparkles size={16} aria-hidden /><span>Média das stacks</span><strong>{stackAverage}%</strong></div>
       </div>
@@ -86,7 +86,7 @@ export default function LearningProgressPanel({
 
         <article className="stackProgressCard">
           <div className="stackProgressHeader">
-            <div><p className="eyebrow">minhas stacks</p><h3>Progresso por tópico</h3></div>
+            <div><p className="eyebrow">minhas stacks</p><h3>Passo a passo das stacks</h3></div>
             <form className="stackProgressForm" onSubmit={(event) => { event.preventDefault(); onAddStack(); }}>
               <input value={newStack} onChange={(event) => onNewStackChange(event.target.value)} placeholder="Adicionar tecnologia" aria-label="Adicionar stack" />
               <button type="submit" disabled={!newStack.trim()} aria-label="Adicionar stack"><Plus size={16} aria-hidden /></button>
@@ -146,7 +146,7 @@ export default function LearningProgressPanel({
                       <label className={checked ? "stackTopicSlide checked" : "stackTopicSlide"}>
                         <input type="checkbox" checked={checked} onChange={() => onToggleStackTopic(selectedStack, topicKey)} />
                         <span className="stackTopicCheckbox"><Check size={16} aria-hidden /></span>
-                        <span><small>Foco essencial</small><strong>{selectedTopics[activeTopicIndex]}</strong></span>
+                        <span><small>Etapa {activeTopicIndex + 1}</small><strong>{selectedTopics[activeTopicIndex]}</strong></span>
                       </label>
                     );
                   })()}

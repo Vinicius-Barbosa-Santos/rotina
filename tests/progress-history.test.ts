@@ -41,15 +41,15 @@ test("resets progress history once while preserving preferences", () => {
 });
 
 test("weekends are optional and do not count in progress reports or streak", () => {
-  const weeklyDates = getProgressReportDates("weekly", new Date("2026-09-08T12:00:00-03:00")).map(dateKey);
+  const weeklyDates = getProgressReportDates("weekly", new Date("2026-09-14T12:00:00-03:00")).map(dateKey);
 
-  assert.deepEqual(weeklyDates, ["2026-09-02", "2026-09-03", "2026-09-04", "2026-09-08"]);
-  assert.equal(isProgressTrackingDate(new Date("2026-09-05T12:00:00-03:00")), false);
-  assert.equal(isProgressTrackingDate(new Date("2026-09-08T12:00:00-03:00")), true);
+  assert.deepEqual(weeklyDates, ["2026-09-08", "2026-09-09", "2026-09-10", "2026-09-11", "2026-09-14"]);
+  assert.equal(isProgressTrackingDate(new Date("2026-09-12T12:00:00-03:00")), false);
+  assert.equal(isProgressTrackingDate(new Date("2026-09-14T12:00:00-03:00")), true);
   assert.equal(
     calculateProgressStreak(
-      ["2026-09-03", "2026-09-04", "2026-09-08"],
-      new Date("2026-09-08T12:00:00-03:00")
+      ["2026-09-10", "2026-09-11", "2026-09-14"],
+      new Date("2026-09-14T12:00:00-03:00")
     ),
     3
   );
@@ -70,16 +70,16 @@ test("São Paulo holidays are day off and do not count in progress", () => {
 });
 
 test("reports and streak only count dates from the new start date", () => {
-  const dates = getProgressReportDates("weekly", new Date("2026-09-02T12:00:00-03:00")).map(dateKey);
+  const dates = getProgressReportDates("weekly", new Date("2026-09-09T12:00:00-03:00")).map(dateKey);
 
-  assert.deepEqual(dates, ["2026-09-01", "2026-09-02"]);
+  assert.deepEqual(dates, ["2026-09-08", "2026-09-09"]);
   assert.equal(
     calculateProgressStreak(
-      ["2026-08-29", "2026-08-30", "2026-08-31", "2026-09-01"],
-      new Date("2026-09-02T12:00:00-03:00")
+      ["2026-09-01", "2026-09-02", "2026-09-03", "2026-09-08"],
+      new Date("2026-09-09T12:00:00-03:00")
     ),
     1
   );
-  assert.equal(progressTrackingStartDate, "2026-09-01");
-  assert.equal(progressResetVersion, "2026-09-01-essential-trails-v1");
+  assert.equal(progressTrackingStartDate, "2026-09-08");
+  assert.equal(progressResetVersion, "2026-09-08-complete-trails-v1");
 });

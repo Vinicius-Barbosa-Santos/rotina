@@ -54,6 +54,7 @@ type ParsedDate = {
 };
 
 const meetingHosts = [
+  ["hub.coders.com.br", "Coders"],
   ["meet.google.com", "Google Meet"],
   ["zoom.us", "Zoom"],
   ["teams.microsoft.com", "Microsoft Teams"],

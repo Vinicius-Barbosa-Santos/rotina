@@ -29,7 +29,7 @@ Em vez de usar vários aplicativos isolados, a aplicação organiza tarefas por 
 - Blocos por horário para a rotina e guias permanentes de inglês, desenvolvimento e vida funcional.
 - Checklist diário com progresso geral e progresso por seção.
 - Painel dedicado ao inglês, com hábitos do dia e domínio do guia completo.
-- Stacks agrupadas por área, com ícones, tópicos marcáveis e progresso automático.
+- Stacks agrupadas por área, com ícones, trilhas completas em etapas marcáveis e progresso automático.
 - Streak para acompanhar dias completamente concluídos.
 - Edição de nomes, horários e tarefas.
 - Criação e exclusão de tarefas personalizadas.
@@ -209,7 +209,7 @@ A chave `service_role` deve ficar somente no servidor, dentro da Vercel ou do `.
 
 ## Persistência e relatórios
 
-O histórico atual começa em **1º de setembro de 2026**. O reset preserva tarefas personalizadas, horários, reuniões e integrações, mas reinicia o progresso dos guias e das trilhas.
+O histórico atual começa em **8 de setembro de 2026**. O dia 7 é feriado nacional e fica fora da contagem. O reset preserva tarefas personalizadas, horários, reuniões e integrações, mas reinicia o progresso dos guias e das trilhas.
 
 Chaves principais utilizadas no navegador:
 

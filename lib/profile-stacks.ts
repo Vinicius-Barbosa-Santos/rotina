@@ -14,60 +14,130 @@ export const stackCategoryOrder = ["Base Full-Stack", "Frontend", "Backend", "Cl
 export type StackCategory = (typeof stackCategoryOrder)[number];
 
 const defaultStackTopics = [
-  "Entender os fundamentos essenciais",
-  "Praticar com um exercício real",
-  "Aplicar em um pequeno projeto",
-  "Validar com testes e boas práticas"
+  "Configurar o ambiente e entender os fundamentos",
+  "Aprender a sintaxe e os principais conceitos",
+  "Praticar cada conceito com exercícios pequenos",
+  "Conhecer as ferramentas e bibliotecas principais",
+  "Construir uma funcionalidade completa",
+  "Tratar erros, validação e segurança",
+  "Escrever testes automatizados",
+  "Aplicar boas práticas e refatoração",
+  "Publicar um projeto próprio",
+  "Documentar o aprendizado e revisar pontos fracos"
 ] as const;
 
 const stackTopics: Record<string, readonly string[]> = {
   "full-stack typescript": [
-    "JavaScript: escopo, closures e assincronismo",
-    "TypeScript: generics e utility types",
-    "APIs seguras com autenticação e validação",
-    "Dados, testes, Docker e deploy"
+    "Entender web, HTTP, navegador, terminal e Git",
+    "Dominar JavaScript: tipos, funções, objetos, arrays e módulos",
+    "Entender escopo, closures, protótipos e event loop",
+    "Trabalhar com Promises, async/await e tratamento de erros",
+    "Aplicar TypeScript: interfaces, unions, narrowing e generics",
+    "Usar mapped types, utility types e configuração estrita",
+    "Construir APIs Node.js com rotas, camadas e validação",
+    "Implementar autenticação, autorização, sessões ou JWT",
+    "Modelar SQL, migrations, relacionamentos, índices e transações",
+    "Usar NoSQL e cache somente quando o problema justificar",
+    "Integrar frontend, API, estado, cache, CSR e SSR",
+    "Testar, proteger, documentar, dockerizar e publicar um projeto completo"
   ],
   react: [
-    "Componentes, props, estado e hooks",
-    "Dados do servidor, cache e rotas",
-    "Formulários acessíveis e validação",
-    "Testes, performance e boas práticas"
+    "Revisar JavaScript moderno, módulos e imutabilidade",
+    "Criar componentes com JSX, props, composição e eventos",
+    "Controlar estado local e renderização condicional",
+    "Dominar useState, useEffect, useRef e hooks personalizados",
+    "Criar formulários acessíveis com React Hook Form e Zod",
+    "Implementar rotas, layouts, loading, erro e páginas vazias",
+    "Consumir APIs e gerenciar cache com TanStack Query ou SWR",
+    "Usar Context e estado global apenas quando necessário",
+    "Testar comportamento, interações e acessibilidade",
+    "Otimizar renderização, memoização, divisão de código e imagens",
+    "Conhecer Server Components e os fundamentos do Next.js",
+    "Publicar uma aplicação completa com documentação e testes"
   ],
   angular: [
-    "Componentes standalone e data binding",
-    "Serviços, injeção de dependência e Signals",
-    "RxJS e programação reativa",
-    "Forms, rotas e consumo de APIs"
+    "Revisar TypeScript, decorators, classes e interfaces",
+    "Configurar workspace, Angular CLI e estrutura do projeto",
+    "Criar componentes standalone, templates e data binding",
+    "Usar diretivas, pipes e comunicação entre componentes",
+    "Organizar serviços e injeção de dependências",
+    "Gerenciar estado local e derivado com Signals",
+    "Dominar Observables, operadores, Subjects e RxJS",
+    "Criar Reactive Forms com validação e mensagens de erro",
+    "Configurar rotas, lazy loading, guards e resolvers",
+    "Consumir APIs com HttpClient e interceptors",
+    "Escrever testes de componentes, serviços e fluxos",
+    "Otimizar build e publicar uma aplicação Angular completa"
   ],
   "java & spring boot": [
-    "Java: orientação a objetos, collections e streams",
-    "APIs Spring com camadas, DTOs e validação",
-    "JPA, relacionamentos e transações",
-    "Security, testes e observabilidade"
+    "Dominar sintaxe Java, tipos, fluxo, métodos e depuração",
+    "Aplicar orientação a objetos, interfaces, records e enums",
+    "Usar collections, generics, streams, lambdas e Optional",
+    "Tratar exceptions, datas, arquivos e entrada e saída",
+    "Entender concorrência, executors e CompletableFuture",
+    "Configurar Maven ou Gradle e testes com JUnit e Mockito",
+    "Criar projeto Spring Boot com configuração e injeção de dependência",
+    "Organizar controllers, services, repositories, DTOs e mappers",
+    "Validar entradas e padronizar o tratamento de erros",
+    "Modelar entidades, JPA, relacionamentos, queries e transações",
+    "Implementar autenticação e autorização com Spring Security e JWT",
+    "Testar com MockMvc e Testcontainers, observar e publicar uma API"
   ],
   "microsserviços node.js": [
-    "Limites de domínio e comunicação entre serviços",
-    "Mensageria, idempotência, retries e DLQ",
-    "Resiliência com gateway, timeout e circuit breaker",
-    "Docker Compose e transações distribuídas"
+    "Construir um serviço Node.js com TypeScript, testes e configuração",
+    "Separar domínios, responsabilidades e dados de cada serviço",
+    "Definir contratos REST e versionamento compatível",
+    "Comparar comunicação síncrona, gRPC e eventos",
+    "Usar filas ou streaming com RabbitMQ, Kafka ou SQS",
+    "Garantir idempotência, retries, deduplicação e DLQ",
+    "Implementar API Gateway, autenticação e rate limiting",
+    "Aplicar timeout, circuit breaker, fallback e health checks",
+    "Coordenar transações distribuídas com sagas e compensações",
+    "Adicionar logs estruturados, métricas, traces e alertas",
+    "Executar o ambiente com Docker e Docker Compose",
+    "Testar contratos e falhas e publicar um sistema com dois serviços"
   ],
   graphql: [
-    "Schemas, queries, mutations e subscriptions",
-    "Resolvers seguros e DataLoader",
-    "Cliente, cache e fragmentos",
-    "Atualizações otimistas e testes"
+    "Entender quando GraphQL é adequado e compará-lo com REST",
+    "Modelar schema, scalars, types, interfaces e unions",
+    "Criar queries, mutations, inputs e fragments",
+    "Implementar resolvers, contexto e separação em camadas",
+    "Validar entradas, autenticar e autorizar operações",
+    "Resolver o problema N+1 com DataLoader e batching",
+    "Implementar paginação, filtros, erros e limites de consulta",
+    "Adicionar subscriptions quando houver necessidade em tempo real",
+    "Integrar Apollo Client ou Urql e gerenciar o cache",
+    "Criar atualizações otimistas e fragmentos reutilizáveis",
+    "Testar schema, resolvers, autorização e integração",
+    "Publicar uma aplicação Full-Stack GraphQL documentada"
   ],
   aws: [
-    "Regiões, disponibilidade e responsabilidade compartilhada",
-    "IAM e princípio do menor privilégio",
-    "EC2, VPC, Lambda e API Gateway",
-    "S3, bancos, CloudWatch e controle de custos"
+    "Entender regiões, zonas e responsabilidade compartilhada",
+    "Configurar conta, MFA, budgets e alertas de custo",
+    "Dominar IAM, roles, policies e menor privilégio",
+    "Entender VPC, subnets, rotas, security groups e DNS",
+    "Executar aplicações com EC2, Load Balancer e Auto Scaling",
+    "Armazenar arquivos com S3, políticas, lifecycle e versionamento",
+    "Escolher entre RDS e DynamoDB conforme acesso e consistência",
+    "Criar funções Lambda orientadas a eventos",
+    "Expor serviços com API Gateway",
+    "Processar tarefas assíncronas com SQS, SNS e EventBridge",
+    "Monitorar logs, métricas e alarmes com CloudWatch",
+    "Automatizar, proteger e publicar uma arquitetura pequena controlando custos"
   ],
   "desenvolvimento com ia": [
-    "Contexto, regras e prompts objetivos",
-    "Codex e Claude Code para implementar e diagnosticar",
-    "Testes, revisão e segurança assistidos por IA",
-    "Controle de contexto, tokens e documentação"
+    "Entender capacidades, limites, alucinações e janela de contexto",
+    "Escrever objetivos claros, restrições e critérios de aceite",
+    "Fornecer contexto relevante sem expor dados sensíveis",
+    "Criar regras reutilizáveis para o projeto e sua arquitetura",
+    "Usar Cursor para navegar, editar e refatorar com contexto",
+    "Usar Codex para implementar, testar e revisar alterações completas",
+    "Usar Claude Code para análise, diagnóstico e refatoração",
+    "Dividir tarefas grandes em planos pequenos e verificáveis",
+    "Validar toda saída com testes, tipos, lint e revisão humana",
+    "Revisar segurança, permissões, dependências e dados privados",
+    "Gerenciar contexto, tokens, custo e escolha de modelo",
+    "Automatizar um fluxo real e documentar decisões, riscos e resultados"
   ]
 };
 

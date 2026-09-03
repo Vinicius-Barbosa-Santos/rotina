@@ -5,6 +5,7 @@ import { getSaoPauloHoliday, isSaoPauloHolidayDate } from "../lib/sao-paulo-holi
 test("identifies São Paulo fixed and moving holidays", () => {
   assert.equal(getSaoPauloHoliday(new Date("2026-01-25T12:00:00-03:00"))?.name, "Aniversário de São Paulo");
   assert.equal(getSaoPauloHoliday(new Date("2026-07-09T12:00:00-03:00"))?.name, "Revolução Constitucionalista");
+  assert.equal(getSaoPauloHoliday(new Date("2026-09-07T12:00:00-03:00"))?.name, "Independência do Brasil");
   assert.equal(getSaoPauloHoliday(new Date("2026-06-04T12:00:00-03:00"))?.name, "Corpus Christi");
   assert.equal(isSaoPauloHolidayDate(new Date("2026-07-10T12:00:00-03:00")), false);
 });

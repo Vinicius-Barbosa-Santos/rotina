@@ -17,6 +17,8 @@ export function getDateKeyInTimeZone(date = new Date(), timeZone = "America/Sao_
 }
 
 export function getDueTelegramReportPeriods(dateKey: string): TelegramReportPeriod[] {
+  if (dateKey < progressTrackingStartDate) return [];
+
   const date = dateFromKey(dateKey);
   const periods: TelegramReportPeriod[] = [];
 

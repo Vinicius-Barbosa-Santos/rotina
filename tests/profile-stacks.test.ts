@@ -28,16 +28,13 @@ test("stacks are grouped into useful learning categories", () => {
 });
 
 test("known and custom stacks receive trackable learning topics", () => {
-  assert.deepEqual(getStackTopics("React"), [
-    "Componentes, props, estado e hooks",
-    "Dados do servidor, cache e rotas",
-    "Formulários acessíveis e validação",
-    "Testes, performance e boas práticas"
-  ]);
-  assert.deepEqual(getStackTopics("Terraform"), [
-    "Entender os fundamentos essenciais",
-    "Praticar com um exercício real",
-    "Aplicar em um pequeno projeto",
-    "Validar com testes e boas práticas"
-  ]);
+  const reactTopics = getStackTopics("React");
+  const customTopics = getStackTopics("Terraform");
+
+  assert.equal(reactTopics.length, 12);
+  assert.match(reactTopics[0], /JavaScript moderno/);
+  assert.match(reactTopics.at(-1) ?? "", /aplicação completa/);
+  assert.equal(customTopics.length, 10);
+  assert.match(customTopics[0], /ambiente.*fundamentos/);
+  assert.match(customTopics.at(-1) ?? "", /revisar pontos fracos/);
 });
