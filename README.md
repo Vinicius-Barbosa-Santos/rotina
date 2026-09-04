@@ -52,7 +52,7 @@ Em vez de usar vários aplicativos isolados, a aplicação organiza tarefas por 
 
 As aulas de crescimento alternam entre YouTube, investimentos e marketing, com somente uma trilha por dia. Segunda e sexta reduzem a carga de projetos, não incluem Coders e usam caminhada, bicicleta ou mobilidade leve.
 
-O Guia de Trilhas Técnicas organiza oito formações ativas — Full-Stack, React, Angular, Java, Node.js, GraphQL, AWS e desenvolvimento com IA — com aproximadamente 430 horas de conteúdo.
+O Guia de Trilhas Técnicas organiza nove formações ativas — fundamentos de HTML, CSS e JavaScript, Full-Stack, React, Angular, Java, Node.js, GraphQL, AWS e desenvolvimento com IA. O painel também inclui uma trilha de inglês, com todas as competências organizadas dos fundamentos até a fluência e o uso profissional.
 
 ### Agenda e notificações
 

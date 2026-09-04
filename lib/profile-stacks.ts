@@ -1,5 +1,6 @@
 // Conteúdo condensado a partir da seção "Trilhas Técnicas em Andamento".
 export const currentProfileStacks = [
+  "HTML, CSS & JavaScript",
   "Full-Stack TypeScript",
   "React",
   "Angular",
@@ -27,6 +28,20 @@ const defaultStackTopics = [
 ] as const;
 
 const stackTopics: Record<string, readonly string[]> = {
+  "html, css & javascript": [
+    "Entender como a web funciona: navegador, servidor, HTTP, URLs e DevTools",
+    "Criar páginas com HTML semântico, metadados e uma estrutura acessível",
+    "Dominar links, imagens, tabelas, mídia e formulários com validação",
+    "Aplicar CSS com cascata, especificidade, herança e box model",
+    "Construir layouts responsivos com Flexbox, Grid e abordagem mobile-first",
+    "Usar variáveis, pseudo-classes, animações e uma organização sustentável de CSS",
+    "Dominar JavaScript: tipos, operadores, condições, laços e funções",
+    "Trabalhar com arrays, objetos, escopo, closures e módulos",
+    "Manipular DOM, eventos, formulários, storage e acessibilidade pelo JavaScript",
+    "Consumir APIs com Fetch, Promises, async/await e tratamento de erros",
+    "Melhorar qualidade com depuração, testes, desempenho e boas práticas",
+    "Construir, documentar e publicar uma aplicação responsiva completa sem framework"
+  ],
   "full-stack typescript": [
     "Entender web, HTTP, navegador, terminal e Git",
     "Dominar JavaScript: tipos, funções, objetos, arrays e módulos",
@@ -142,6 +157,7 @@ const stackTopics: Record<string, readonly string[]> = {
 };
 
 const stackCategories: Record<string, StackCategory> = {
+  "html, css & javascript": "Base Full-Stack",
   "full-stack typescript": "Base Full-Stack",
   react: "Frontend",
   angular: "Frontend",

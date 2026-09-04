@@ -1315,11 +1315,14 @@ export default function HomePage() {
             stackTopicChecks={routinePrefs.stackTopicChecks}
             englishDaily={{ done: englishView?.doneItems.size ?? 0, total: englishView?.items.length ?? 0 }}
             englishGuide={{ done: englishGuideDone, total: englishGuideTotal }}
+            englishTrack={englishGuideSection?.referenceGroups ?? []}
+            englishTrackChecks={routinePrefs.guideChecks["english-guide"] ?? []}
             newStack={newStack}
             onNewStackChange={setNewStack}
             onAddStack={addProfileStack}
             onDeleteStack={deleteProfileStack}
             onToggleStackTopic={toggleStackTopic}
+            onToggleEnglishTopic={(key) => toggleGuideItem("english-guide", key)}
           />
 
           <ProgressCharts weekly={evolution.weekly} monthly={evolution.monthly} />

@@ -6,6 +6,7 @@ import { getStackCategory, getStackTopics, stackCategoryOrder, type StackCategor
 import StackIcon from "./StackIcon";
 
 type ProgressValue = { done: number; total: number };
+type EnglishTrackGroup = { title: string; items: string[] };
 
 type LearningProgressPanelProps = {
   stacks: string[];
@@ -13,11 +14,14 @@ type LearningProgressPanelProps = {
   stackTopicChecks: Record<string, string[]>;
   englishDaily: ProgressValue;
   englishGuide: ProgressValue;
+  englishTrack: EnglishTrackGroup[];
+  englishTrackChecks: string[];
   newStack: string;
   onNewStackChange: (value: string) => void;
   onAddStack: () => void;
   onDeleteStack: (stack: string) => void;
   onToggleStackTopic: (stack: string, topic: string) => void;
+  onToggleEnglishTopic: (topic: string) => void;
 };
 
 function percentage({ done, total }: ProgressValue) {
@@ -36,8 +40,8 @@ function getTopicProgress(stack: string, checks: Record<string, string[]>) {
 }
 
 export default function LearningProgressPanel({
-  stacks, customStacks, stackTopicChecks, englishDaily, englishGuide, newStack,
-  onNewStackChange, onAddStack, onDeleteStack, onToggleStackTopic
+  stacks, customStacks, stackTopicChecks, englishDaily, englishGuide, englishTrack, englishTrackChecks, newStack,
+  onNewStackChange, onAddStack, onDeleteStack, onToggleStackTopic, onToggleEnglishTopic
 }: LearningProgressPanelProps) {
   const categories = stackCategoryOrder.filter((item) => stacks.some((stack) => getStackCategory(stack) === item));
   const [activeCategory, setActiveCategory] = useState<StackCategory>(categories[0] ?? "Frontend");
@@ -45,6 +49,7 @@ export default function LearningProgressPanel({
   const categoryStacks = stacks.filter((stack) => getStackCategory(stack) === category);
   const [activeStack, setActiveStack] = useState(stacks[0] ?? "");
   const [activeTopicIndex, setActiveTopicIndex] = useState(0);
+  const [activeEnglishGroup, setActiveEnglishGroup] = useState(0);
   const selectedStack = categoryStacks.includes(activeStack) ? activeStack : categoryStacks[0] ?? "";
   const selectedTopics = selectedStack ? getStackTopics(selectedStack) : [];
   const selectedChecks = new Set(stackTopicChecks[selectedStack] ?? []);
@@ -52,6 +57,8 @@ export default function LearningProgressPanel({
   const customKeys = new Set(customStacks.map(stackKey));
   const dailyPct = percentage(englishDaily);
   const guidePct = percentage(englishGuide);
+  const selectedEnglishGroup = englishTrack[activeEnglishGroup] ?? englishTrack[0];
+  const englishChecks = new Set(englishTrackChecks);
   const stackAverage = stacks.length
     ? Math.round(stacks.reduce((sum, stack) => sum + getTopicProgress(stack, stackTopicChecks).pct, 0) / stacks.length)
     : 0;
@@ -71,7 +78,7 @@ export default function LearningProgressPanel({
         <article className="englishProgressCard">
           <div className="englishProgressHeading">
             <span className="englishProgressIcon"><Languages size={21} aria-hidden /></span>
-            <div><p className="eyebrow">meu inglês</p><h3>Progresso do idioma</h3></div>
+            <div><p className="eyebrow">meu inglês</p><h3>Inglês até a fluência</h3></div>
           </div>
           <div className="englishProgressHero">
             <div className="progressRing" style={{ "--progress": `${guidePct * 3.6}deg` } as CSSProperties} aria-label={`${guidePct}% do Guia de Inglês dominado`}><span>{guidePct}%</span></div>
@@ -81,6 +88,34 @@ export default function LearningProgressPanel({
             <div className="englishMetric"><span><BookOpen size={15} aria-hidden /> Hábitos de hoje</span><strong>{englishDaily.done}/{englishDaily.total}</strong><div><i style={{ width: `${dailyPct}%` }} /></div><small>{dailyPct}% concluído</small></div>
             <div className="englishMetric guide"><span><Languages size={15} aria-hidden /> Guia completo</span><strong>{englishGuide.done}/{englishGuide.total}</strong><div><i style={{ width: `${guidePct}%` }} /></div><small>{guidePct}% dominado</small></div>
           </div>
+          {selectedEnglishGroup && (
+            <section className="englishTrack" aria-label="Trilha completa de inglês até a fluência">
+              <div className="englishTrackHeader">
+                <div><small>Trilha até a fluência</small><strong>{selectedEnglishGroup.title}</strong></div>
+                <span>{activeEnglishGroup + 1} / {englishTrack.length}</span>
+              </div>
+              <div className="englishTrackNav">
+                <button type="button" onClick={() => setActiveEnglishGroup((current) => (current - 1 + englishTrack.length) % englishTrack.length)} aria-label="Tópico de inglês anterior"><ChevronLeft size={17} aria-hidden /></button>
+                <div className="englishTrackDots" aria-label="Escolher tópico de inglês">
+                  {englishTrack.map((group, index) => <button type="button" key={group.title} className={index === activeEnglishGroup ? "active" : ""} onClick={() => setActiveEnglishGroup(index)} aria-label={group.title} aria-current={index === activeEnglishGroup ? "step" : undefined} />)}
+                </div>
+                <button type="button" onClick={() => setActiveEnglishGroup((current) => (current + 1) % englishTrack.length)} aria-label="Próximo tópico de inglês"><ChevronRight size={17} aria-hidden /></button>
+              </div>
+              <div className="englishTrackChecklist">
+                {selectedEnglishGroup.items.map((item, itemIndex) => {
+                  const itemKey = `${activeEnglishGroup}:${itemIndex}`;
+                  const checked = englishChecks.has(itemKey);
+                  return (
+                    <label className={checked ? "englishTrackCheck checked" : "englishTrackCheck"} key={item}>
+                      <input type="checkbox" checked={checked} onChange={() => onToggleEnglishTopic(itemKey)} />
+                      <span className="stackTopicCheckbox">{checked && <Check size={13} aria-hidden />}</span>
+                      <span>{item}</span>
+                    </label>
+                  );
+                })}
+              </div>
+            </section>
+          )}
           <div className="englishProgressLinks"><a href="#english">Abrir hábitos</a><a href="#english-guide">Abrir Guia de Inglês</a></div>
         </article>
 

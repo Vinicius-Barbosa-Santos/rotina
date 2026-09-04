@@ -471,6 +471,132 @@
   color: var(--text);
 }
 
+.englishTrack {
+  display: grid;
+  gap: 12px;
+  margin-top: 18px;
+  border-top: 1px solid var(--line);
+  padding-top: 16px;
+}
+
+.englishTrackHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.englishTrackHeader > div {
+  display: grid;
+  gap: 3px;
+}
+
+.englishTrackHeader small {
+  color: #c9a7ff;
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.englishTrackHeader strong {
+  font-size: 13px;
+  line-height: 1.35;
+}
+
+.englishTrackHeader > span {
+  flex: 0 0 auto;
+  color: var(--soft);
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.englishTrackNav {
+  display: grid;
+  grid-template-columns: 30px minmax(0, 1fr) 30px;
+  align-items: center;
+  gap: 8px;
+}
+
+.englishTrackNav > button {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 0;
+  background: rgba(255, 255, 255, 0.035);
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.englishTrackNav > button:hover {
+  border-color: rgba(181, 123, 238, 0.45);
+  color: #c9a7ff;
+}
+
+.englishTrackDots {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 5px;
+}
+
+.englishTrackDots button {
+  width: 6px;
+  height: 6px;
+  border: 0;
+  border-radius: 999px;
+  padding: 0;
+  background: rgba(255, 255, 255, 0.16);
+  cursor: pointer;
+}
+
+.englishTrackDots button.active {
+  width: 18px;
+  background: #b57bee;
+}
+
+.englishTrackChecklist {
+  display: grid;
+  gap: 6px;
+}
+
+.englishTrackCheck {
+  display: grid;
+  grid-template-columns: 20px minmax(0, 1fr);
+  align-items: center;
+  gap: 9px;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  padding: 8px;
+  background: rgba(255, 255, 255, 0.025);
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 650;
+  line-height: 1.4;
+  cursor: pointer;
+}
+
+.englishTrackCheck input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.englishTrackCheck.checked {
+  border-color: rgba(181, 123, 238, 0.28);
+  background: rgba(181, 123, 238, 0.08);
+  color: var(--text);
+}
+
+.englishTrackCheck.checked .stackTopicCheckbox {
+  border-color: #b57bee;
+  background: #b57bee;
+  color: #111014;
+}
+
 .stackProgressCard {
   padding: 18px;
 }
@@ -675,6 +801,38 @@
   height: 25px;
 }
 
+.stackProgressIcon .stackIconTrio {
+  position: relative;
+}
+
+.stackProgressIcon .stackIconTrio img,
+.stackProgressIcon.large .stackIconTrio img {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+}
+
+.stackProgressIcon.large .stackIconTrio img {
+  width: 16px;
+  height: 16px;
+}
+
+.stackIconTrio .javascript {
+  top: 1px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.stackIconTrio .html {
+  bottom: 1px;
+  left: 2px;
+}
+
+.stackIconTrio .css {
+  right: 2px;
+  bottom: 1px;
+}
+
 .stackTopicPanel {
   min-width: 0;
   border: 1px solid var(--line);
@@ -710,11 +868,9 @@
 }
 
 .stackTopicTitle h4 {
-  overflow: hidden;
   margin: 2px 0 0;
   font-size: 15px;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  line-height: 1.25;
 }
 
 .stackTopicSummary {

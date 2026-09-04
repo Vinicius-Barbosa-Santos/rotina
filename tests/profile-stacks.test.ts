@@ -8,7 +8,8 @@ test("current profile includes the complete development stack", () => {
   assert.ok(currentProfileStacks.includes("Full-Stack TypeScript"));
   assert.ok(currentProfileStacks.includes("Microsserviços Node.js"));
   assert.ok(currentProfileStacks.includes("Desenvolvimento com IA"));
-  assert.equal(currentProfileStacks.length, 8);
+  assert.ok(currentProfileStacks.includes("HTML, CSS & JavaScript"));
+  assert.equal(currentProfileStacks.length, 9);
 });
 
 test("custom profile stacks are appended without duplicates", () => {
@@ -20,6 +21,7 @@ test("custom profile stacks are appended without duplicates", () => {
 
 test("stacks are grouped into useful learning categories", () => {
   assert.equal(getStackCategory("Full-Stack TypeScript"), "Base Full-Stack");
+  assert.equal(getStackCategory("HTML, CSS & JavaScript"), "Base Full-Stack");
   assert.equal(getStackCategory("React"), "Frontend");
   assert.equal(getStackCategory("Java & Spring Boot"), "Backend");
   assert.equal(getStackCategory("AWS"), "Cloud");
@@ -30,10 +32,14 @@ test("stacks are grouped into useful learning categories", () => {
 test("known and custom stacks receive trackable learning topics", () => {
   const reactTopics = getStackTopics("React");
   const customTopics = getStackTopics("Terraform");
+  const webTopics = getStackTopics("HTML, CSS & JavaScript");
 
   assert.equal(reactTopics.length, 12);
   assert.match(reactTopics[0], /JavaScript moderno/);
   assert.match(reactTopics.at(-1) ?? "", /aplicação completa/);
+  assert.equal(webTopics.length, 12);
+  assert.match(webTopics[0], /web funciona/);
+  assert.match(webTopics.at(-1) ?? "", /sem framework/);
   assert.equal(customTopics.length, 10);
   assert.match(customTopics[0], /ambiente.*fundamentos/);
   assert.match(customTopics.at(-1) ?? "", /revisar pontos fracos/);

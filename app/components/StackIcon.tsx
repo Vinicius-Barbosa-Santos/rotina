@@ -40,6 +40,7 @@ const stackVisuals: StackVisual[] = [
 export default function StackIcon({ stack }: { stack: string }) {
   const [imageFailed, setImageFailed] = useState(false);
   const normalizedStack = stack.trim().toLocaleLowerCase("pt-BR");
+  const isWebFoundation = normalizedStack.includes("html") && normalizedStack.includes("css") && normalizedStack.includes("javascript");
   const visual = stackVisuals.find((candidate) =>
     candidate.matches.some((term) => normalizedStack.includes(term))
   );
@@ -49,6 +50,16 @@ export default function StackIcon({ stack }: { stack: string }) {
   const ConceptIcon = normalizedStack.includes("microservice") ? Network
     : normalizedStack.includes("rest") || normalizedStack.includes("api") ? Braces
       : Code2;
+
+  if (isWebFoundation && !imageFailed) {
+    return (
+      <span className="dayStackIcon stackIconTrio" title={stack} role="img" aria-label={stack}>
+        <img className="javascript" src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/javascript/javascript-original.svg" alt="" loading="lazy" decoding="async" onError={() => setImageFailed(true)} />
+        <img className="html" src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/html5/html5-original.svg" alt="" loading="lazy" decoding="async" onError={() => setImageFailed(true)} />
+        <img className="css" src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/css3/css3-original.svg" alt="" loading="lazy" decoding="async" onError={() => setImageFailed(true)} />
+      </span>
+    );
+  }
 
   return (
     <span className="dayStackIcon" style={style} title={stack} role="img" aria-label={stack}>
