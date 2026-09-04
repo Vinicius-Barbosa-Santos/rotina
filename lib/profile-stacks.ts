@@ -4,6 +4,7 @@ export const currentProfileStacks = [
   "Full-Stack TypeScript",
   "React",
   "Angular",
+  "Node.js",
   "Java & Spring Boot",
   "Microsserviços Node.js",
   "GraphQL",
@@ -84,6 +85,20 @@ const stackTopics: Record<string, readonly string[]> = {
     "Escrever testes de componentes, serviços e fluxos",
     "Otimizar build e publicar uma aplicação Angular completa"
   ],
+  "node.js": [
+    "Entender o runtime Node.js, V8, event loop e operações não bloqueantes",
+    "Configurar um projeto com npm, scripts, variáveis de ambiente e TypeScript",
+    "Dominar módulos, sistema de arquivos, buffers, streams e eventos",
+    "Criar servidores HTTP e APIs REST com Express ou Fastify",
+    "Organizar rotas, controllers, services, repositories e dependências",
+    "Validar entradas, padronizar respostas e tratar erros corretamente",
+    "Modelar dados e integrar PostgreSQL com migrations e transações",
+    "Implementar autenticação, autorização, sessões ou JWT com segurança",
+    "Criar tarefas assíncronas, filas, cache e integrações com serviços externos",
+    "Escrever testes unitários, de integração e de API",
+    "Adicionar logs, métricas, documentação, segurança e controle de desempenho",
+    "Dockerizar e publicar uma API Node.js completa com CI/CD"
+  ],
   "java & spring boot": [
     "Dominar sintaxe Java, tipos, fluxo, métodos e depuração",
     "Aplicar orientação a objetos, interfaces, records e enums",
@@ -161,6 +176,7 @@ const stackCategories: Record<string, StackCategory> = {
   "full-stack typescript": "Base Full-Stack",
   react: "Frontend",
   angular: "Frontend",
+  "node.js": "Backend",
   "java & spring boot": "Backend",
   "microsserviços node.js": "Backend",
   graphql: "Backend",
