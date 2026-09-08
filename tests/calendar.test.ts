@@ -19,7 +19,7 @@ test("deduplicates the same meeting imported more than once", () => {
   assert.equal(events[0].id, "calendar-a:event-1");
 });
 
-test("keeps simultaneous meetings when their links are different", () => {
+test("deduplicates visually identical meetings even when their links are different", () => {
   const sharedTime = {
     title: "Daily",
     startsAt: "2026-09-08T10:15:00-03:00",
@@ -29,6 +29,29 @@ test("keeps simultaneous meetings when their links are different", () => {
   const events = deduplicateCalendarEvents([
     { ...sharedTime, id: "event-1", meetingUrl: "https://meet.google.com/abc-defg-hij" },
     { ...sharedTime, id: "event-2", meetingUrl: "https://meet.google.com/xyz-wxyz-xyz" }
+  ]);
+
+  assert.equal(events.length, 1);
+});
+
+test("keeps simultaneous meetings when their titles are different", () => {
+  const events = deduplicateCalendarEvents([
+    {
+      id: "event-1",
+      title: "Daily do time",
+      startsAt: "2026-09-08T10:15:00-03:00",
+      endsAt: "2026-09-08T11:00:00-03:00",
+      allDay: false,
+      meetingUrl: "https://meet.google.com/abc-defg-hij"
+    },
+    {
+      id: "event-2",
+      title: "Conversa com cliente",
+      startsAt: "2026-09-08T10:15:30-03:00",
+      endsAt: "2026-09-08T11:00:30-03:00",
+      allDay: false,
+      meetingUrl: "https://meet.google.com/xyz-wxyz-xyz"
+    }
   ]);
 
   assert.equal(events.length, 2);

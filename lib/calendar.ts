@@ -129,8 +129,7 @@ export function deduplicateCalendarEvents<T extends CalendarEvent>(events: reado
       normalizeEventTitle(event.title),
       normalizeEventTime(event.startsAt),
       normalizeEventTime(event.endsAt),
-      event.allDay ? "all-day" : "timed",
-      normalizeMeetingUrl(event.meetingUrl)
+      event.allDay ? "all-day" : "timed"
     ].join("|");
 
     if (!uniqueEvents.has(fingerprint)) uniqueEvents.set(fingerprint, event);
@@ -145,18 +144,7 @@ function normalizeEventTitle(title: string) {
 
 function normalizeEventTime(value: string) {
   const timestamp = Date.parse(value);
-  return Number.isNaN(timestamp) ? value : String(timestamp);
-}
-
-function normalizeMeetingUrl(value?: string) {
-  if (!value) return "";
-
-  try {
-    const url = new URL(value);
-    return `${url.hostname.toLocaleLowerCase("en-US")}${url.pathname.replace(/\/$/, "")}`;
-  } catch {
-    return value.trim().toLocaleLowerCase("en-US");
-  }
+  return Number.isNaN(timestamp) ? value : String(Math.floor(timestamp / 60_000));
 }
 
 function readRawEvents(icsText: string): RawEvent[] {
