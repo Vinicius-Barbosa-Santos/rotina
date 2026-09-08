@@ -76,17 +76,20 @@ export default function LearningProgressPanel({
 
       <div className="learningHubGrid">
         <article className="englishProgressCard">
-          <div className="englishProgressHeading">
-            <span className="englishProgressIcon"><Languages size={21} aria-hidden /></span>
-            <div><p className="eyebrow">meu inglês</p><h3>Inglês até a fluência</h3></div>
-          </div>
-          <div className="englishProgressHero">
-            <div className="progressRing" style={{ "--progress": `${guidePct * 3.6}deg` } as CSSProperties} aria-label={`${guidePct}% do Guia de Inglês dominado`}><span>{guidePct}%</span></div>
-            <div><strong>Conhecimento registrado</strong><span>{englishGuide.done} de {englishGuide.total} competências dominadas</span></div>
-          </div>
-          <div className="englishMetricList">
-            <div className="englishMetric"><span><BookOpen size={15} aria-hidden /> Hábitos de hoje</span><strong>{englishDaily.done}/{englishDaily.total}</strong><div><i style={{ width: `${dailyPct}%` }} /></div><small>{dailyPct}% concluído</small></div>
-            <div className="englishMetric guide"><span><Languages size={15} aria-hidden /> Guia completo</span><strong>{englishGuide.done}/{englishGuide.total}</strong><div><i style={{ width: `${guidePct}%` }} /></div><small>{guidePct}% dominado</small></div>
+          <div className="englishOverview">
+            <div className="englishProgressHeading">
+              <span className="englishProgressIcon"><Languages size={21} aria-hidden /></span>
+              <div><p className="eyebrow">meu inglês</p><h3>Inglês até a fluência</h3></div>
+            </div>
+            <div className="englishProgressHero">
+              <div className="progressRing" style={{ "--progress": `${guidePct * 3.6}deg` } as CSSProperties} aria-label={`${guidePct}% do Guia de Inglês dominado`}><span>{guidePct}%</span></div>
+              <div><strong>Conhecimento registrado</strong><span>{englishGuide.done} de {englishGuide.total} competências dominadas</span></div>
+            </div>
+            <div className="englishMetricList">
+              <div className="englishMetric"><span><BookOpen size={15} aria-hidden /> Hábitos de hoje</span><strong>{englishDaily.done}/{englishDaily.total}</strong><div><i style={{ width: `${dailyPct}%` }} /></div><small>{dailyPct}% concluído</small></div>
+              <div className="englishMetric guide"><span><Languages size={15} aria-hidden /> Guia completo</span><strong>{englishGuide.done}/{englishGuide.total}</strong><div><i style={{ width: `${guidePct}%` }} /></div><small>{guidePct}% dominado</small></div>
+            </div>
+            <div className="englishProgressLinks"><a href="#english">Abrir hábitos</a><a href="#english-guide">Abrir Guia de Inglês</a></div>
           </div>
           {selectedEnglishGroup && (
             <section className="englishTrack" aria-label="Trilha completa de inglês até a fluência">
@@ -116,7 +119,6 @@ export default function LearningProgressPanel({
               </div>
             </section>
           )}
-          <div className="englishProgressLinks"><a href="#english">Abrir hábitos</a><a href="#english-guide">Abrir Guia de Inglês</a></div>
         </article>
 
         <article className="stackProgressCard">

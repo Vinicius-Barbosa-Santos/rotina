@@ -9,11 +9,9 @@ import type { CalendarEvent, MeetingForm, ManualMeeting } from "@/lib/types";
 type ManualMeetingsCardProps = {
   meetings: ManualMeeting[];
   todayEvents: CalendarEvent[];
-  doneMeetingIds: Set<string>;
   form: MeetingForm;
   setForm: Dispatch<SetStateAction<MeetingForm>>;
   onToggleDay: (day: number) => void;
-  onToggleMeeting: (id: string) => void;
   onCreate: () => void;
   onDelete: (id: string) => void;
 };
@@ -21,11 +19,9 @@ type ManualMeetingsCardProps = {
 export default function ManualMeetingsCard({
   meetings,
   todayEvents,
-  doneMeetingIds,
   form,
   setForm,
   onToggleDay,
-  onToggleMeeting,
   onCreate,
   onDelete
 }: ManualMeetingsCardProps) {
@@ -36,45 +32,33 @@ export default function ManualMeetingsCard({
 
   return (
     <article className="routineCard" id="meetings">
-      <span
-        className="sectionProgress"
-        style={{ width: `${todayEvents.length ? (doneMeetingIds.size / todayEvents.length) * 100 : 0}%`, background: "var(--blue)" }}
-      />
       <div className="sectionHeader staticHeader">
-        <span className="iconBadge" style={{ color: "var(--blue)", background: "rgba(106, 167, 255, 0.12)" }}>
+        <span className="iconBadge meetingIconBadge">
           <CalendarDays size={17} aria-hidden />
         </span>
         <span className="sectionTitle">
           <strong>Reuniões</strong>
-          <small>check das reuniões importantes do dia</small>
+          <small>agenda informativa — não interfere no seu progresso</small>
         </span>
         <span className="sectionActions">
-          <span className="countBadge" style={{ color: "var(--blue)", background: "rgba(106, 167, 255, 0.12)" }}>
-            {doneMeetingIds.size}/{todayEvents.length}
+          <span className="countBadge meetingCountBadge">
+            {todayEvents.length} hoje
           </span>
         </span>
       </div>
       <div className="checklist">
         <div className="meetingToday">
-          <p className="meetingSubtitle">Progresso de hoje</p>
+          <p className="meetingSubtitle">Compromissos de hoje</p>
           {todayEvents.length === 0 && <div className="emptySection">Nenhuma reunião com link para hoje.</div>}
-          {todayEvents.map((event) => {
-            const checked = doneMeetingIds.has(event.id);
-            return (
-              <button
-                className={checked ? "meetingCheck done" : "meetingCheck"}
-                key={event.id}
-                type="button"
-                onClick={() => onToggleMeeting(event.id)}
-              >
-                <span className="checkCircle">{checked && "✓"}</span>
-                <span>
-                  <strong>{event.title}</strong>
-                  <small>{event.allDay ? "dia todo" : `${formatTime(event.startsAt)}-${formatTime(event.endsAt)}`}</small>
-                </span>
-              </button>
-            );
-          })}
+          {todayEvents.map((event) => (
+            <div className="meetingCheck informational" key={event.id}>
+              <span className="meetingInfoIcon"><CalendarDays size={14} aria-hidden /></span>
+              <span>
+                <strong>{event.title}</strong>
+                <small>{event.allDay ? "dia todo" : `${formatTime(event.startsAt)}-${formatTime(event.endsAt)}`}</small>
+              </span>
+            </div>
+          ))}
         </div>
 
         <form className="meetingForm" onSubmit={handleSubmit}>

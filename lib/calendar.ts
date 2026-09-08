@@ -139,7 +139,12 @@ export function deduplicateCalendarEvents<T extends CalendarEvent>(events: reado
 }
 
 function normalizeEventTitle(title: string) {
-  return title.trim().toLocaleLowerCase("pt-BR").replace(/\s+/g, " ");
+  return title
+    .normalize("NFKD")
+    .replace(/\p{Diacritic}/gu, "")
+    .toLocaleLowerCase("pt-BR")
+    .replace(/[^\p{Letter}\p{Number}]+/gu, " ")
+    .trim();
 }
 
 function normalizeEventTime(value: string) {

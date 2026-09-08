@@ -109,7 +109,7 @@
     linear-gradient(180deg, rgba(255, 255, 255, 0.035), transparent),
     rgba(255, 255, 255, 0.025);
   color: var(--text);
-  cursor: pointer;
+  cursor: default;
   text-align: left;
   transition:
     border-color 180ms ease,
@@ -117,15 +117,29 @@
     transform 180ms ease;
 }
 
-.meetingCheck:hover {
-  border-color: rgba(106, 167, 255, 0.38);
-  background: rgba(106, 167, 255, 0.09);
-  transform: translateY(-1px);
+.meetingCheck.informational {
+  border-color: rgba(168, 85, 247, 0.22);
+  background: rgba(168, 85, 247, 0.07);
 }
 
-.meetingCheck.done {
-  border-color: rgba(82, 201, 142, 0.34);
-  background: rgba(82, 201, 142, 0.1);
+.meetingInfoIcon,
+.meetingIconBadge {
+  display: grid;
+  place-items: center;
+  color: #c084fc;
+  background: rgba(168, 85, 247, 0.13);
+}
+
+.meetingInfoIcon {
+  width: 24px;
+  height: 24px;
+  flex: 0 0 auto;
+  border-radius: 7px;
+}
+
+.meetingCountBadge {
+  color: #c084fc;
+  background: rgba(168, 85, 247, 0.13);
 }
 
 .meetingCheck > span:last-child {
@@ -191,8 +205,8 @@
 
 .dayToggle:hover,
 .dayToggle.selected {
-  border-color: rgba(106, 167, 255, 0.55);
-  background: rgba(106, 167, 255, 0.13);
+  border-color: rgba(168, 85, 247, 0.58);
+  background: rgba(168, 85, 247, 0.14);
   color: var(--text);
 }
 
@@ -336,8 +350,8 @@
 }
 
 .customTask.done .taskIcon {
-  border-color: rgba(82, 201, 142, 0.26);
-  background: rgba(82, 201, 142, 0.1);
+  border-color: rgba(168, 85, 247, 0.3);
+  background: rgba(168, 85, 247, 0.12);
   color: var(--green);
 }
 

@@ -41,7 +41,6 @@ import { getSaoPauloHoliday } from "@/lib/sao-paulo-holidays";
 import { readStorageJson } from "@/lib/storage";
 import type { CalendarProgressDays } from "@/lib/calendar-progress";
 import type {
-  CalendarEvent,
   CalendarResponse,
   ManualMeeting,
   PersonalizedRoutineItem,
@@ -411,24 +410,23 @@ export default function HomePage() {
     ),
     [calendar?.events, manualEvents]
   );
-  const doneMeetingIds = useMemo(() => {
-    const visibleIds = new Set(visibleAgendaEvents.map((event) => event.id));
-    return new Set((state.meetings ?? []).filter((id) => visibleIds.has(String(id))).map(String));
-  }, [state.meetings, visibleAgendaEvents]);
   const totals = useMemo(() => {
     if (!isTodayProgressDay) return { total: 0, done: 0, pending: 0, pct: 0 };
     const routineTotal = todaySectionViews.reduce((sum, view) => sum + view.items.length, 0);
     const routineDone = todaySectionViews.reduce((sum, view) => sum + view.doneItems.size, 0);
-    const total = routineTotal + visibleAgendaEvents.length;
-    const done = routineDone + doneMeetingIds.size;
-    return { total, done, pending: total - done, pct: total ? Math.round((done / total) * 100) : 0 };
-  }, [doneMeetingIds.size, isTodayProgressDay, todaySectionViews, visibleAgendaEvents.length]);
+    return {
+      total: routineTotal,
+      done: routineDone,
+      pending: routineTotal - routineDone,
+      pct: routineTotal ? Math.round((routineDone / routineTotal) * 100) : 0
+    };
+  }, [isTodayProgressDay, todaySectionViews]);
   const evolution = useMemo(
     () => ({
       weekly: getProgressReportDates("weekly").map(buildProgressPoint),
       monthly: getProgressReportDates("monthly").map(buildProgressPoint)
     }),
-    [calendarProgressDays, manualMeetings, routinePrefs, state, visibleAgendaEvents]
+    [calendarProgressDays, routinePrefs, state]
   );
   const dayModeLabel = isTodayProgressDay ? "Rotina de programação" : todayHoliday ? "Feriado em SP" : "Fluxo opcional";
   const routineNotificationSections = useMemo<RoutineNotificationSection[]>(() => {
@@ -519,10 +517,6 @@ export default function HomePage() {
       else selected.add(key);
       return { ...current, [sectionKey]: Array.from(selected) };
     });
-  }
-
-  function toggleMeeting(id: string) {
-    toggleItem("meetings", id);
   }
 
   function clearSection(sectionKey: string) {
@@ -782,9 +776,6 @@ export default function HomePage() {
           return { label: section.label, done, total };
         })
         .filter((section) => section.total > 0);
-      const meetingProgress = buildMeetingProgressForDate(date, dayState);
-      if (meetingProgress.total > 0) sections.push(meetingProgress);
-
       return [{
         date: key,
         done: sections.reduce((sum, section) => sum + section.done, 0),
@@ -809,13 +800,8 @@ export default function HomePage() {
       },
       { done: 0, total: 0 }
     );
-    const meetingProgress = buildMeetingProgressForDate(date, dayState);
-    const localWithMeetings = {
-      done: localTotals.done + meetingProgress.done,
-      total: localTotals.total + meetingProgress.total
-    };
     const calendarTotals = !isToday ? calendarProgressDays[key] : undefined;
-    const totals = calendarTotals && calendarTotals.done > localWithMeetings.done ? calendarTotals : localWithMeetings;
+    const totals = calendarTotals && calendarTotals.done > localTotals.done ? calendarTotals : localTotals;
 
     return {
       date: key,
@@ -825,16 +811,6 @@ export default function HomePage() {
       total: totals.total,
       pct: totals.total ? Math.round((totals.done / totals.total) * 100) : 0
     };
-  }
-
-  function buildMeetingProgressForDate(date: Date, dayState: RoutineState) {
-    const key = dateKey(date);
-    const events: CalendarEvent[] = key === todayKey()
-      ? visibleAgendaEvents
-      : getManualMeetingEvents(manualMeetings, date).filter((event) => Boolean(event.meetingUrl));
-    const visibleIds = new Set(events.map((event) => event.id));
-    const done = (dayState.meetings ?? []).filter((id) => visibleIds.has(String(id))).length;
-    return { label: "Reuniões", done, total: events.length };
   }
 
   async function markProgressDateComplete(value = historyControlDate, options: { automatic?: boolean } = {}) {
@@ -857,10 +833,7 @@ export default function HomePage() {
       dayState[section.key] = getPersonalizedItems(section, date).map((item) => item.key);
     });
 
-    const meetingEvents = key === todayKey()
-      ? visibleAgendaEvents
-      : getManualMeetingEvents(manualMeetings, date).filter((event) => Boolean(event.meetingUrl));
-    dayState.meetings = meetingEvents.map((event) => event.id);
+    delete dayState.meetings;
 
     const nextStates = { ...storedStates, [key]: dayState };
     const completedDates = [...new Set([...readCompletedDates(), key])]
@@ -910,10 +883,7 @@ export default function HomePage() {
         dayState[section.key] = getPersonalizedItems(section, date).map((item) => item.key);
       });
 
-      const meetingEvents = value === todayKey()
-        ? visibleAgendaEvents
-        : getManualMeetingEvents(manualMeetings, date).filter((event) => Boolean(event.meetingUrl));
-      dayState.meetings = meetingEvents.map((event) => event.id);
+      delete dayState.meetings;
       nextStates[value] = dayState;
       localStorage.setItem(`${routineStatePrefix}${value}`, JSON.stringify(dayState));
     });
@@ -1253,15 +1223,8 @@ export default function HomePage() {
             <a href="#meetings" className="navItem">
               <CalendarDays size={16} aria-hidden />
               <span>Reuniões</span>
-              <i>
-                <b
-                  style={{
-                    width: visibleAgendaEvents.length ? `${(doneMeetingIds.size / visibleAgendaEvents.length) * 100}%` : "0%",
-                    background: "var(--blue)"
-                  }}
-                />
-              </i>
-              <em>{visibleAgendaEvents.length ? `${doneMeetingIds.size}/${visibleAgendaEvents.length}` : "fora"}</em>
+              <i />
+              <em>{visibleAgendaEvents.length ? `${visibleAgendaEvents.length} hoje` : "fora"}</em>
             </a>
             {todaySectionViews.map(({ section, items, doneItems }) => {
               const done = doneItems.size;
@@ -1334,11 +1297,9 @@ export default function HomePage() {
             <ManualMeetingsCard
               meetings={manualMeetings}
               todayEvents={visibleAgendaEvents}
-              doneMeetingIds={doneMeetingIds}
               form={newMeeting}
               setForm={setNewMeeting}
               onToggleDay={toggleMeetingDay}
-              onToggleMeeting={toggleMeeting}
               onCreate={addManualMeeting}
               onDelete={deleteManualMeeting}
             />

@@ -28,7 +28,7 @@ test("deduplicates visually identical meetings even when their links are differe
   };
   const events = deduplicateCalendarEvents([
     { ...sharedTime, id: "event-1", meetingUrl: "https://meet.google.com/abc-defg-hij" },
-    { ...sharedTime, id: "event-2", meetingUrl: "https://meet.google.com/xyz-wxyz-xyz" }
+    { ...sharedTime, id: "event-2", title: "Daily!", meetingUrl: "https://meet.google.com/xyz-wxyz-xyz" }
   ]);
 
   assert.equal(events.length, 1);

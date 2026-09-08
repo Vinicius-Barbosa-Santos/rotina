@@ -29,6 +29,17 @@
     grid-template-columns: 1fr;
   }
 
+  .englishProgressCard {
+    grid-template-columns: 1fr;
+  }
+
+  .englishTrack {
+    border-top: 1px solid var(--line);
+    border-left: 0;
+    padding-top: 16px;
+    padding-left: 0;
+  }
+
   .weekendFlowGrid {
     grid-template-columns: 1fr;
   }

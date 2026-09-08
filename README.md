@@ -58,7 +58,7 @@ O Guia de Trilhas Técnicas organiza dez formações ativas — fundamentos de H
 
 - Login seguro com Google OAuth.
 - Leitura de múltiplos Google Calendars.
-- Agenda lateral mostrando somente eventos com links de reunião.
+- Agenda lateral mostrando uma única ocorrência de cada reunião com link. Reuniões são informativas e não entram no progresso, streak ou relatórios.
 - Detecção de Google Meet, Microsoft Teams, Zoom e outros provedores.
 - Cadastro manual de reuniões recorrentes.
 - Sincronização da rotina com o Google Calendar.
