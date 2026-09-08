@@ -121,6 +121,44 @@ export function mapGoogleCalendarEvents(
   return mappedEvents.sort((a, b) => a.startsAt.localeCompare(b.startsAt));
 }
 
+export function deduplicateCalendarEvents<T extends CalendarEvent>(events: readonly T[]): T[] {
+  const uniqueEvents = new Map<string, T>();
+
+  events.forEach((event) => {
+    const fingerprint = [
+      normalizeEventTitle(event.title),
+      normalizeEventTime(event.startsAt),
+      normalizeEventTime(event.endsAt),
+      event.allDay ? "all-day" : "timed",
+      normalizeMeetingUrl(event.meetingUrl)
+    ].join("|");
+
+    if (!uniqueEvents.has(fingerprint)) uniqueEvents.set(fingerprint, event);
+  });
+
+  return [...uniqueEvents.values()].sort((left, right) => left.startsAt.localeCompare(right.startsAt));
+}
+
+function normalizeEventTitle(title: string) {
+  return title.trim().toLocaleLowerCase("pt-BR").replace(/\s+/g, " ");
+}
+
+function normalizeEventTime(value: string) {
+  const timestamp = Date.parse(value);
+  return Number.isNaN(timestamp) ? value : String(timestamp);
+}
+
+function normalizeMeetingUrl(value?: string) {
+  if (!value) return "";
+
+  try {
+    const url = new URL(value);
+    return `${url.hostname.toLocaleLowerCase("en-US")}${url.pathname.replace(/\/$/, "")}`;
+  } catch {
+    return value.trim().toLocaleLowerCase("en-US");
+  }
+}
+
 function readRawEvents(icsText: string): RawEvent[] {
   const unfolded = icsText.replace(/\r?\n[ \t]/g, "");
   const lines = unfolded.split(/\r?\n/);

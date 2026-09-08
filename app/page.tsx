@@ -11,6 +11,7 @@ import {
 } from "@/lib/routine";
 import { dateKey, formatDate, formatShortDate, todayKey } from "@/lib/date";
 import { defaultMeetingForm, getManualMeetingEvents } from "@/lib/manual-meetings";
+import { deduplicateCalendarEvents } from "@/lib/calendar";
 import type { TaskIconName } from "@/lib/task-icons";
 import {
   calculateProgressStreak,
@@ -405,7 +406,9 @@ export default function HomePage() {
   const englishGuideDone = Math.min(routinePrefs.guideChecks["english-guide"]?.length ?? 0, englishGuideTotal);
   const manualEvents = useMemo(() => getManualMeetingEvents(manualMeetings), [manualMeetings]);
   const visibleAgendaEvents = useMemo(
-    () => [...manualEvents, ...(calendar?.events ?? [])].filter((event) => Boolean(event.meetingUrl)),
+    () => deduplicateCalendarEvents(
+      [...manualEvents, ...(calendar?.events ?? [])].filter((event) => Boolean(event.meetingUrl))
+    ),
     [calendar?.events, manualEvents]
   );
   const doneMeetingIds = useMemo(() => {

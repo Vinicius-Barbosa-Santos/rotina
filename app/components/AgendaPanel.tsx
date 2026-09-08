@@ -3,6 +3,7 @@
 import { useMemo, useState, type MutableRefObject } from "react";
 import { ArrowUpRight, CalendarDays, Loader2, Trash2 } from "lucide-react";
 import { calendarRoutineSyncDays } from "@/lib/calendar-routine-sync";
+import { deduplicateCalendarEvents } from "@/lib/calendar";
 import { formatTime } from "@/lib/date";
 import type { CalendarEvent, CalendarResponse, CalendarSyncSection } from "@/lib/types";
 
@@ -27,10 +28,9 @@ export default function AgendaPanel({
   const [clearing, setClearing] = useState(false);
   const [syncMessage, setSyncMessage] = useState("");
   const events = useMemo(
-    () =>
-      [...manualEvents, ...(calendar?.events ?? [])]
-        .filter((event) => Boolean(event.meetingUrl))
-        .sort((a, b) => a.startsAt.localeCompare(b.startsAt)),
+    () => deduplicateCalendarEvents(
+      [...manualEvents, ...(calendar?.events ?? [])].filter((event) => Boolean(event.meetingUrl))
+    ),
     [calendar?.events, manualEvents]
   );
 

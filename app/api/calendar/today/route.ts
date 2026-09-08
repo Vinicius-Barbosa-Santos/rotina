@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { mapGoogleCalendarEvents, parseCalendarEvents, type GoogleCalendarApiEvent } from "@/lib/calendar";
+import { deduplicateCalendarEvents, mapGoogleCalendarEvents, parseCalendarEvents, type GoogleCalendarApiEvent } from "@/lib/calendar";
 import { clearGoogleAuthCookies, getGoogleAccessToken, GoogleCalendarAuthError } from "@/lib/google-auth";
 
 export const dynamic = "force-dynamic";
@@ -126,10 +126,10 @@ export async function GET(request: Request) {
 
 function getGoogleCalendarIds() {
   const configuredIds = process.env.GOOGLE_CALENDAR_IDS || process.env.GOOGLE_CALENDAR_ID || "";
-  return configuredIds
+  return [...new Set(configuredIds
     .split(",")
     .map((calendarId) => calendarId.trim())
-    .filter(Boolean);
+    .filter(Boolean))];
 }
 
 async function fetchGoogleCalendarEventsWithToken({
@@ -184,7 +184,7 @@ async function fetchGoogleCalendarEventsFromMany({
     )
   );
 
-  return eventsByCalendar.flat().sort((a, b) => a.startsAt.localeCompare(b.startsAt));
+  return deduplicateCalendarEvents(eventsByCalendar.flat());
 }
 
 async function fetchGoogleCalendarEvents({
@@ -234,7 +234,7 @@ async function fetchGoogleCalendarEventsFromManyWithApiKey({
     )
   );
 
-  return eventsByCalendar.flat().sort((a, b) => a.startsAt.localeCompare(b.startsAt));
+  return deduplicateCalendarEvents(eventsByCalendar.flat());
 }
 
 function getGoogleCalendarEventsUrl({

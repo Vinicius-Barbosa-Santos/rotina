@@ -1,6 +1,38 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { mapGoogleCalendarEvents, parseCalendarEvents } from "../lib/calendar.ts";
+import { deduplicateCalendarEvents, mapGoogleCalendarEvents, parseCalendarEvents } from "../lib/calendar.ts";
+
+test("deduplicates the same meeting imported more than once", () => {
+  const sharedMeeting = {
+    title: "Daily Time de Desenvolvimento (N3 – Corretivas)",
+    startsAt: "2026-09-08T10:15:00-03:00",
+    endsAt: "2026-09-08T11:00:00-03:00",
+    allDay: false,
+    meetingUrl: "https://meet.google.com/abc-defg-hij"
+  };
+  const events = deduplicateCalendarEvents([
+    { ...sharedMeeting, id: "calendar-a:event-1", calendarId: "calendar-a" },
+    { ...sharedMeeting, id: "calendar-b:event-1", calendarId: "calendar-b" }
+  ]);
+
+  assert.equal(events.length, 1);
+  assert.equal(events[0].id, "calendar-a:event-1");
+});
+
+test("keeps simultaneous meetings when their links are different", () => {
+  const sharedTime = {
+    title: "Daily",
+    startsAt: "2026-09-08T10:15:00-03:00",
+    endsAt: "2026-09-08T11:00:00-03:00",
+    allDay: false
+  };
+  const events = deduplicateCalendarEvents([
+    { ...sharedTime, id: "event-1", meetingUrl: "https://meet.google.com/abc-defg-hij" },
+    { ...sharedTime, id: "event-2", meetingUrl: "https://meet.google.com/xyz-wxyz-xyz" }
+  ]);
+
+  assert.equal(events.length, 2);
+});
 
 test("mapGoogleCalendarEvents only exposes recognized meeting links", () => {
   const events = mapGoogleCalendarEvents([
