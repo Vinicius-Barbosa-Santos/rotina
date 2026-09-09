@@ -121,14 +121,18 @@ export function mapGoogleCalendarEvents(
   return mappedEvents.sort((a, b) => a.startsAt.localeCompare(b.startsAt));
 }
 
-export function deduplicateCalendarEvents<T extends CalendarEvent>(events: readonly T[]): T[] {
+export function deduplicateCalendarEvents<T extends CalendarEvent>(
+  events: readonly T[],
+  options: { timeZone?: string } = {}
+): T[] {
   const uniqueEvents = new Map<string, T>();
+  const timeZone = options.timeZone ?? "America/Sao_Paulo";
 
   events.forEach((event) => {
     const fingerprint = [
       normalizeEventTitle(event.title),
-      normalizeEventTime(event.startsAt),
-      normalizeEventTime(event.endsAt),
+      normalizeEventTime(event.startsAt, timeZone),
+      normalizeEventTime(event.endsAt, timeZone),
       event.allDay ? "all-day" : "timed"
     ].join("|");
 
@@ -147,9 +151,16 @@ function normalizeEventTitle(title: string) {
     .trim();
 }
 
-function normalizeEventTime(value: string) {
-  const timestamp = Date.parse(value);
-  return Number.isNaN(timestamp) ? value : String(Math.floor(timestamp / 60_000));
+function normalizeEventTime(value: string, timeZone: string) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+
+  return new Intl.DateTimeFormat("pt-BR", {
+    timeZone,
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23"
+  }).format(date);
 }
 
 function readRawEvents(icsText: string): RawEvent[] {

@@ -406,9 +406,10 @@ export default function HomePage() {
   const manualEvents = useMemo(() => getManualMeetingEvents(manualMeetings), [manualMeetings]);
   const visibleAgendaEvents = useMemo(
     () => deduplicateCalendarEvents(
-      [...manualEvents, ...(calendar?.events ?? [])].filter((event) => Boolean(event.meetingUrl))
+      [...manualEvents, ...(calendar?.events ?? [])].filter((event) => Boolean(event.meetingUrl)),
+      { timeZone: calendar?.timeZone }
     ),
-    [calendar?.events, manualEvents]
+    [calendar?.events, calendar?.timeZone, manualEvents]
   );
   const totals = useMemo(() => {
     if (!isTodayProgressDay) return { total: 0, done: 0, pending: 0, pct: 0 };

@@ -130,6 +130,14 @@ export default function LearningProgressPanel({
             </form>
           </div>
 
+          <div className="stackMotionStrip" aria-hidden>
+            {stacks.map((stack, index) => (
+              <span key={stack} style={{ "--stack-index": index } as CSSProperties}>
+                <StackIcon stack={stack} />
+              </span>
+            ))}
+          </div>
+
           <div className="stackCategoryTabs" role="tablist" aria-label="Categorias de tecnologias">
             {categories.map((item) => (
               <button key={item} type="button" role="tab" aria-selected={item === category} className={item === category ? "active" : ""}
@@ -145,10 +153,10 @@ export default function LearningProgressPanel({
 
           <div className="stackExplorer">
             <div className="stackPicker" role="tablist" aria-label={`Tecnologias de ${category}`}>
-              {categoryStacks.map((stack) => {
+              {categoryStacks.map((stack, index) => {
                 const progress = getTopicProgress(stack, stackTopicChecks);
                 return (
-                  <button key={stack} type="button" role="tab" aria-selected={stack === selectedStack} className={stack === selectedStack ? "active" : ""} onClick={() => { setActiveStack(stack); setActiveTopicIndex(0); }}>
+                  <button key={stack} style={{ "--stack-index": index } as CSSProperties} type="button" role="tab" aria-selected={stack === selectedStack} className={stack === selectedStack ? "active" : ""} onClick={() => { setActiveStack(stack); setActiveTopicIndex(0); }}>
                     <span className="stackProgressIcon"><StackIcon stack={stack} /></span>
                     <span className="stackPickerLabel"><strong>{stack}</strong><small>{progress.done}/{progress.total} tópicos</small></span>
                     <span className="stackPickerProgress"><i style={{ width: `${progress.pct}%` }} /></span>
@@ -159,7 +167,7 @@ export default function LearningProgressPanel({
             </div>
 
             {selectedStack && (
-              <section className="stackTopicPanel" aria-label={`Tópicos de ${selectedStack}`}>
+              <section className="stackTopicPanel" key={selectedStack} aria-label={`Tópicos de ${selectedStack}`}>
                 <div className="stackTopicHeader">
                   <div className="stackTopicTitle"><span className="stackProgressIcon large"><StackIcon stack={selectedStack} /></span><div><span>Trilha selecionada</span><h4>{selectedStack}</h4></div></div>
                   <div className="stackTopicSummary"><strong>{selectedProgress.pct}%</strong><span>{selectedProgress.done} de {selectedProgress.total}</span></div>
@@ -180,7 +188,7 @@ export default function LearningProgressPanel({
                     const topicKey = String(activeTopicIndex);
                     const checked = selectedChecks.has(topicKey);
                     return (
-                      <label className={checked ? "stackTopicSlide checked" : "stackTopicSlide"}>
+                      <label className={checked ? "stackTopicSlide checked" : "stackTopicSlide"} key={`${selectedStack}-${topicKey}`}>
                         <input type="checkbox" checked={checked} onChange={() => onToggleStackTopic(selectedStack, topicKey)} />
                         <span className="stackTopicCheckbox"><Check size={16} aria-hidden /></span>
                         <span><small>Etapa {activeTopicIndex + 1}</small><strong>{selectedTopics[activeTopicIndex]}</strong></span>

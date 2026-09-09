@@ -34,6 +34,29 @@ test("deduplicates visually identical meetings even when their links are differe
   assert.equal(events.length, 1);
 });
 
+test("deduplicates copies on different dates when title and visible time are equal", () => {
+  const events = deduplicateCalendarEvents([
+    {
+      id: "event-today",
+      title: "Daily Time de Desenvolvimento (N3 – Corretivas)",
+      startsAt: "2026-09-09T10:15:00-03:00",
+      endsAt: "2026-09-09T11:00:00-03:00",
+      allDay: false,
+      meetingUrl: "https://meet.google.com/abc-defg-hij"
+    },
+    {
+      id: "event-adjacent-date",
+      title: "Daily Time de Desenvolvimento (N3 - Corretivas)",
+      startsAt: "2026-09-10T10:15:30-03:00",
+      endsAt: "2026-09-10T11:00:30-03:00",
+      allDay: false,
+      meetingUrl: "https://meet.google.com/xyz-wxyz-xyz"
+    }
+  ], { timeZone: "America/Sao_Paulo" });
+
+  assert.equal(events.length, 1);
+});
+
 test("keeps simultaneous meetings when their titles are different", () => {
   const events = deduplicateCalendarEvents([
     {

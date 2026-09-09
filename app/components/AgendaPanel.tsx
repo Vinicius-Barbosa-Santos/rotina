@@ -29,9 +29,10 @@ export default function AgendaPanel({
   const [syncMessage, setSyncMessage] = useState("");
   const events = useMemo(
     () => deduplicateCalendarEvents(
-      [...manualEvents, ...(calendar?.events ?? [])].filter((event) => Boolean(event.meetingUrl))
+      [...manualEvents, ...(calendar?.events ?? [])].filter((event) => Boolean(event.meetingUrl)),
+      { timeZone: calendar?.timeZone }
     ),
-    [calendar?.events, manualEvents]
+    [calendar?.events, calendar?.timeZone, manualEvents]
   );
 
   async function syncRoutineReminders() {

@@ -184,7 +184,7 @@ async function fetchGoogleCalendarEventsFromMany({
     )
   );
 
-  return deduplicateCalendarEvents(eventsByCalendar.flat());
+  return deduplicateCalendarEvents(eventsByCalendar.flat(), { timeZone });
 }
 
 async function fetchGoogleCalendarEvents({
@@ -234,7 +234,7 @@ async function fetchGoogleCalendarEventsFromManyWithApiKey({
     )
   );
 
-  return deduplicateCalendarEvents(eventsByCalendar.flat());
+  return deduplicateCalendarEvents(eventsByCalendar.flat(), { timeZone });
 }
 
 function getGoogleCalendarEventsUrl({

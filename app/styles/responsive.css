@@ -103,6 +103,11 @@
     width: 100%;
   }
 
+  .stackMotionStrip {
+    justify-content: flex-start;
+    overflow-x: auto;
+  }
+
   .stackExplorer {
     grid-template-columns: 1fr;
   }
