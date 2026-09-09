@@ -609,6 +609,8 @@
 }
 
 .stackMotionStrip {
+  position: relative;
+  isolation: isolate;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -620,11 +622,26 @@
   border-radius: 12px;
   padding: 8px 14px;
   background:
-    radial-gradient(circle at 50% 120%, rgba(168, 85, 247, 0.18), transparent 56%),
+    linear-gradient(90deg, transparent, rgba(168, 85, 247, 0.07), transparent),
     rgba(168, 85, 247, 0.035);
 }
 
+.stackMotionStrip::before {
+  position: absolute;
+  z-index: 0;
+  top: 0;
+  bottom: 0;
+  left: -28%;
+  width: 24%;
+  background: linear-gradient(90deg, transparent, rgba(181, 123, 238, 0.2), transparent);
+  content: "";
+  filter: blur(8px);
+  animation: stackLightSweep 7s ease-in-out infinite;
+}
+
 .stackMotionStrip > span {
+  position: relative;
+  z-index: 1;
   display: grid;
   place-items: center;
   width: 34px;
@@ -634,8 +651,9 @@
   border-radius: 10px;
   background: rgba(13, 11, 17, 0.78);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.22);
-  animation: stackFloat 3.2s ease-in-out infinite;
-  animation-delay: calc(var(--stack-index, 0) * -180ms);
+  animation: stackSpotlight 7s ease-in-out infinite;
+  animation-delay: calc(var(--stack-index, 0) * 320ms);
+  will-change: transform, border-color, box-shadow;
 }
 
 .stackMotionStrip .dayStackIcon,
@@ -1082,14 +1100,33 @@
   background: var(--green);
 }
 
-@keyframes stackFloat {
-  0%, 100% {
-    transform: translateY(2px) rotate(-1deg);
+@keyframes stackSpotlight {
+  0%, 8%, 22%, 100% {
+    border-color: rgba(255, 255, 255, 0.08);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.22);
+    transform: translateY(0) scale(1);
   }
-  50% {
-    border-color: rgba(168, 85, 247, 0.42);
-    box-shadow: 0 10px 28px rgba(168, 85, 247, 0.2);
-    transform: translateY(-3px) rotate(1deg);
+  13% {
+    border-color: rgba(192, 132, 252, 0.72);
+    box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.1), 0 8px 24px rgba(168, 85, 247, 0.32);
+    transform: translateY(-2px) scale(1.09);
+  }
+}
+
+@keyframes stackLightSweep {
+  0%, 12% {
+    opacity: 0;
+    transform: translateX(0);
+  }
+  24% {
+    opacity: 1;
+  }
+  76% {
+    opacity: 1;
+  }
+  88%, 100% {
+    opacity: 0;
+    transform: translateX(650%);
   }
 }
 
