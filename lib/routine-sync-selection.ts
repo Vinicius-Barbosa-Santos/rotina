@@ -43,6 +43,11 @@ function hasRoutinePrefsData(prefs: RoutinePrefs) {
       Object.keys(prefs.iconOverrides ?? {}).length ||
       Object.keys(prefs.guideChecks ?? {}).length ||
       Object.keys(prefs.stackProgress ?? {}).length ||
-      Object.keys(prefs.stackTopicChecks ?? {}).length
+      Object.keys(prefs.stackTopicChecks ?? {}).length ||
+      Object.keys(prefs.stackTopicInProgress ?? {}).length ||
+      Object.keys(prefs.stackNextSteps ?? {}).length ||
+      Object.keys(prefs.stackTopicEvidence ?? {}).length ||
+      Object.keys(prefs.stackTopicReviewedAt ?? {}).length ||
+      Object.keys(prefs.weeklyPriorities ?? {}).length
   );
 }

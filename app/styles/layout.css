@@ -301,6 +301,183 @@
   gap: 14px;
 }
 
+.weeklyFocusCard {
+  display: grid;
+  grid-template-columns: minmax(190px, 0.8fr) minmax(280px, 1.45fr) minmax(180px, 0.75fr) minmax(210px, 0.9fr);
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 14px;
+  border: 1px solid rgba(181, 123, 238, 0.2);
+  border-radius: 16px;
+  padding: 14px;
+  background: linear-gradient(115deg, rgba(168, 85, 247, 0.1), rgba(22, 22, 24, 0.94) 38%);
+}
+
+.weeklyFocusIntro {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.weeklyFocusIcon {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  flex: 0 0 auto;
+  border: 1px solid rgba(181, 123, 238, 0.32);
+  border-radius: 11px;
+  background: rgba(181, 123, 238, 0.13);
+  color: #c9a7ff;
+}
+
+.weeklyFocusIntro h3 {
+  margin: 2px 0;
+  font-size: 14px;
+}
+
+.weeklyFocusIntro small {
+  color: var(--soft);
+  font-size: 9px;
+}
+
+.weeklyPriorityList {
+  display: grid;
+  gap: 5px;
+}
+
+.weeklyPriority,
+.weeklyPriorityForm {
+  display: grid;
+  grid-template-columns: 26px minmax(0, 1fr) 28px;
+  align-items: center;
+  gap: 6px;
+}
+
+.weeklyPriority input,
+.weeklyPriorityForm input,
+.stackNextStep input,
+.stackEvidence input {
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 7px 9px;
+  background: rgba(255, 255, 255, 0.035);
+  color: var(--text);
+  outline: 0;
+}
+
+.weeklyPriority input:focus,
+.weeklyPriorityForm input:focus,
+.stackNextStep input:focus,
+.stackEvidence input:focus {
+  border-color: rgba(181, 123, 238, 0.55);
+}
+
+.weeklyPriority.done input {
+  color: var(--soft);
+  text-decoration: line-through;
+}
+
+.weeklyPriorityCheck,
+.weeklyPriorityDelete,
+.weeklyPriorityForm button {
+  display: grid;
+  place-items: center;
+  height: 26px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  padding: 0;
+  background: rgba(255, 255, 255, 0.035);
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.weeklyPriority.done .weeklyPriorityCheck {
+  border-color: #b57bee;
+  background: #b57bee;
+  color: #111014;
+}
+
+.weeklyPriorityDelete:hover {
+  color: var(--danger);
+}
+
+.weeklyPriorityForm {
+  grid-template-columns: minmax(0, 1fr) 28px;
+  padding-left: 32px;
+}
+
+.weeklyPriorityForm button {
+  background: rgba(181, 123, 238, 0.16);
+  color: #c9a7ff;
+}
+
+.weeklyPriorityForm button:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+
+.weeklyLoad,
+.weeklyReview {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 9px;
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.weeklyLoad > div,
+.weeklyReview {
+  gap: 2px;
+}
+
+.weeklyLoad small,
+.weeklyReview small {
+  color: var(--soft);
+  font-size: 8px;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.weeklyLoad strong,
+.weeklyReview strong {
+  font-size: 11px;
+}
+
+.weeklyLoad span,
+.weeklyReview span {
+  color: var(--muted);
+  font-size: 9px;
+  line-height: 1.35;
+}
+
+.weeklyLoad.balanced {
+  border-color: rgba(181, 123, 238, 0.28);
+  color: #c9a7ff;
+}
+
+.weeklyLoad.high {
+  border-color: rgba(244, 133, 90, 0.35);
+  color: var(--danger);
+}
+
+.weeklyReview {
+  grid-template-columns: 1fr;
+}
+
+.weeklyReview.active {
+  border-color: rgba(181, 123, 238, 0.45);
+  background: rgba(181, 123, 238, 0.1);
+}
+
 .englishProgressCard,
 .stackProgressCard {
   min-width: 0;
@@ -977,6 +1154,25 @@
   background: rgba(255, 255, 255, 0.07);
 }
 
+.stackNextStep,
+.stackEvidence {
+  display: grid;
+  gap: 5px;
+}
+
+.stackNextStep {
+  margin-bottom: 12px;
+}
+
+.stackNextStep span,
+.stackEvidence span {
+  color: var(--soft);
+  font-size: 8px;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
 .stackTopicSlider {
   display: grid;
   gap: 12px;
@@ -1006,6 +1202,11 @@
   color: var(--green);
 }
 
+.stackTopicSliderNav button:disabled {
+  cursor: not-allowed;
+  opacity: 0.35;
+}
+
 .stackTopicSliderNav > span {
   color: var(--soft);
   font-size: 10px;
@@ -1013,8 +1214,30 @@
   text-transform: uppercase;
 }
 
+.stackPendingFilter {
+  display: inline-flex;
+  align-items: center;
+  justify-self: end;
+  gap: 5px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 6px 9px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 9px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.stackPendingFilter.active {
+  border-color: rgba(181, 123, 238, 0.42);
+  background: rgba(181, 123, 238, 0.1);
+  color: #c9a7ff;
+}
+
 .stackTopicSlide {
-  display: flex;
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr);
   align-items: center;
   gap: 12px;
   min-height: 90px;
@@ -1025,18 +1248,11 @@
   color: var(--muted);
   font-size: 11px;
   font-weight: 700;
-  cursor: pointer;
   transition: 140ms ease;
   animation: stackTopicReveal 220ms ease-out both;
 }
 
-.stackTopicSlide input {
-  position: absolute;
-  opacity: 0;
-  pointer-events: none;
-}
-
-.stackTopicSlide > span:last-child {
+.stackTopicSlide > span:nth-child(2) {
   display: grid;
   gap: 5px;
 }
@@ -1066,16 +1282,113 @@
   color: transparent;
 }
 
-.stackTopicSlide.checked {
+.stackTopicSlide.done {
   border-color: rgba(168, 85, 247, 0.34);
   background: rgba(168, 85, 247, 0.08);
   color: var(--text);
 }
 
-.stackTopicSlide.checked .stackTopicCheckbox {
+.stackTopicSlide.done .stackTopicCheckbox {
   border-color: var(--green);
   background: var(--green);
   color: #0d1012;
+}
+
+.stackTopicSlide.progress {
+  border-color: rgba(250, 204, 21, 0.26);
+  background: rgba(250, 204, 21, 0.045);
+}
+
+.stackTopicSlide.progress .stackTopicCheckbox {
+  border-color: rgba(250, 204, 21, 0.55);
+  color: #facc15;
+}
+
+.stackTopicStatus {
+  display: flex;
+  grid-column: 1 / -1;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.stackTopicStatus button {
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 6px 9px;
+  background: rgba(255, 255, 255, 0.025);
+  color: var(--soft);
+  font-size: 9px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.stackTopicStatus button.active {
+  border-color: var(--line-2);
+  color: var(--text);
+}
+
+.stackTopicStatus button.active.progress {
+  border-color: rgba(250, 204, 21, 0.42);
+  background: rgba(250, 204, 21, 0.08);
+  color: #facc15;
+}
+
+.stackTopicStatus button.active.done {
+  border-color: rgba(181, 123, 238, 0.5);
+  background: rgba(181, 123, 238, 0.12);
+  color: #d8b4fe;
+}
+
+.stackEvidence,
+.stackReviewMeta {
+  grid-column: 1 / -1;
+}
+
+.stackReviewMeta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.stackReviewMeta > span,
+.stackReviewMeta button {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--soft);
+  font-size: 9px;
+}
+
+.stackReviewMeta button {
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: #c9a7ff;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.stackEmptyTopics {
+  display: grid;
+  justify-items: center;
+  gap: 5px;
+  min-height: 130px;
+  align-content: center;
+  border: 1px dashed rgba(181, 123, 238, 0.32);
+  border-radius: 12px;
+  color: #c9a7ff;
+  text-align: center;
+}
+
+.stackEmptyTopics strong {
+  color: var(--text);
+  font-size: 12px;
+}
+
+.stackEmptyTopics span {
+  color: var(--muted);
+  font-size: 10px;
 }
 
 .stackTopicDots {

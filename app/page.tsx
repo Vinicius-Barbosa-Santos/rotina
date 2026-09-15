@@ -97,6 +97,14 @@ function haveSameDoneKeys(previous: RoutineState[string] = [], current: RoutineS
   return current.every((key) => previousKeys.has(String(key)));
 }
 
+function getCurrentWeekKey(date = new Date()) {
+  const monday = new Date(date);
+  const weekday = monday.getDay() || 7;
+  monday.setHours(12, 0, 0, 0);
+  monday.setDate(monday.getDate() - weekday + 1);
+  return dateKey(monday);
+}
+
 export default function HomePage() {
   const [hydrated, setHydrated] = useState(false);
   const [syncReady, setSyncReady] = useState(false);
@@ -135,7 +143,12 @@ export default function HomePage() {
     iconOverrides: {},
     guideChecks: {},
     stackProgress: {},
-    stackTopicChecks: {}
+    stackTopicChecks: {},
+    stackTopicInProgress: {},
+    stackNextSteps: {},
+    stackTopicEvidence: {},
+    stackTopicReviewedAt: {},
+    weeklyPriorities: {}
   });
   const [newRoutineItems, setNewRoutineItems] = useState<Record<string, string>>({});
   const [streak, setStreak] = useState(0);
@@ -580,20 +593,106 @@ export default function HomePage() {
     setRoutinePrefs((current) => {
       const stackProgress = { ...current.stackProgress };
       const stackTopicChecks = { ...current.stackTopicChecks };
+      const stackTopicInProgress = { ...current.stackTopicInProgress };
+      const stackNextSteps = { ...current.stackNextSteps };
+      const stackTopicEvidence = { ...current.stackTopicEvidence };
+      const stackTopicReviewedAt = { ...current.stackTopicReviewedAt };
       delete stackProgress[stack];
       delete stackTopicChecks[stack];
-      return { ...current, stackProgress, stackTopicChecks };
+      delete stackTopicInProgress[stack];
+      delete stackNextSteps[stack];
+      delete stackTopicEvidence[stack];
+      delete stackTopicReviewedAt[stack];
+      return {
+        ...current,
+        stackProgress,
+        stackTopicChecks,
+        stackTopicInProgress,
+        stackNextSteps,
+        stackTopicEvidence,
+        stackTopicReviewedAt
+      };
     });
   }
 
-  function toggleStackTopic(stack: string, topic: string) {
+  function setStackTopicStatus(stack: string, topic: string, status: "pending" | "progress" | "done") {
+    setRoutinePrefs((current) => {
+      const completed = new Set(current.stackTopicChecks[stack] ?? []);
+      const inProgress = new Set(current.stackTopicInProgress[stack] ?? []);
+      completed.delete(topic);
+      inProgress.delete(topic);
+      if (status === "done") completed.add(topic);
+      if (status === "progress") inProgress.add(topic);
+
+      return {
+        ...current,
+        stackTopicChecks: { ...current.stackTopicChecks, [stack]: [...completed] },
+        stackTopicInProgress: { ...current.stackTopicInProgress, [stack]: [...inProgress] },
+        stackTopicReviewedAt: status === "done"
+          ? {
+              ...current.stackTopicReviewedAt,
+              [stack]: { ...(current.stackTopicReviewedAt[stack] ?? {}), [topic]: todayKey() }
+            }
+          : current.stackTopicReviewedAt
+      };
+    });
+  }
+
+  function setStackNextStep(stack: string, value: string) {
     setRoutinePrefs((current) => ({
       ...current,
-      stackTopicChecks: {
-        ...current.stackTopicChecks,
-        [stack]: (current.stackTopicChecks[stack] ?? []).includes(topic)
-          ? (current.stackTopicChecks[stack] ?? []).filter((item) => item !== topic)
-          : [...(current.stackTopicChecks[stack] ?? []), topic]
+      stackNextSteps: { ...current.stackNextSteps, [stack]: value }
+    }));
+  }
+
+  function setStackTopicEvidence(stack: string, topic: string, value: string) {
+    setRoutinePrefs((current) => ({
+      ...current,
+      stackTopicEvidence: {
+        ...current.stackTopicEvidence,
+        [stack]: { ...(current.stackTopicEvidence[stack] ?? {}), [topic]: value }
+      }
+    }));
+  }
+
+  function reviewStackTopic(stack: string, topic: string) {
+    setRoutinePrefs((current) => ({
+      ...current,
+      stackTopicReviewedAt: {
+        ...current.stackTopicReviewedAt,
+        [stack]: { ...(current.stackTopicReviewedAt[stack] ?? {}), [topic]: todayKey() }
+      }
+    }));
+  }
+
+  function addWeeklyPriority(label: string) {
+    const nextLabel = label.trim();
+    if (!nextLabel) return;
+    const week = getCurrentWeekKey();
+    setRoutinePrefs((current) => {
+      const priorities = current.weeklyPriorities[week] ?? [];
+      if (priorities.length >= 3) return current;
+      return {
+        ...current,
+        weeklyPriorities: {
+          ...current.weeklyPriorities,
+          [week]: [...priorities, { id: crypto.randomUUID(), label: nextLabel, done: false }]
+        }
+      };
+    });
+  }
+
+  function updateWeeklyPriority(id: string, update: { label?: string; done?: boolean; remove?: boolean }) {
+    const week = getCurrentWeekKey();
+    setRoutinePrefs((current) => ({
+      ...current,
+      weeklyPriorities: {
+        ...current.weeklyPriorities,
+        [week]: update.remove
+          ? (current.weeklyPriorities[week] ?? []).filter((priority) => priority.id !== id)
+          : (current.weeklyPriorities[week] ?? []).map((priority) =>
+              priority.id === id ? { ...priority, ...update } : priority
+            )
       }
     }));
   }
@@ -915,7 +1014,12 @@ export default function HomePage() {
       progressResetVersion,
       guideChecks: {},
       stackProgress: {},
-      stackTopicChecks: {}
+      stackTopicChecks: {},
+      stackTopicInProgress: {},
+      stackNextSteps: {},
+      stackTopicEvidence: {},
+      stackTopicReviewedAt: {},
+      weeklyPriorities: {}
     };
 
     const keys = Array.from({ length: localStorage.length }, (_, index) => localStorage.key(index)).filter(
@@ -1280,6 +1384,12 @@ export default function HomePage() {
             stacks={stackPreview}
             customStacks={profileStacks}
             stackTopicChecks={routinePrefs.stackTopicChecks}
+            stackTopicInProgress={routinePrefs.stackTopicInProgress}
+            stackNextSteps={routinePrefs.stackNextSteps}
+            stackTopicEvidence={routinePrefs.stackTopicEvidence}
+            stackTopicReviewedAt={routinePrefs.stackTopicReviewedAt}
+            weeklyPriorities={routinePrefs.weeklyPriorities[getCurrentWeekKey()] ?? []}
+            currentWeekKey={getCurrentWeekKey()}
             englishDaily={{ done: englishView?.doneItems.size ?? 0, total: englishView?.items.length ?? 0 }}
             englishGuide={{ done: englishGuideDone, total: englishGuideTotal }}
             englishTrack={englishGuideSection?.referenceGroups ?? []}
@@ -1288,7 +1398,12 @@ export default function HomePage() {
             onNewStackChange={setNewStack}
             onAddStack={addProfileStack}
             onDeleteStack={deleteProfileStack}
-            onToggleStackTopic={toggleStackTopic}
+            onSetStackTopicStatus={setStackTopicStatus}
+            onSetStackNextStep={setStackNextStep}
+            onSetStackTopicEvidence={setStackTopicEvidence}
+            onReviewStackTopic={reviewStackTopic}
+            onAddWeeklyPriority={addWeeklyPriority}
+            onUpdateWeeklyPriority={updateWeeklyPriority}
             onToggleEnglishTopic={(key) => toggleGuideItem("english-guide", key)}
           />
 

@@ -46,6 +46,12 @@ export type RoutineCustomItem = {
   label: string;
 };
 
+export type WeeklyPriority = {
+  id: string;
+  label: string;
+  done: boolean;
+};
+
 export type RoutinePrefs = {
   progressResetVersion: string;
   hiddenItems: Record<string, number[]>;
@@ -56,6 +62,11 @@ export type RoutinePrefs = {
   guideChecks: Record<string, string[]>;
   stackProgress: Record<string, number>;
   stackTopicChecks: Record<string, string[]>;
+  stackTopicInProgress: Record<string, string[]>;
+  stackNextSteps: Record<string, string>;
+  stackTopicEvidence: Record<string, Record<string, string>>;
+  stackTopicReviewedAt: Record<string, Record<string, string>>;
+  weeklyPriorities: Record<string, WeeklyPriority[]>;
 };
 
 export type PersonalizedRoutineItem = {

@@ -32,7 +32,12 @@ export function getDefaultRoutineSyncData(): RoutineSyncData {
       iconOverrides: {},
       guideChecks: {},
       stackProgress: {},
-      stackTopicChecks: {}
+      stackTopicChecks: {},
+      stackTopicInProgress: {},
+      stackNextSteps: {},
+      stackTopicEvidence: {},
+      stackTopicReviewedAt: {},
+      weeklyPriorities: {}
     },
     manualMeetings: [],
     profileStacks: [],
@@ -123,7 +128,12 @@ function normalizeRoutineSyncData(data: Partial<RoutineSyncData>): RoutineSyncDa
       iconOverrides: isObject(data.routinePrefs?.iconOverrides) ? data.routinePrefs.iconOverrides : {},
       guideChecks: resetProgress ? {} : isObject(data.routinePrefs?.guideChecks) ? data.routinePrefs.guideChecks as Record<string, string[]> : {},
       stackProgress: resetProgress ? {} : normalizeStackProgress(data.routinePrefs?.stackProgress),
-      stackTopicChecks: resetProgress ? {} : normalizeStackTopicChecks(data.routinePrefs?.stackTopicChecks)
+      stackTopicChecks: resetProgress ? {} : normalizeStackTopicChecks(data.routinePrefs?.stackTopicChecks),
+      stackTopicInProgress: resetProgress ? {} : normalizeStackTopicChecks(data.routinePrefs?.stackTopicInProgress),
+      stackNextSteps: normalizeStringRecord(data.routinePrefs?.stackNextSteps),
+      stackTopicEvidence: resetProgress ? {} : normalizeNestedStringRecord(data.routinePrefs?.stackTopicEvidence),
+      stackTopicReviewedAt: resetProgress ? {} : normalizeNestedStringRecord(data.routinePrefs?.stackTopicReviewedAt),
+      weeklyPriorities: resetProgress ? {} : normalizeWeeklyPriorities(data.routinePrefs?.weeklyPriorities)
     },
     manualMeetings: Array.isArray(data.manualMeetings) ? data.manualMeetings : [],
     profileStacks: Array.isArray(data.profileStacks)
@@ -151,6 +161,47 @@ function normalizeStackTopicChecks(value: unknown) {
     Object.entries(value)
       .filter(([stack, topics]) => stack.trim() && Array.isArray(topics))
       .map(([stack, topics]) => [stack, [...new Set((topics as unknown[]).filter(isString).map((topic) => topic.trim()).filter(Boolean))]])
+  );
+}
+
+function normalizeStringRecord(value: unknown): Record<string, string> {
+  if (!isObject(value)) return {};
+
+  return Object.fromEntries(
+    Object.entries(value)
+      .filter(([key, item]) => key.trim() && typeof item === "string")
+      .map(([key, item]) => [key, item as string])
+  );
+}
+
+function normalizeNestedStringRecord(value: unknown): Record<string, Record<string, string>> {
+  if (!isObject(value)) return {};
+
+  return Object.fromEntries(
+    Object.entries(value)
+      .filter(([key, item]) => key.trim() && isObject(item))
+      .map(([key, item]) => [key, normalizeStringRecord(item)])
+  );
+}
+
+function normalizeWeeklyPriorities(value: unknown): RoutinePrefs["weeklyPriorities"] {
+  if (!isObject(value)) return {};
+
+  return Object.fromEntries(
+    Object.entries(value).map(([week, priorities]) => [
+      week,
+      Array.isArray(priorities)
+        ? priorities
+            .filter((priority) => isObject(priority) && typeof priority.id === "string" && typeof priority.label === "string")
+            .map((priority) => ({
+              id: priority.id as string,
+              label: (priority.label as string).trim(),
+              done: Boolean(priority.done)
+            }))
+            .filter((priority) => priority.label)
+            .slice(0, 3)
+        : []
+    ])
   );
 }
 

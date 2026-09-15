@@ -1,3 +1,9 @@
+@media (max-width: 1280px) {
+  .weeklyFocusCard {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
 @media (max-width: 920px) {
   .topbar {
     padding: 14px 16px;
@@ -96,6 +102,15 @@
 
   .learningHubSummary {
     width: 100%;
+  }
+
+  .weeklyFocusCard {
+    grid-template-columns: 1fr;
+  }
+
+  .stackReviewMeta {
+    align-items: flex-start;
+    flex-direction: column;
   }
 
   .stackProgressForm {

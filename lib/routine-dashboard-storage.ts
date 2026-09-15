@@ -31,7 +31,12 @@ export function normalizeRoutinePrefs(savedPrefs: Partial<RoutinePrefs>): Routin
     iconOverrides: savedPrefs.iconOverrides ?? {},
     guideChecks,
     stackProgress: resetProgress ? {} : normalizeStackProgress(savedPrefs.stackProgress),
-    stackTopicChecks: resetProgress ? {} : normalizeStackTopicChecks(savedPrefs.stackTopicChecks)
+    stackTopicChecks: resetProgress ? {} : normalizeStackTopicChecks(savedPrefs.stackTopicChecks),
+    stackTopicInProgress: resetProgress ? {} : normalizeStackTopicChecks(savedPrefs.stackTopicInProgress),
+    stackNextSteps: normalizeStringRecord(savedPrefs.stackNextSteps),
+    stackTopicEvidence: resetProgress ? {} : normalizeNestedStringRecord(savedPrefs.stackTopicEvidence),
+    stackTopicReviewedAt: resetProgress ? {} : normalizeNestedStringRecord(savedPrefs.stackTopicReviewedAt),
+    weeklyPriorities: resetProgress ? {} : normalizeWeeklyPriorities(savedPrefs.weeklyPriorities)
   };
 }
 
@@ -152,7 +157,12 @@ function hasRoutinePrefsData(prefs: RoutinePrefs) {
       Object.keys(prefs.iconOverrides).length ||
       Object.keys(prefs.guideChecks).length ||
       Object.keys(prefs.stackProgress).length ||
-      Object.keys(prefs.stackTopicChecks).length
+      Object.keys(prefs.stackTopicChecks).length ||
+      Object.keys(prefs.stackTopicInProgress).length ||
+      Object.keys(prefs.stackNextSteps).length ||
+      Object.keys(prefs.stackTopicEvidence).length ||
+      Object.keys(prefs.stackTopicReviewedAt).length ||
+      Object.keys(prefs.weeklyPriorities).length
   );
 }
 
@@ -169,6 +179,35 @@ function normalizeStackTopicChecks(checks?: Record<string, string[]>) {
     Object.entries(checks ?? {})
       .filter(([stack, topics]) => stack.trim() && Array.isArray(topics))
       .map(([stack, topics]) => [stack, [...new Set(topics.filter((topic) => typeof topic === "string" && topic.trim()))]])
+  );
+}
+
+function normalizeStringRecord(values?: Record<string, string>) {
+  return Object.fromEntries(
+    Object.entries(values ?? {}).filter(([key, value]) => key.trim() && typeof value === "string")
+  );
+}
+
+function normalizeNestedStringRecord(values?: Record<string, Record<string, string>>) {
+  return Object.fromEntries(
+    Object.entries(values ?? {})
+      .filter(([key, value]) => key.trim() && value && typeof value === "object" && !Array.isArray(value))
+      .map(([key, value]) => [key, normalizeStringRecord(value)])
+  );
+}
+
+function normalizeWeeklyPriorities(values?: RoutinePrefs["weeklyPriorities"]) {
+  return Object.fromEntries(
+    Object.entries(values ?? {}).map(([week, priorities]) => [
+      week,
+      Array.isArray(priorities)
+        ? priorities
+            .filter((priority) => priority && typeof priority.id === "string" && typeof priority.label === "string")
+            .map((priority) => ({ id: priority.id, label: priority.label.trim(), done: Boolean(priority.done) }))
+            .filter((priority) => priority.label)
+            .slice(0, 3)
+        : []
+    ])
   );
 }
 

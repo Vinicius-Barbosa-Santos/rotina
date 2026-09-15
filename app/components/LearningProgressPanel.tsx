@@ -1,9 +1,11 @@
 "use client";
 
 import { useState, type CSSProperties } from "react";
-import { BookOpen, Check, ChevronLeft, ChevronRight, Languages, Plus, Sparkles, X } from "lucide-react";
+import { BookOpen, Check, ChevronLeft, ChevronRight, Clock3, Filter, Languages, Plus, RotateCcw, Sparkles, X } from "lucide-react";
 import { getStackCategory, getStackTopics, stackCategoryOrder, type StackCategory } from "@/lib/profile-stacks";
+import type { WeeklyPriority } from "@/lib/types";
 import StackIcon from "./StackIcon";
+import WeeklyFocusPanel from "./WeeklyFocusPanel";
 
 type ProgressValue = { done: number; total: number };
 type EnglishTrackGroup = { title: string; items: string[] };
@@ -12,6 +14,12 @@ type LearningProgressPanelProps = {
   stacks: string[];
   customStacks: string[];
   stackTopicChecks: Record<string, string[]>;
+  stackTopicInProgress: Record<string, string[]>;
+  stackNextSteps: Record<string, string>;
+  stackTopicEvidence: Record<string, Record<string, string>>;
+  stackTopicReviewedAt: Record<string, Record<string, string>>;
+  weeklyPriorities: WeeklyPriority[];
+  currentWeekKey: string;
   englishDaily: ProgressValue;
   englishGuide: ProgressValue;
   englishTrack: EnglishTrackGroup[];
@@ -20,7 +28,12 @@ type LearningProgressPanelProps = {
   onNewStackChange: (value: string) => void;
   onAddStack: () => void;
   onDeleteStack: (stack: string) => void;
-  onToggleStackTopic: (stack: string, topic: string) => void;
+  onSetStackTopicStatus: (stack: string, topic: string, status: "pending" | "progress" | "done") => void;
+  onSetStackNextStep: (stack: string, value: string) => void;
+  onSetStackTopicEvidence: (stack: string, topic: string, value: string) => void;
+  onReviewStackTopic: (stack: string, topic: string) => void;
+  onAddWeeklyPriority: (label: string) => void;
+  onUpdateWeeklyPriority: (id: string, update: { label?: string; done?: boolean; remove?: boolean }) => void;
   onToggleEnglishTopic: (topic: string) => void;
 };
 
@@ -40,8 +53,11 @@ function getTopicProgress(stack: string, checks: Record<string, string[]>) {
 }
 
 export default function LearningProgressPanel({
-  stacks, customStacks, stackTopicChecks, englishDaily, englishGuide, englishTrack, englishTrackChecks, newStack,
-  onNewStackChange, onAddStack, onDeleteStack, onToggleStackTopic, onToggleEnglishTopic
+  stacks, customStacks, stackTopicChecks, stackTopicInProgress, stackNextSteps, stackTopicEvidence,
+  stackTopicReviewedAt, weeklyPriorities, currentWeekKey, englishDaily, englishGuide, englishTrack,
+  englishTrackChecks, newStack, onNewStackChange, onAddStack, onDeleteStack, onSetStackTopicStatus,
+  onSetStackNextStep, onSetStackTopicEvidence, onReviewStackTopic, onAddWeeklyPriority,
+  onUpdateWeeklyPriority, onToggleEnglishTopic
 }: LearningProgressPanelProps) {
   const categories = stackCategoryOrder.filter((item) => stacks.some((stack) => getStackCategory(stack) === item));
   const [activeCategory, setActiveCategory] = useState<StackCategory>(categories[0] ?? "Frontend");
@@ -50,9 +66,15 @@ export default function LearningProgressPanel({
   const [activeStack, setActiveStack] = useState(stacks[0] ?? "");
   const [activeTopicIndex, setActiveTopicIndex] = useState(0);
   const [activeEnglishGroup, setActiveEnglishGroup] = useState(0);
+  const [pendingOnly, setPendingOnly] = useState(false);
   const selectedStack = categoryStacks.includes(activeStack) ? activeStack : categoryStacks[0] ?? "";
   const selectedTopics = selectedStack ? getStackTopics(selectedStack) : [];
   const selectedChecks = new Set(stackTopicChecks[selectedStack] ?? []);
+  const selectedInProgress = new Set(stackTopicInProgress[selectedStack] ?? []);
+  const topicEntries = selectedTopics.map((topic, index) => ({ topic, index, key: String(index) }));
+  const visibleTopicEntries = pendingOnly ? topicEntries.filter(({ key }) => !selectedChecks.has(key)) : topicEntries;
+  const activeTopic = visibleTopicEntries.find(({ index }) => index === activeTopicIndex) ?? visibleTopicEntries[0];
+  const activeVisibleIndex = activeTopic ? visibleTopicEntries.findIndex(({ key }) => key === activeTopic.key) : -1;
   const selectedProgress = selectedStack ? getTopicProgress(selectedStack, stackTopicChecks) : { done: 0, total: 0, pct: 0 };
   const customKeys = new Set(customStacks.map(stackKey));
   const dailyPct = percentage(englishDaily);
@@ -62,6 +84,17 @@ export default function LearningProgressPanel({
   const stackAverage = stacks.length
     ? Math.round(stacks.reduce((sum, stack) => sum + getTopicProgress(stack, stackTopicChecks).pct, 0) / stacks.length)
     : 0;
+  const inProgressCount = Object.values(stackTopicInProgress).reduce((sum, topics) => sum + topics.length, 0);
+  const reviewedThisWeek = Object.values(stackTopicReviewedAt).reduce(
+    (sum, topics) => sum + Object.values(topics).filter((date) => date >= currentWeekKey).length,
+    0
+  );
+
+  function moveTopic(direction: -1 | 1) {
+    if (!visibleTopicEntries.length) return;
+    const nextIndex = (activeVisibleIndex + direction + visibleTopicEntries.length) % visibleTopicEntries.length;
+    setActiveTopicIndex(visibleTopicEntries[nextIndex].index);
+  }
 
   return (
     <section className="learningHub" id="learning-progress" aria-labelledby="learning-hub-title">
@@ -73,6 +106,15 @@ export default function LearningProgressPanel({
         </div>
         <div className="learningHubSummary"><Sparkles size={16} aria-hidden /><span>Média das stacks</span><strong>{stackAverage}%</strong></div>
       </div>
+
+      <WeeklyFocusPanel
+        priorities={weeklyPriorities}
+        currentWeekKey={currentWeekKey}
+        inProgressCount={inProgressCount}
+        reviewedThisWeek={reviewedThisWeek}
+        onAdd={onAddWeeklyPriority}
+        onUpdate={onUpdateWeeklyPriority}
+      />
 
       <div className="learningHubGrid">
         <article className="englishProgressCard">
@@ -174,30 +216,52 @@ export default function LearningProgressPanel({
                   {customKeys.has(stackKey(selectedStack)) && <button className="stackDeleteButton" type="button" onClick={() => onDeleteStack(selectedStack)} aria-label={`Remover ${selectedStack}`}><X size={15} aria-hidden /></button>}
                 </div>
                 <div className="stackTopicBar"><i style={{ width: `${selectedProgress.pct}%` }} /></div>
+                <label className="stackNextStep">
+                  <span>Próximo passo</span>
+                  <input value={stackNextSteps[selectedStack] ?? ""} onChange={(event) => onSetStackNextStep(selectedStack, event.target.value)} placeholder="Defina a ação mais importante desta stack" />
+                </label>
                 <div className="stackTopicSlider">
                   <div className="stackTopicSliderNav">
-                    <button type="button" onClick={() => setActiveTopicIndex((current) => (current - 1 + selectedTopics.length) % selectedTopics.length)} aria-label="Tópico anterior">
+                    <button type="button" onClick={() => moveTopic(-1)} aria-label="Tópico anterior" disabled={!visibleTopicEntries.length}>
                       <ChevronLeft size={18} aria-hidden />
                     </button>
-                    <span>Tópico {activeTopicIndex + 1} de {selectedTopics.length}</span>
-                    <button type="button" onClick={() => setActiveTopicIndex((current) => (current + 1) % selectedTopics.length)} aria-label="Próximo tópico">
+                    <span>{activeTopic ? `Tópico ${activeVisibleIndex + 1} de ${visibleTopicEntries.length}` : "Nenhuma pendência"}</span>
+                    <button type="button" onClick={() => moveTopic(1)} aria-label="Próximo tópico" disabled={!visibleTopicEntries.length}>
                       <ChevronRight size={18} aria-hidden />
                     </button>
                   </div>
-                  {selectedTopics[activeTopicIndex] && (() => {
-                    const topicKey = String(activeTopicIndex);
+                  <button type="button" className={pendingOnly ? "stackPendingFilter active" : "stackPendingFilter"} onClick={() => setPendingOnly((current) => !current)}>
+                    <Filter size={13} aria-hidden /> {pendingOnly ? "Exibindo pendentes" : "Mostrar somente pendentes"}
+                  </button>
+                  {activeTopic ? (() => {
+                    const topicKey = activeTopic.key;
                     const checked = selectedChecks.has(topicKey);
+                    const inProgress = selectedInProgress.has(topicKey);
+                    const status = checked ? "done" : inProgress ? "progress" : "pending";
+                    const reviewedAt = stackTopicReviewedAt[selectedStack]?.[topicKey];
                     return (
-                      <label className={checked ? "stackTopicSlide checked" : "stackTopicSlide"} key={`${selectedStack}-${topicKey}`}>
-                        <input type="checkbox" checked={checked} onChange={() => onToggleStackTopic(selectedStack, topicKey)} />
-                        <span className="stackTopicCheckbox"><Check size={16} aria-hidden /></span>
-                        <span><small>Etapa {activeTopicIndex + 1}</small><strong>{selectedTopics[activeTopicIndex]}</strong></span>
-                      </label>
+                      <div className={`stackTopicSlide ${status}`} key={`${selectedStack}-${topicKey}`}>
+                        <span className="stackTopicCheckbox">{checked ? "×" : inProgress ? "~" : ""}</span>
+                        <span><small>Etapa {activeTopic.index + 1}</small><strong>{activeTopic.topic}</strong></span>
+                        <div className="stackTopicStatus" aria-label="Status do tópico">
+                          <button type="button" className={status === "pending" ? "active" : ""} onClick={() => onSetStackTopicStatus(selectedStack, topicKey, "pending")}>[ ] Pendente</button>
+                          <button type="button" className={status === "progress" ? "active progress" : ""} onClick={() => onSetStackTopicStatus(selectedStack, topicKey, "progress")}>[~] Em andamento</button>
+                          <button type="button" className={status === "done" ? "active done" : ""} onClick={() => onSetStackTopicStatus(selectedStack, topicKey, "done")}>[x] Concluído</button>
+                        </div>
+                        <label className="stackEvidence">
+                          <span>Evidência prática</span>
+                          <input value={stackTopicEvidence[selectedStack]?.[topicKey] ?? ""} onChange={(event) => onSetStackTopicEvidence(selectedStack, topicKey, event.target.value)} placeholder="Projeto, exercício ou link que comprova o domínio" />
+                        </label>
+                        <div className="stackReviewMeta">
+                          <span><Clock3 size={13} aria-hidden /> {reviewedAt ? `Última revisão: ${new Intl.DateTimeFormat("pt-BR").format(new Date(`${reviewedAt}T12:00:00`))}` : "Ainda não revisado"}</span>
+                          <button type="button" onClick={() => onReviewStackTopic(selectedStack, topicKey)}><RotateCcw size={13} aria-hidden /> Revisado hoje</button>
+                        </div>
+                      </div>
                     );
-                  })()}
+                  })() : <div className="stackEmptyTopics"><Check size={20} aria-hidden /><strong>Nenhum tópico pendente</strong><span>Você concluiu todas as etapas visíveis desta stack.</span></div>}
                   <div className="stackTopicDots" aria-label="Escolher tópico">
-                    {selectedTopics.map((topic, index) => (
-                      <button type="button" className={index === activeTopicIndex ? "active" : ""} key={topic} onClick={() => setActiveTopicIndex(index)} aria-label={`Abrir tópico ${index + 1}`} aria-current={index === activeTopicIndex ? "step" : undefined} />
+                    {visibleTopicEntries.map(({ topic, index }) => (
+                      <button type="button" className={index === activeTopic?.index ? "active" : ""} key={topic} onClick={() => setActiveTopicIndex(index)} aria-label={`Abrir tópico ${index + 1}`} aria-current={index === activeTopic?.index ? "step" : undefined} />
                     ))}
                   </div>
                 </div>
