@@ -799,21 +799,33 @@
   border-radius: 12px;
   padding: 8px 14px;
   background:
-    linear-gradient(90deg, transparent, rgba(168, 85, 247, 0.07), transparent),
-    rgba(168, 85, 247, 0.035);
+    linear-gradient(180deg, rgba(255, 255, 255, 0.018), transparent),
+    rgba(168, 85, 247, 0.025);
 }
 
 .stackMotionStrip::before {
   position: absolute;
   z-index: 0;
-  top: 0;
-  bottom: 0;
-  left: -28%;
-  width: 24%;
-  background: linear-gradient(90deg, transparent, rgba(181, 123, 238, 0.2), transparent);
+  inset: -90% -15%;
+  background:
+    radial-gradient(circle at 28% 50%, rgba(139, 92, 246, 0.28), transparent 22%),
+    radial-gradient(circle at 72% 50%, rgba(192, 132, 252, 0.2), transparent 20%);
   content: "";
-  filter: blur(8px);
-  animation: stackLightSweep 7s ease-in-out infinite;
+  filter: blur(18px);
+  animation: stackAuroraDrift 8s ease-in-out infinite alternate;
+}
+
+.stackMotionStrip::after {
+  position: absolute;
+  z-index: 1;
+  bottom: 0;
+  left: 12%;
+  width: 34%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #a855f7, #d8b4fe, transparent);
+  box-shadow: 0 0 10px rgba(168, 85, 247, 0.65);
+  content: "";
+  animation: stackLightTrail 6s ease-in-out infinite alternate;
 }
 
 .stackMotionStrip > span {
@@ -828,9 +840,13 @@
   border-radius: 10px;
   background: rgba(13, 11, 17, 0.78);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.22);
-  animation: stackSpotlight 7s ease-in-out infinite;
-  animation-delay: calc(var(--stack-index, 0) * 320ms);
-  will-change: transform, border-color, box-shadow;
+  transition: border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
+}
+
+.stackMotionStrip > span:hover {
+  border-color: rgba(192, 132, 252, 0.6);
+  box-shadow: 0 0 18px rgba(168, 85, 247, 0.28);
+  transform: translateY(-2px) scale(1.06);
 }
 
 .stackMotionStrip .dayStackIcon,
@@ -1413,33 +1429,25 @@
   background: var(--green);
 }
 
-@keyframes stackSpotlight {
-  0%, 8%, 22%, 100% {
-    border-color: rgba(255, 255, 255, 0.08);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.22);
-    transform: translateY(0) scale(1);
+@keyframes stackAuroraDrift {
+  from {
+    opacity: 0.55;
+    transform: translateX(-8%) rotate(-2deg) scale(0.96);
   }
-  13% {
-    border-color: rgba(192, 132, 252, 0.72);
-    box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.1), 0 8px 24px rgba(168, 85, 247, 0.32);
-    transform: translateY(-2px) scale(1.09);
+  to {
+    opacity: 1;
+    transform: translateX(8%) rotate(2deg) scale(1.04);
   }
 }
 
-@keyframes stackLightSweep {
-  0%, 12% {
-    opacity: 0;
-    transform: translateX(0);
+@keyframes stackLightTrail {
+  from {
+    opacity: 0.45;
+    transform: translateX(0) scaleX(0.7);
   }
-  24% {
+  to {
     opacity: 1;
-  }
-  76% {
-    opacity: 1;
-  }
-  88%, 100% {
-    opacity: 0;
-    transform: translateX(650%);
+    transform: translateX(155%) scaleX(1.15);
   }
 }
 
