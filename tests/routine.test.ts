@@ -109,6 +109,21 @@ test("developer curriculum is a permanent guide and does not count toward routin
   assert.equal(routineReferenceSections.some((section) => section.key === career.key), true);
 });
 
+test("professional roadmap adapts the focus plan without counting toward daily progress", () => {
+  const roadmap = routineSections.find((item) => item.key === "professional-roadmap");
+
+  assert.ok(roadmap);
+  assert.equal(roadmap.label, "Rota Profissional 2026–2027");
+  assert.equal(getSectionScheduleLabel(roadmap), "referência");
+  assert.deepEqual(getVisibleItems(roadmap, new Date(2026, 9, 15)), []);
+  assert.ok(roadmap.referenceGroups?.some((group) => group.title === "AWS essencial aplicada à produção"));
+  assert.ok(roadmap.referenceGroups?.some((group) => group.title === "Engenharia e arquitetura de software"));
+  assert.ok(roadmap.referenceGroups?.some((group) => group.title === "Ritmo semanal sustentável"));
+  assert.ok(roadmap.referenceGroups?.some((group) => group.title === "Método de estudo e resultado para 2027"));
+  assert.equal(trackedRoutineSections.some((section) => section.key === roadmap.key), false);
+  assert.equal(routineReferenceSections.some((section) => section.key === roadmap.key), true);
+});
+
 test("Coders runs from Tuesday to Thursday before the gym transition", () => {
   const study = routineSections.find((item) => item.key === "programming-study");
 

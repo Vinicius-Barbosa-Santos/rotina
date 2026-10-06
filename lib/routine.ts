@@ -567,6 +567,146 @@ export const routineSections: RoutineSection[] = [
     ]
   },
   {
+    key: "professional-roadmap",
+    icon: "Target",
+    label: "Rota Profissional 2026–2027",
+    shortLabel: "Rota Prof.",
+    color: "#c084fc",
+    bg: "rgba(192, 132, 252, 0.12)",
+    time: "plano permanente",
+    note: "Plano de foco profissional adaptado para evoluir com constância, aplicação real no trabalho e sem competir com inglês, saúde ou descanso. Marque somente o que estiver realmente consolidado; este guia não entra no progresso diário.",
+    items: [],
+    referenceGroups: [
+      {
+        title: "Norte e regras do plano",
+        items: [
+          "Manter a regra Constância maior que intensidade",
+          "Priorizar inglês, AWS aplicada ao trabalho, engenharia e arquitetura de software",
+          "Tratar saúde e condicionamento como parte da evolução profissional",
+          "Evitar estudar todas as tecnologias e cursos ao mesmo tempo",
+          "Antes de iniciar algo novo, confirmar se melhora inglês, stack principal, AWS, engenharia ou oportunidades",
+          "Preferir meses de prática sustentável a períodos curtos de sobrecarga"
+        ]
+      },
+      {
+        title: "Inglês profissional rumo ao B2",
+        items: [
+          "Manter 30 minutos de inglês em um dia normal",
+          "Cumprir o mínimo de 15 minutos em um dia difícil",
+          "Evitar dois dias consecutivos sem contato com o idioma",
+          "Praticar listening com conteúdo profissional e técnico",
+          "Praticar speaking para reuniões, entrevistas e explicações técnicas",
+          "Ler documentação e registrar vocabulário relevante",
+          "Comunicar andamento, bloqueios, decisões e próximos passos em inglês",
+          "Preparar conversação para processos seletivos internacionais"
+        ]
+      },
+      {
+        title: "AWS essencial aplicada à produção",
+        items: [
+          "IAM: users, groups, roles, policies, access keys e least privilege",
+          "Diagnosticar se uma falha de acesso está no código, na role ou na policy",
+          "Lambda: handler, eventos, triggers, timeout, memória, variáveis, concorrência e cold start",
+          "Mapear quem dispara uma Lambda, o que ela recebe, suas dependências, permissões e logs",
+          "API Gateway: rotas, estágios, integração Lambda, autenticação, JWT e Cognito",
+          "Localizar uma falha entre cliente, API Gateway, autenticação, Lambda, banco e dependências",
+          "SQS: producer, consumer, filas standard e FIFO, polling, retenção e visibility timeout",
+          "Dominar retries, idempotência, duplicidade, DLQ, redrive e partial batch failure"
+        ]
+      },
+      {
+        title: "Observabilidade, incidentes e segurança",
+        items: [
+          "CloudWatch: log groups, streams, logs, métricas, alarmes e métricas customizadas",
+          "Usar request ID ou correlation ID para acompanhar uma execução",
+          "Usar X-Ray, traces e trace map para localizar dependências e gargalos",
+          "Investigar stack trace, métricas e traces até chegar à causa raiz",
+          "Secrets Manager: recuperar credenciais por IAM Role sem valores hardcoded",
+          "Aplicar least privilege, CloudTrail e princípios básicos de VPC",
+          "Entender segurança, conexão, backup e disponibilidade de bancos no RDS",
+          "Documentar correção, impacto, risco e ação preventiva após um incidente"
+        ]
+      },
+      {
+        title: "AWS — segunda etapa",
+        items: [
+          "DynamoDB: partition key, sort key, CRUD, Query, Scan, índices e streams",
+          "S3: buckets, objetos, upload, versionamento, lifecycle, permissões e eventos",
+          "RDS PostgreSQL: conexão, segurança, backups, read replicas e Multi-AZ",
+          "CI/CD: entender o caminho do código até cada ambiente e o rollback",
+          "Kubernetes: cluster, node, pod, deployment, service e namespace",
+          "ConfigMap, Secret, liveness, readiness, requests, limits, logs e scaling",
+          "Entender onde a aplicação está rodando no EKS e como investigar problemas",
+          "Deixar Kubernetes avançado, Terraform avançado e novos frameworks como baixa prioridade"
+        ]
+      },
+      {
+        title: "Engenharia e arquitetura de software",
+        items: [
+          "Consolidar HTTP, REST, contratos de API, autenticação, autorização e JWT",
+          "Aplicar timeout, retry, circuit breaker e idempotência com critérios claros",
+          "Entender filas, eventos e processamento assíncrono",
+          "Compreender cache, concorrência, consistência e SQL versus NoSQL",
+          "Usar logs, métricas e traces como parte do desenho da solução",
+          "Avaliar resiliência, escalabilidade e trade-offs de arquitetura",
+          "Entender microsserviços, integrações e sistemas distribuídos sem complexidade prematura",
+          "Evoluir de implementar demandas para compreender o fluxo completo e propor soluções seguras"
+        ]
+      },
+      {
+        title: "Stack principal consolidada no trabalho",
+        items: [
+          "React sólido por meio de funcionalidades e manutenção reais",
+          "TypeScript sólido com modelagem, narrowing, generics e segurança de tipos",
+          "Node.js sólido em APIs, integrações e processamento assíncrono",
+          "APIs sólidas com contratos, validação, erros, autenticação e observabilidade",
+          "SQL sólido com modelagem, consultas, índices e transações",
+          "Testes úteis nos níveis unitário, integração e contrato",
+          "Conectar frontend, backend, dados e AWS em um fluxo completo",
+          "Evitar um curso simultâneo para cada tecnologia quando o trabalho já oferece prática"
+        ]
+      },
+      {
+        title: "Ritmo semanal sustentável",
+        items: [
+          "Segunda: inglês e AWS por 45 a 60 minutos",
+          "Terça: inglês e treino, sem obrigação de estudo técnico",
+          "Quarta: inglês e AWS por 45 a 60 minutos",
+          "Quinta: inglês e treino, sem obrigação de estudo técnico",
+          "Sexta: inglês, AWS por 45 a 60 minutos e fechamento leve",
+          "Sábado: speaking ou revisão, com AWS ou arquitetura opcional e movimento",
+          "Domingo: inglês leve opcional e descanso",
+          "Em dia cansado, fazer 15 minutos de inglês e priorizar descanso ou caminhada"
+        ]
+      },
+      {
+        title: "Saúde e capacidade de longo prazo",
+        items: [
+          "Dormir pelo menos sete horas e buscar entre sete horas e meia e nove horas",
+          "Realizar treino de força de duas a três vezes por semana",
+          "Caminhar e incluir movimento leve ao longo da semana",
+          "Fazer pausas durante o trabalho e cuidar da ergonomia",
+          "Trabalhar mobilidade sem provocar dor",
+          "Reduzir intensidade quando cansaço ou dor comprometerem a recuperação",
+          "Procurar avaliação profissional se dores forem persistentes, fortes ou estiverem piorando"
+        ]
+      },
+      {
+        title: "Método de estudo e resultado para 2027",
+        items: [
+          "Para cada tecnologia, responder o que é, para que serve, quando usar e como funciona",
+          "Entender como a tecnologia se integra e como pode falhar",
+          "Saber onde encontrar logs, métricas e sinais de diagnóstico",
+          "Praticar como investigar, corrigir e prevenir a repetição de uma falha",
+          "Usar situações reais, laboratórios e projetos em vez de apenas acumular aulas",
+          "Conseguir construir, entender e operar sistemas reais em produção",
+          "Conseguir investigar incidentes, encontrar causa raiz e explicar trade-offs",
+          "Chegar a 2027 com inglês em direção ao B2, stack sólida, AWS prática e rotina sustentável"
+        ]
+      }
+    ]
+  },
+  {
     key: "house-cleaning",
     icon: "Home",
     label: "Limpeza da Casa",
@@ -964,6 +1104,7 @@ const routineSectionEmoji: Record<string, string> = {
   "technical-study": "🧑‍💻",
   "programming-study": "📚",
   career: "🚀",
+  "professional-roadmap": "🧭",
   "house-cleaning": "🧹",
   health: "💪",
   "functional-life": "🏠",
