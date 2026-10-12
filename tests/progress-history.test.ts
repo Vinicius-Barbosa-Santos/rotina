@@ -81,5 +81,5 @@ test("reports and streak only count dates from the new start date", () => {
     1
   );
   assert.equal(progressTrackingStartDate, "2026-10-15");
-  assert.equal(progressResetVersion, "2026-10-15-clean-history-v1");
+  assert.equal(progressResetVersion, "2026-10-15-clean-history-v2");
 });

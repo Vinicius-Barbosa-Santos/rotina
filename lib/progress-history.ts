@@ -2,7 +2,7 @@ import type { TelegramReportPeriod } from "@/lib/types";
 import { isSaoPauloHolidayDate } from "./sao-paulo-holidays.ts";
 
 export const progressTrackingStartDate = "2026-10-15";
-export const progressResetVersion = "2026-10-15-clean-history-v1";
+export const progressResetVersion = "2026-10-15-clean-history-v2";
 
 const progressResetKey = "rotina_progress_reset_version";
 const completedDatesKey = "rotina_completed_dates";
