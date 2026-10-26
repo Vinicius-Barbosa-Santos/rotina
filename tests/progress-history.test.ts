@@ -41,15 +41,15 @@ test("resets progress history once while preserving preferences", () => {
 });
 
 test("weekends are optional and do not count in progress reports or streak", () => {
-  const weeklyDates = getProgressReportDates("weekly", new Date("2026-10-19T12:00:00-03:00")).map(dateKey);
+  const weeklyDates = getProgressReportDates("weekly", new Date("2026-11-03T12:00:00-03:00")).map(dateKey);
 
-  assert.deepEqual(weeklyDates, ["2026-10-19"]);
-  assert.equal(isProgressTrackingDate(new Date("2026-10-17T12:00:00-03:00")), false);
-  assert.equal(isProgressTrackingDate(new Date("2026-10-19T12:00:00-03:00")), true);
+  assert.deepEqual(weeklyDates, ["2026-11-03"]);
+  assert.equal(isProgressTrackingDate(new Date("2026-11-01T12:00:00-03:00")), false);
+  assert.equal(isProgressTrackingDate(new Date("2026-11-03T12:00:00-03:00")), true);
   assert.equal(
     calculateProgressStreak(
-      ["2026-10-19"],
-      new Date("2026-10-19T12:00:00-03:00")
+      ["2026-11-03"],
+      new Date("2026-11-03T12:00:00-03:00")
     ),
     1
   );
@@ -70,16 +70,16 @@ test("São Paulo holidays are day off and do not count in progress", () => {
 });
 
 test("reports and streak only count dates from the new start date", () => {
-  const dates = getProgressReportDates("weekly", new Date("2026-10-20T12:00:00-03:00")).map(dateKey);
+  const dates = getProgressReportDates("weekly", new Date("2026-11-04T12:00:00-03:00")).map(dateKey);
 
-  assert.deepEqual(dates, ["2026-10-19", "2026-10-20"]);
+  assert.deepEqual(dates, ["2026-11-03", "2026-11-04"]);
   assert.equal(
     calculateProgressStreak(
-      ["2026-09-21", "2026-10-01", "2026-10-15", "2026-10-19"],
-      new Date("2026-10-20T12:00:00-03:00")
+      ["2026-09-21", "2026-10-01", "2026-10-19", "2026-11-03"],
+      new Date("2026-11-04T12:00:00-03:00")
     ),
     1
   );
-  assert.equal(progressTrackingStartDate, "2026-10-19");
-  assert.equal(progressResetVersion, "2026-10-19-clean-history-v1");
+  assert.equal(progressTrackingStartDate, "2026-11-01");
+  assert.equal(progressResetVersion, "2026-11-01-clean-history-v1");
 });
