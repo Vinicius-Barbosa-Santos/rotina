@@ -1,0 +1,708 @@
+/* Visual refresh — novo ciclo 2027 */
+:root {
+  --bg: #070b14;
+  --panel: #0d1422;
+  --panel-2: #121c2d;
+  --panel-3: #172338;
+  --line: rgba(184, 199, 224, 0.1);
+  --line-2: rgba(184, 199, 224, 0.2);
+  --text: #f4f7fb;
+  --muted: #9aa8bc;
+  --soft: #66758b;
+  --green: #a78bfa;
+  --blue: #67e8f9;
+  --danger: #fb7185;
+  --focus-glow: rgba(139, 92, 246, 0.26);
+  --cyan-glow: rgba(34, 211, 238, 0.18);
+  --surface-shadow: 0 22px 60px rgba(0, 0, 0, 0.28);
+}
+
+body {
+  background:
+    radial-gradient(circle at 8% -10%, rgba(124, 58, 237, 0.24), transparent 34rem),
+    radial-gradient(circle at 100% 12%, rgba(14, 165, 233, 0.15), transparent 32rem),
+    radial-gradient(circle at 52% 105%, rgba(139, 92, 246, 0.12), transparent 40rem),
+    linear-gradient(180deg, #090e19 0%, #070b14 54%, #080d17 100%);
+  background-attachment: fixed;
+  font-family: "Avenir Next", Avenir, Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+body::before {
+  position: fixed;
+  z-index: -1;
+  inset: 0;
+  pointer-events: none;
+  content: "";
+  opacity: 0.24;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.018) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.018) 1px, transparent 1px);
+  background-size: 56px 56px;
+  mask-image: linear-gradient(to bottom, black, transparent 72%);
+}
+
+::selection {
+  background: rgba(167, 139, 250, 0.32);
+  color: #fff;
+}
+
+:where(button, a, input):focus-visible {
+  outline: 2px solid #a78bfa;
+  outline-offset: 3px;
+}
+
+.shell {
+  isolation: isolate;
+}
+
+.topbar {
+  min-height: 92px;
+  padding: 17px clamp(20px, 3vw, 48px);
+  border-bottom: 1px solid rgba(167, 139, 250, 0.14);
+  background: rgba(7, 11, 20, 0.72);
+  backdrop-filter: blur(24px) saturate(140%);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.2);
+}
+
+.brandHeader {
+  gap: 16px;
+}
+
+.brandHeader img {
+  width: 58px;
+  height: 58px;
+  border: 1px solid rgba(167, 139, 250, 0.42);
+  border-radius: 18px;
+  background: #0c1320;
+  box-shadow:
+    0 0 0 5px rgba(139, 92, 246, 0.08),
+    0 14px 38px rgba(0, 0, 0, 0.34);
+}
+
+.brandHeader h1 {
+  margin-top: 1px;
+  color: #fff;
+  font-size: clamp(20px, 2vw, 28px);
+  font-weight: 700;
+  letter-spacing: -0.035em;
+}
+
+.eyebrow,
+.sideLabel {
+  color: #8b9ab0;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+}
+
+.brandStatus {
+  display: block;
+  margin-top: 3px;
+  color: var(--soft);
+  font-size: 11px;
+}
+
+.progressPill {
+  display: grid;
+  gap: 8px;
+  width: min(260px, 32vw);
+  min-width: 210px;
+  padding: 12px 14px;
+  border: 1px solid rgba(167, 139, 250, 0.2);
+  border-radius: 16px;
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.12), rgba(13, 20, 34, 0.9));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.progressPillMeta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.progressPillMeta span {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.progressPillMeta strong {
+  color: #c4b5fd;
+  font-size: 15px;
+}
+
+.progressTrack,
+.wideProgress {
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.progressTrack span,
+.wideProgress span {
+  background: linear-gradient(90deg, #8b5cf6, #a78bfa 58%, #67e8f9);
+  box-shadow: 0 0 16px rgba(139, 92, 246, 0.5);
+}
+
+.layout {
+  grid-template-columns: 322px minmax(0, 1fr);
+  max-width: 1920px;
+  margin: 0 auto;
+}
+
+.sidebar {
+  top: 92px;
+  height: calc(100vh - 92px);
+  padding: 26px 18px 44px;
+  border-right: 1px solid rgba(167, 139, 250, 0.12);
+  background: linear-gradient(180deg, rgba(11, 17, 29, 0.78), rgba(8, 13, 23, 0.48));
+  backdrop-filter: blur(20px);
+}
+
+.sideBlock {
+  margin-bottom: 14px;
+  border: 1px solid rgba(184, 199, 224, 0.09);
+  border-radius: 18px;
+  padding: 14px;
+  background: linear-gradient(145deg, rgba(18, 28, 45, 0.8), rgba(11, 17, 29, 0.72));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.025);
+}
+
+.sideBlock > .sideLabel:first-child {
+  margin-bottom: 12px;
+}
+
+.statsGrid {
+  gap: 8px;
+}
+
+.statsGrid div {
+  min-height: 76px;
+  padding: 14px 9px;
+  border-color: rgba(184, 199, 224, 0.08);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.statsGrid div:hover {
+  border-color: rgba(167, 139, 250, 0.28);
+  background: rgba(139, 92, 246, 0.08);
+  transform: translateY(-2px);
+}
+
+.statsGrid strong {
+  color: #fff;
+  font-size: 23px;
+  letter-spacing: -0.04em;
+}
+
+.statsGrid span {
+  color: #7f8da2;
+}
+
+.navList {
+  gap: 5px;
+}
+
+.navItem {
+  min-height: 42px;
+  border: 1px solid transparent;
+  border-radius: 11px;
+  padding: 9px 10px;
+}
+
+.navItem:hover {
+  border-color: rgba(167, 139, 250, 0.16);
+  background: rgba(139, 92, 246, 0.09);
+  color: #fff;
+  transform: translateX(3px);
+}
+
+.navItem i {
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.content {
+  width: 100%;
+  max-width: 1500px;
+  margin: 0 auto;
+  padding: 34px clamp(20px, 3.2vw, 52px) 72px;
+}
+
+.dayCard {
+  min-height: 200px;
+  align-content: space-between;
+  gap: 28px;
+  margin-bottom: 24px;
+  border: 1px solid rgba(167, 139, 250, 0.22);
+  border-radius: 28px;
+  padding: clamp(24px, 3.5vw, 44px);
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 86% 12%, rgba(103, 232, 249, 0.16), transparent 28%),
+    radial-gradient(circle at 12% 96%, rgba(139, 92, 246, 0.26), transparent 36%),
+    linear-gradient(135deg, rgba(25, 34, 58, 0.96), rgba(12, 19, 33, 0.96));
+  box-shadow: var(--surface-shadow);
+}
+
+.dayCard::before {
+  inset: auto -70px -110px auto;
+  width: 290px;
+  height: 290px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 50%;
+  background: transparent;
+  box-shadow:
+    0 0 0 34px rgba(167, 139, 250, 0.025),
+    0 0 0 68px rgba(103, 232, 249, 0.018);
+}
+
+.dayCard h2 {
+  max-width: 850px;
+  margin-top: 8px;
+  color: #fff;
+  font-size: clamp(30px, 4vw, 54px);
+  font-weight: 720;
+  letter-spacing: -0.055em;
+  line-height: 1.02;
+}
+
+.dayMode {
+  border-color: rgba(167, 139, 250, 0.34);
+  padding: 8px 12px;
+  background: rgba(139, 92, 246, 0.13);
+  color: #ddd6fe;
+  backdrop-filter: blur(12px);
+}
+
+.wideProgress {
+  height: 9px;
+  border: 1px solid rgba(255, 255, 255, 0.035);
+}
+
+.learningHub {
+  gap: 18px;
+  margin-bottom: 30px;
+  scroll-margin-top: 112px;
+}
+
+.learningHubHeader,
+.evolutionHeader,
+.referenceAreaHeader {
+  padding-inline: 4px;
+}
+
+.learningHubHeader h2,
+.evolutionHeader h2,
+.referenceAreaHeader h2 {
+  color: #fff;
+  font-size: clamp(22px, 2.5vw, 30px);
+  font-weight: 700;
+  letter-spacing: -0.035em;
+}
+
+.learningHubSummary {
+  border-color: rgba(103, 232, 249, 0.18);
+  border-radius: 16px;
+  background: rgba(103, 232, 249, 0.06);
+  color: #67e8f9;
+}
+
+.weeklyFocusCard,
+.englishProgressCard,
+.stackProgressCard,
+.weekendFlow,
+.evolutionChartCard,
+.routineCard {
+  border-color: rgba(184, 199, 224, 0.1);
+  background:
+    linear-gradient(145deg, rgba(18, 28, 45, 0.9), rgba(10, 16, 28, 0.94));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.035),
+    0 18px 46px rgba(0, 0, 0, 0.2);
+}
+
+.weeklyFocusCard {
+  border-radius: 20px;
+  padding: 16px;
+  background:
+    linear-gradient(110deg, rgba(139, 92, 246, 0.15), transparent 34%),
+    rgba(13, 20, 34, 0.96);
+}
+
+.weeklyLoad > div {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.weeklyLoad small,
+.weeklyLoad strong,
+.weeklyLoad span {
+  display: block;
+}
+
+.englishProgressCard,
+.stackProgressCard {
+  border-radius: 24px;
+}
+
+.englishProgressCard {
+  padding: clamp(18px, 2.5vw, 28px);
+  background:
+    radial-gradient(circle at 94% 4%, rgba(103, 232, 249, 0.11), transparent 32%),
+    linear-gradient(145deg, rgba(139, 92, 246, 0.11), transparent 48%),
+    rgba(13, 20, 34, 0.96);
+}
+
+.englishProgressIcon,
+.weeklyFocusIcon,
+.iconBadge {
+  border-color: rgba(167, 139, 250, 0.24);
+  background: linear-gradient(145deg, rgba(139, 92, 246, 0.18), rgba(103, 232, 249, 0.07));
+  color: #c4b5fd;
+}
+
+.progressRing {
+  background: conic-gradient(#a78bfa var(--progress), rgba(255, 255, 255, 0.07) 0);
+  box-shadow: 0 0 34px rgba(139, 92, 246, 0.22);
+}
+
+.progressRing::before {
+  background: #0d1524;
+}
+
+.englishTrack {
+  border-color: rgba(184, 199, 224, 0.1);
+}
+
+.englishTrackCheck,
+.stackTopicSlide,
+.weeklyLoad,
+.weeklyReview,
+.referenceSlide {
+  border-color: rgba(184, 199, 224, 0.08);
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.englishTrackCheck:hover,
+.referenceCheck:hover {
+  border-color: rgba(167, 139, 250, 0.22);
+  background: rgba(139, 92, 246, 0.07);
+}
+
+.stackProgressCard {
+  padding: clamp(18px, 2.5vw, 28px);
+}
+
+.stackMotionStrip {
+  border-color: rgba(167, 139, 250, 0.12);
+  border-radius: 15px;
+  background: rgba(7, 11, 20, 0.44);
+}
+
+.stackCategoryTabs button {
+  border-color: rgba(184, 199, 224, 0.1);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.stackCategoryTabs button.active {
+  border-color: rgba(167, 139, 250, 0.42);
+  background: rgba(139, 92, 246, 0.14);
+  color: #ddd6fe;
+}
+
+.stackPicker {
+  gap: 8px;
+}
+
+.stackPicker > button {
+  border-color: rgba(184, 199, 224, 0.08);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.stackPicker > button:hover,
+.stackPicker > button.active {
+  border-color: rgba(167, 139, 250, 0.3);
+  background: rgba(139, 92, 246, 0.08);
+}
+
+.stackTopicPanel {
+  border-color: rgba(184, 199, 224, 0.1);
+  border-radius: 20px;
+  background: rgba(7, 11, 20, 0.34);
+}
+
+.stackTopicSlide {
+  border-radius: 15px;
+}
+
+.stackTopicSlide.progress {
+  border-color: rgba(103, 232, 249, 0.24);
+  background: rgba(34, 211, 238, 0.055);
+}
+
+.stackTopicSlide.done {
+  border-color: rgba(167, 139, 250, 0.25);
+  background: rgba(139, 92, 246, 0.075);
+}
+
+.evolutionPanel {
+  margin-block: 32px;
+}
+
+.evolutionCharts {
+  gap: 16px;
+}
+
+.evolutionChartCard {
+  border-radius: 22px;
+  padding: 20px;
+}
+
+.evolutionChartCard::before {
+  background: linear-gradient(90deg, #8b5cf6, #67e8f9);
+}
+
+.evolutionBarTrack {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.evolutionBarTrack span {
+  background: linear-gradient(180deg, #67e8f9, #8b5cf6);
+  box-shadow: 0 0 14px rgba(139, 92, 246, 0.22);
+}
+
+.sections {
+  gap: 14px;
+}
+
+.routineCard {
+  border-radius: 20px;
+  overflow: clip;
+}
+
+.routineCard:hover {
+  border-color: rgba(167, 139, 250, 0.22);
+  transform: translateY(-2px);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.04),
+    0 24px 54px rgba(0, 0, 0, 0.24);
+}
+
+.sectionProgress {
+  height: 3px;
+  background: rgba(255, 255, 255, 0.045);
+}
+
+.sectionHeader {
+  min-height: 78px;
+  padding: 16px 18px;
+}
+
+.sectionHeader:hover {
+  background: rgba(139, 92, 246, 0.045);
+}
+
+.iconBadge {
+  width: 43px;
+  height: 43px;
+  border-radius: 13px;
+}
+
+.sectionTitle strong {
+  color: #f8fafc;
+  font-size: 15px;
+}
+
+.sectionTitle small {
+  color: #77869b;
+}
+
+.countBadge {
+  border: 1px solid rgba(184, 199, 224, 0.09);
+  border-radius: 999px;
+  padding: 5px 9px;
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.checklistShell,
+.checklist {
+  border-color: rgba(184, 199, 224, 0.08);
+}
+
+.checkItem {
+  min-height: 48px;
+  padding-inline: 18px;
+}
+
+.checkItem:hover {
+  background: rgba(139, 92, 246, 0.055);
+}
+
+.taskIcon {
+  width: 28px;
+  height: 28px;
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.checkCircle,
+.referenceCheckbox,
+.stackTopicCheckbox {
+  border-color: rgba(184, 199, 224, 0.24);
+}
+
+.done .checkCircle,
+.referenceCheck.done .referenceCheckbox {
+  border-color: #a78bfa;
+  background: #a78bfa;
+}
+
+.referenceArea {
+  margin-top: 48px;
+  border-top-color: rgba(167, 139, 250, 0.12);
+}
+
+.agendaState,
+.agendaItem {
+  border-color: rgba(184, 199, 224, 0.09);
+  border-radius: 13px;
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.agendaItem a,
+.connectButton,
+.notificationButton.active,
+.historyFillForm button {
+  background: linear-gradient(135deg, #a78bfa, #8b5cf6);
+  color: #090d16;
+  box-shadow: 0 8px 22px rgba(139, 92, 246, 0.18);
+}
+
+.syncButton {
+  background: linear-gradient(135deg, #67e8f9, #38bdf8);
+  color: #07111f;
+}
+
+.notificationButton,
+.telegramReportButtons button,
+.telegramAutomatic,
+.historyFillForm input,
+.taskForm input,
+.meetingForm input,
+.sectionEditor input,
+.stackProgressForm input,
+.weeklyPriority input,
+.weeklyPriorityForm input,
+.stackNextStep input,
+.stackEvidence input {
+  border-color: rgba(184, 199, 224, 0.11);
+  border-radius: 11px;
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.historyReconcileButton {
+  border-color: rgba(103, 232, 249, 0.22);
+  background: rgba(34, 211, 238, 0.07);
+  color: #a5f3fc;
+}
+
+.historyClearButton {
+  border-color: rgba(251, 113, 133, 0.22);
+  background: rgba(251, 113, 133, 0.065);
+  color: #fda4af;
+}
+
+.weekendFlow {
+  border-radius: 24px;
+  background:
+    radial-gradient(circle at 96% 0%, rgba(103, 232, 249, 0.1), transparent 38%),
+    rgba(13, 20, 34, 0.94);
+}
+
+.weekendTrack {
+  border-color: rgba(184, 199, 224, 0.09);
+  border-radius: 15px;
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.weekendTrack:hover {
+  border-color: rgba(167, 139, 250, 0.24);
+  background: rgba(139, 92, 246, 0.07);
+  transform: translateY(-2px);
+}
+
+@media (max-width: 920px) {
+  .topbar {
+    min-height: auto;
+  }
+
+  .layout {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar {
+    height: auto;
+    padding: 16px;
+    border-top: 1px solid rgba(167, 139, 250, 0.1);
+    border-right: 0;
+    background: rgba(8, 13, 23, 0.72);
+  }
+
+  .content {
+    padding-top: 22px;
+  }
+
+  .dayCard {
+    min-height: 180px;
+  }
+}
+
+@media (max-width: 560px) {
+  .topbar {
+    gap: 14px;
+    padding: 14px 16px 16px;
+  }
+
+  .brandHeader img {
+    width: 50px;
+    height: 50px;
+    border-radius: 15px;
+  }
+
+  .brandStatus {
+    display: none;
+  }
+
+  .progressPill {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .content {
+    padding: 16px 12px 44px;
+  }
+
+  .dayCard {
+    min-height: 190px;
+    border-radius: 22px;
+    padding: 22px 18px;
+  }
+
+  .dayCard h2 {
+    font-size: clamp(28px, 10vw, 40px);
+  }
+
+  .englishProgressCard,
+  .stackProgressCard,
+  .weeklyFocusCard,
+  .evolutionChartCard {
+    border-radius: 18px;
+  }
+
+  .sideBlock {
+    border-radius: 16px;
+  }
+}

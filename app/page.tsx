@@ -1202,13 +1202,17 @@ export default function HomePage() {
           <div>
             <p className="eyebrow">minha rotina</p>
             <h1>{formatDate(new Date())}</h1>
+            <span className="brandStatus">Seu espaço de foco para 2027</span>
           </div>
         </div>
         <div className="progressPill" aria-label={`Progresso ${totals.pct}%`}>
+          <div className="progressPillMeta">
+            <span>Progresso de hoje</span>
+            <strong>{totals.pct}%</strong>
+          </div>
           <div className="progressTrack">
             <span style={{ width: `${totals.pct}%` }} />
           </div>
-          <strong>{totals.pct}%</strong>
         </div>
       </header>
 
