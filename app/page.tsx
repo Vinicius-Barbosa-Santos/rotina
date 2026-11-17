@@ -1,7 +1,8 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Bell, CalendarDays, Flame, GraduationCap, Loader2 } from "lucide-react";
+import { Bell, CalendarDays, Flame, GraduationCap, Loader2, Wallet } from "lucide-react";
 import {
   getVisibleItems,
   isReferenceSection,
@@ -1323,6 +1324,10 @@ export default function HomePage() {
 
           <section className="sideBlock navList">
             <p className="sideLabel">seções</p>
+            <Link href="/controle-financeiro" className="navItem">
+              <Wallet size={16} aria-hidden />
+              <span>Controle financeiro</span>
+            </Link>
             <a href="#learning-progress" className="navItem">
               <GraduationCap size={16} aria-hidden />
               <span>Evolução</span>

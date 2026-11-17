@@ -1,0 +1,242 @@
+.financePage {
+  display: grid;
+  gap: 16px;
+  width: min(1120px, 100% - 32px);
+  margin: 0 auto;
+  padding: 32px 0 64px;
+}
+
+.financeBack,
+.financePage button,
+.financeImport {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: fit-content;
+  color: var(--text);
+}
+
+.financeBack {
+  color: var(--muted);
+  text-decoration: none;
+}
+
+.financeHeading,
+.financeActions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.financeActions {
+  justify-content: flex-start;
+}
+
+.financeTitle {
+  align-items: end;
+  margin-bottom: 8px;
+}
+
+.financeTitle h1 {
+  margin: 0;
+  font-size: clamp(30px, 5vw, 46px);
+  letter-spacing: -0.04em;
+}
+
+.financePage h2 {
+  margin: 0 0 12px;
+  font-size: 18px;
+}
+
+.financeHeading h2 {
+  margin: 0;
+}
+
+.financeHint,
+.financeCard span,
+.financeCard small {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.financePage p {
+  margin: 8px 0 0;
+}
+
+.financePanel {
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--panel);
+  padding: 18px;
+  min-width: 0;
+}
+
+.financeCards,
+.financeFields {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 165px), 1fr));
+  align-items: end;
+}
+
+.financeCards {
+  align-items: stretch;
+}
+
+.financeCard {
+  display: grid;
+  align-content: start;
+  gap: 6px;
+}
+
+.financeCard strong {
+  font-size: 20px;
+  overflow-wrap: anywhere;
+}
+
+.financePage label {
+  display: grid;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.financePage input,
+.financePage select,
+.financePage button,
+.financePage .financeImport {
+  padding: 8px 10px;
+  min-height: 38px;
+  border: 1px solid var(--line-2);
+  border-radius: 8px;
+  color: var(--text);
+  background: var(--panel-2);
+  font: inherit;
+}
+
+.financePage input,
+.financePage select {
+  min-width: 0;
+  width: 100%;
+  color-scheme: dark;
+}
+
+.financePage button,
+.financePage .financeImport,
+.financePage summary {
+  cursor: pointer;
+}
+
+.financePage button:disabled {
+  cursor: default;
+  opacity: 0.5;
+}
+
+.financePage :is(button, .financeImport, .financeBack):hover {
+  border-color: var(--green);
+  color: var(--text);
+}
+
+.financePage .financeImport {
+  display: inline-flex;
+  position: relative;
+}
+
+.financeImport:focus-within {
+  outline: 2px solid var(--green);
+  outline-offset: 2px;
+}
+
+.financeImport input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.financeRow {
+  display: grid;
+  gap: 10px;
+  border-top: 1px solid var(--line);
+  padding-top: 12px;
+  margin-top: 12px;
+}
+
+.financeRow .financeHeading {
+  align-items: end;
+}
+
+.financeTransaction {
+  margin: 12px 0;
+}
+
+.financeRow summary {
+  font-size: 13px;
+}
+
+.financeRow details > button {
+  margin-top: 8px;
+}
+
+.financePage .financeWarning {
+  color: var(--danger);
+}
+
+.financeGoal {
+  display: grid;
+  gap: 6px;
+  font-size: 13px;
+  margin-top: 14px;
+}
+
+.financePage progress,
+.financePage meter {
+  display: block;
+  width: 100%;
+  accent-color: var(--green);
+}
+
+.financePage meter::-webkit-meter-optimum-value {
+  background: var(--green);
+}
+
+.financePage meter::-moz-meter-bar {
+  background: var(--green);
+}
+
+.financeBar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(40px, 2fr) auto;
+  align-items: center;
+  gap: 10px;
+  padding: 5px 0;
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+
+.financeTable {
+  overflow-x: auto;
+}
+
+.financeTable table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  text-align: left;
+}
+
+.financeTable :is(td, th) {
+  padding: 8px;
+  border-bottom: 1px solid var(--line);
+  white-space: nowrap;
+}
+
+@media (min-width: 760px) {
+  .financeRow > .financeFields:has(.financeRemove),
+  .financeTransaction {
+    grid-template-columns: minmax(0, 2fr) repeat(2, minmax(0, 1fr)) auto;
+  }
+}
