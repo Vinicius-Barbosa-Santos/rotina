@@ -229,13 +229,23 @@ test("Monday and Friday are lighter than the middle of the week", () => {
   assert.ok(totalFor(friday) < totalFor(wednesday));
 });
 
-test("active courses are a permanent eight-track guide totaling 430 hours", () => {
-  const courses = routineReferenceSections.find((section) => section.key === "active-courses");
+test("the B7Web guide replaces the old course guide and keeps the eight-week checklist", () => {
+  const courses = routineReferenceSections.find((section) => section.key === "b7web-fullstack");
 
   assert.ok(courses);
   assert.equal(getSectionScheduleLabel(courses), "referência");
-  assert.equal(courses.referenceGroups?.length, 8);
-  assert.match(courses.note ?? "", /430 horas/);
+  assert.equal(courses.time, "23/11/2026 a 17/01/2027");
+  assert.ok(!routineReferenceSections.some((section) => section.key === "active-courses"));
+  assert.ok(!trackedRoutineSections.includes(courses));
+
+  const groups = courses.referenceGroups ?? [];
+  const weeks = groups.slice(0, 8);
+  const modules = weeks.flatMap((week) => week.items);
+  assert.equal(groups.length, 9);
+  assert.ok(weeks.every((week) => week.note));
+  assert.deepEqual(modules.map((module) => Number(module.slice(0, 2))),
+    Array.from({ length: 31 }, (_, index) => index + 1));
+  assert.equal(groups[8].items.length, 11);
 });
 
 test("functional adult section is a permanent, categorized reference guide", () => {

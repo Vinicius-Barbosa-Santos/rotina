@@ -242,6 +242,7 @@ export default function RoutineSectionCard({
                       </div>
                       <span>{group.items.filter((_, itemIndex) => guideDoneItems.has(`${groupIndex}:${itemIndex}`)).length}/{group.items.length}</span>
                     </div>
+                    {group.note && <p className="sectionNote">{group.note}</p>}
                     <div className="referenceChecklist">
                       {group.items.map((reference, itemIndex) => {
                         const itemKey = `${groupIndex}:${itemIndex}`;

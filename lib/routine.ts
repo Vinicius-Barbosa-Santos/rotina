@@ -20,6 +20,7 @@ export type RoutineSection = {
   references?: string[];
   referenceGroups?: Array<{
     title: string;
+    note?: string;
     items: string[];
   }>;
 };
@@ -298,7 +299,7 @@ export const routineSections: RoutineSection[] = [
     bg: "rgba(167, 139, 250, 0.12)",
     time: "09:00-10:00",
     days: weekdays,
-    note: "Bloco dedicado às formações técnicas ativas. Priorize prática deliberada: assista, programe, exercite e registre o aprendizado.",
+    note: "Use este bloco para avançar no cronograma Fullstack com IA da B7Web. Consulte a semana e a entrega prática no guia B7Web.",
     items: [
       { label: "Assistir às aulas do módulo em andamento" },
       { label: "Escrever código prático junto com a aula" },
@@ -894,94 +895,110 @@ export const routineSections: RoutineSection[] = [
     ]
   },
   {
-    key: "active-courses",
+    key: "b7web-fullstack",
     icon: "Learning",
-    label: "Trilhas Técnicas em Andamento",
-    shortLabel: "Trilhas",
+    label: "Fullstack com IA — B7Web",
+    shortLabel: "B7Web",
     color: "#c084fc",
     bg: "rgba(192, 132, 252, 0.12)",
-    time: "guia permanente",
-    note: "Mapa das oito formações ativas, com carga total aproximada de 430 horas. Use no bloco das 09:00 às 10:00 para escolher o próximo módulo; este guia não entra no progresso diário.",
+    time: "23/11/2026 a 17/01/2027",
+    note: "Consolide Full Stack com foco em Backend e Engenharia de Software. São 8 semanas, com 1 hora por dia útil e 40 horas planejadas para uma formação seletiva.",
     items: [],
+    references: [
+      "📈 Marcos do prazo: 23/11 · início (0/31); 06/12 · 25% (13/31); 20/12 · 50% (19/31); 03/01 · 75% (24/31); 17/01 · 100% (31/31). Os percentuais indicam o tempo transcorrido.",
+      "🗓️ Segunda e terça: teoria. Quarta: implementação. Quinta: continuação dos módulos. Sexta: revisão. Sábado: recuperação opcional, inclusive nas semanas de festas. Domingo: descanso.",
+      "🤖 Use IA para planejar, desenvolver, investigar erros, testar e documentar. Entenda e valide o código gerado. Use dados fictícios nos exercícios.",
+      "📌 Mantenha a B7Web como formação principal. Revise rapidamente assuntos dominados, priorize Backend, testes e arquitetura e estude temas externos conforme a demanda profissional. Marque os módulos após validar o aprendizado.",
+      "🔜 A partir de 18/01/2027: Backend avançado → NestJS → Microsserviços → AWS e Serverless → Kubernetes e DevOps → System Design → Liderança Técnica."
+    ],
     referenceGroups: [
       {
-        title: "Full-Stack JavaScript e TypeScript — 181h",
+        title: "🟦 Semana 1 — Fundamentos | 23/11 a 29/11",
+        note: "Entrega prática: consumir uma API com TypeScript e tratar falhas de requisição.",
         items: [
-          "Dominar escopo, closures, protótipos, hoisting e assincronismo",
-          "Aplicar TypeScript avançado com generics, mapped types e utility types",
-          "Construir APIs com validação, tratamento de erros, JWT, sessões e RBAC",
-          "Modelar dados SQL e NoSQL e trabalhar com ORMs, migrations, transações e índices",
-          "Integrar frontend, estado, cache, CSR e SSR",
-          "Configurar segurança, CI/CD, Docker e deploy"
+          "01 — Ambiente + HTML + CSS + Landing Page (revisão)",
+          "02 — Lógica e algoritmos (revisão)",
+          "03 — Fundamentos JS + DOM + Lista de Tarefas (revisão)",
+          "04 — Git + GitHub (revisão)",
+          "05 — JS Avançado: Fetch, Async/Await e Timers",
+          "06 — Node, NPM e TypeScript",
+          "07 — Projeto: App de Clima"
         ]
       },
       {
-        title: "React — 19h",
+        title: "⚛️ Semana 2 — React | 30/11 a 06/12",
+        note: "Entrega prática: implementar gerenciamento de estado e histórico de mensagens.",
         items: [
-          "Dominar JSX, componentes, props, estado e ciclo de vida",
-          "Usar hooks, custom hooks e otimizações com memoização",
-          "Trabalhar com Context, TanStack Query ou SWR e App Router",
-          "Criar formulários acessíveis com React Hook Form e Zod",
-          "Aplicar estratégias modernas de estilização e acessibilidade"
+          "08 — Fundamentos React",
+          "09 — State, Effects e Listas Dinâmicas em React",
+          "10 — TailwindCSS",
+          "11 — Projeto: Chat Offline",
+          "12 — Context API + Zustand",
+          "13 — Projeto: Chat Offline Multi-Conversa"
         ]
       },
       {
-        title: "Angular — 46h",
+        title: "🐳 Semana 3 — Backend e Docker | 07/12 a 13/12",
+        note: "Entrega prática: executar uma API e um banco PostgreSQL localmente.",
+        items: ["14 — Node + Express (rotas e controllers)", "15 — Docker + PostgreSQL + DBeaver"]
+      },
+      {
+        title: "🗄️ Semana 4 — Banco de dados | 14/12 a 20/12",
+        note: "Entrega prática: modelar tabelas e implementar uma API CRUD com validação.",
         items: [
-          "Dominar componentes standalone, diretivas, pipes e data binding",
-          "Aplicar injeção de dependências e serviços com escopos adequados",
-          "Trabalhar com RxJS, Observables, Subjects e Signals",
-          "Criar Reactive Forms, rotas, lazy loading, guards e resolvers",
-          "Consumir APIs com HttpClient e interceptors"
+          "16 — Planejamento de DB (SQL estrutural)",
+          "17 — Uso de DB (SELECT, WHERE, JOIN, COUNT, SUBQUERY, UPDATE, DELETE)",
+          "18 — DrizzleORM + Projeto: API de contatos",
+          "19 — Zod + validação"
         ]
       },
       {
-        title: "Java e Spring Boot — 100h",
+        title: "🔐 Semana 5 — Segurança e testes | 21/12 a 27/12",
+        note: "Entrega prática: proteger endpoints e testar cenários de sucesso e falha.",
         items: [
-          "Consolidar orientação a objetos, collections, streams, generics e concorrência",
-          "Criar APIs Spring com controllers, DTOs, mappers e validação",
-          "Usar JPA, Hibernate, relacionamentos, queries e transações",
-          "Implementar autenticação e autorização com Spring Security e JWT",
-          "Escrever testes com JUnit, Mockito, MockMvc e Testcontainers"
+          "20 — Autenticação e Autorização",
+          "21 — TDD + testes Unitários e de Integração",
+          "22 — Projeto: API de blog (spec-driven + TDD)"
         ]
       },
       {
-        title: "Microsserviços com Node.js — 50h",
+        title: "🏗️ Semana 6 — Arquitetura | 28/12 a 03/01",
+        note: "Entrega prática: separar responsabilidades e justificar decisões arquiteturais.",
+        items: ["23 — Clean Architecture / Layered / SOLID", "24 — Repository Pattern, Use Cases, DTO"]
+      },
+      {
+        title: "📨 Semana 7 — Produção e mensageria | 04/01 a 10/01",
+        note: "Entrega prática: implementar uma fila, simular uma falha e investigar pelos logs.",
         items: [
-          "Decompor domínios e comparar comunicação REST, gRPC e orientada a eventos",
-          "Usar RabbitMQ, Kafka ou Redis PubSub com idempotência, DLQ e retries",
-          "Aplicar API Gateway, health checks, circuit breaker, fallback e timeout",
-          "Implementar sagas para transações distribuídas",
-          "Criar imagens Docker multi-stage e ambientes com Docker Compose"
+          "25 — Error handling global + logging",
+          "26 — Projeto: Refatorar projeto anterior + likes e replies",
+          "27 — Upload + imagem + e-mail",
+          "28 — Queues (Redis + BullMQ)"
         ]
       },
       {
-        title: "GraphQL Full-Stack — 5h",
+        title: "🏁 Semana 8 — Integração Full Stack | 11/01 a 17/01",
+        note: "Entrega prática: integrar a aplicação, testar o fluxo completo e usar pagamentos em ambiente de teste.",
         items: [
-          "Dominar schemas, types, queries, mutations e subscriptions",
-          "Criar resolvers seguros e resolver N+1 com DataLoader",
-          "Integrar Apollo Client ou Urql",
-          "Gerenciar cache, atualizações otimistas e fragmentos reutilizáveis"
+          "29 — Projeto: Frontend + Backend (integração do projeto anterior)",
+          "30 — Integração a pagamentos (Stripe)",
+          "31 — Testes E2E (Playwright)"
         ]
       },
       {
-        title: "Introdução à AWS — 19h",
+        title: "✅ Checklist de consolidação final",
         items: [
-          "Entender regiões, zonas de disponibilidade e responsabilidade compartilhada",
-          "Configurar IAM aplicando o princípio do menor privilégio",
-          "Trabalhar com EC2, VPC, Lambda e API Gateway",
-          "Usar S3, RDS e DynamoDB",
-          "Monitorar com CloudWatch e controlar custos e Free Tier"
-        ]
-      },
-      {
-        title: "Desenvolvimento com IA — 10h",
-        items: [
-          "Usar Cursor com regras, contexto e edição em múltiplos arquivos",
-          "Operar Claude Code e Codex em refatorações, testes e diagnósticos",
-          "Gerenciar contexto e consumo de tokens em projetos grandes",
-          "Aplicar prompting, documentação, diagramas e testes assistidos por IA",
-          "Realizar code review e análise de segurança com assistência de IA"
+          "Construir uma API REST com TypeScript e Express.",
+          "Integrar React com o Backend.",
+          "Modelar e consultar um banco relacional.",
+          "Executar a aplicação com Docker.",
+          "Implementar validação, autenticação e autorização.",
+          "Aplicar SOLID e separação de responsabilidades.",
+          "Escrever testes unitários, de integração e E2E.",
+          "Implementar logging e tratamento de erros.",
+          "Trabalhar com Redis e filas.",
+          "Investigar uma falha simulada e documentar a causa.",
+          "Explicar as decisões técnicas do projeto."
         ]
       }
     ]
